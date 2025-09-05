@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc server.ts --outDir dist",
+    "build": "vite build && tsc server.ts --outDir dist --project tsconfig.json",
     "start": "node dist/server.js",
     "preview": "vite preview --port $PORT --host"
   },
