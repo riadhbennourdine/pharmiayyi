@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TOPIC_CATEGORIES } from '../constants';
 import { CapsuleIcon } from './icons';
 import { CaseStudy } from '../types';
