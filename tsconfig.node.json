@@ -9,5 +9,5 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["server.ts"]
+  "include": ["server.ts", "types/global.d.ts"]
 }
