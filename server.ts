@@ -63,7 +63,7 @@ app.get('/api/memofiches', async (req, res) => {
 });
 
 // For any other request (client-side routing), serve index.html
-app.get('*', (req, res) => {
+app.get(/.* /, (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
