@@ -45,7 +45,7 @@ app.post('/api/chat', async (req, res) => {
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // For any other request, serve the frontend's index.html
-app.get('/*', (req, res) => {
+app.get(/.* /, (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
