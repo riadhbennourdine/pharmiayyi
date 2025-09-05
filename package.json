@@ -2,7 +2,7 @@
   "name": "pharmia:-micro-learning-pour-la-pharmacie",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc --project tsconfig.node.json",
