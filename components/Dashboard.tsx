@@ -3,23 +3,60 @@ import { TOPIC_CATEGORIES } from '../constants';
 import { CapsuleIcon } from './icons';
 import { CaseStudy } from '../types';
 
-interface DashboardProps {
-  caseStudies: CaseStudy[];
-  onSelectCase: (caseStudy: CaseStudy) => void;
-}
+const Dashboard: React.FC = () => {
+  const [memofiches, setMemofiches] = useState<CaseStudy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const Dashboard: React.FC<DashboardProps> = ({ caseStudies, onSelectCase }) => {
+  useEffect(() => {
+    const fetchMemofiches = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/memofiches');
+        if (!response.ok) {
+          throw new Error('Failed to fetch memofiches');
+        }
+        const data: CaseStudy[] = await response.json();
+        setMemofiches(data);
+      } catch (err) {
+        console.error('Error fetching memofiches:', err);
+        setError('Failed to load memo fiches. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMemofiches();
+  }, []);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
   const activeCategory = TOPIC_CATEGORIES[activeCategoryIndex];
+  console.log('TOPIC_CATEGORIES:', TOPIC_CATEGORIES);
+  console.log('activeCategory:', activeCategory);
   
   const getCasesForTopic = (topic: string) => {
       const isSystemTopic = TOPIC_CATEGORIES[1].topics.includes(topic);
       if (isSystemTopic) {
-        return caseStudies.filter(cs => cs.system === topic);
+        return memofiches.filter(cs => cs.system === topic);
       }
-      return caseStudies.filter(cs => cs.theme === topic);
+      return memofiches.filter(cs => cs.theme === topic);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-slate-600">Loading memo fiches...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-red-600">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in">
