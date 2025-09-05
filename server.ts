@@ -8,9 +8,6 @@ const port = process.env.PORT || 3001;
 
 app.use(express.json());
 
-// Serve the frontend
-app.use(express.static(path.join(__dirname, '../dist')));
-
 app.get('/api/mongo-test', async (req, res) => {
   try {
     const client = await clientPromise;
@@ -43,6 +40,9 @@ app.post('/api/chat', async (req, res) => {
         res.status(500).json({ error: 'Failed to get assistant response' });
     }
 });
+
+// Serve the frontend
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // For any other request, serve the frontend's index.html
 app.get('*', (req, res) => {
