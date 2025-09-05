@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc --project tsconfig.node.json && mv dist/server.js dist/server.cjs",
-    "start": "node dist/server.cjs",
+    "build": "vite build && tsc --project tsconfig.node.json",
+    "start": "node dist-server/server.js",
     "preview": "vite preview --port $PORT --host"
   },
   "dependencies": {

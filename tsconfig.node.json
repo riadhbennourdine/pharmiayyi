@@ -4,10 +4,10 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "outDir": "dist",
+    "outDir": "dist-server",
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["server.ts", "types/global.d.ts"]
+  "include": ["server.ts", "services/**/*.ts", "types/global.d.ts"]
 }
