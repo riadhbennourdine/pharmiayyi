@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { getAssistantResponse } from '../services/geminiService';
+
 import type { ChatMessage, CaseStudy } from '../types';
 import { CommunicationIcon, ChevronRightIcon, SparklesIcon } from './icons';
 import Spinner from './Spinner';
@@ -34,8 +34,20 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
         setIsLoading(true);
 
         try {
-            const modelResponse = await getAssistantResponse([...messages, newUserMessage], caseContext);
-            const newModelMessage: ChatMessage = { role: 'model', content: modelResponse };
+                        const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ messages: [...messages, newUserMessage], caseContext }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get assistant response');
+            }
+
+            const data = await response.json();
+            const newModelMessage: ChatMessage = { role: 'model', content: data.response };
             setMessages(prev => [...prev, newModelMessage]);
         } catch (error) {
             console.error("Error fetching assistant response:", error);

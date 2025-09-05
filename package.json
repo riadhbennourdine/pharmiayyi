@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "start": "vite preview --port $PORT --host",
-    "preview": "vite preview"
+    "build": "vite build && tsc server.ts --outDir dist",
+    "start": "node dist/server.js",
+    "preview": "vite preview --port $PORT --host"
   },
   "dependencies": {
     "@google/genai": "^1.17.0",
     "@google/generative-ai": "^0.24.1",
+    "@types/express": "^5.0.3",
+    "express": "^5.1.0",
     "mongodb": "^6.19.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

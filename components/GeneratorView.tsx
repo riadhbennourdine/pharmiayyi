@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateCaseStudyFromText } from '../services/geminiService';
+
 import { CaseStudy } from '../types';
 import Spinner from './Spinner';
 import MemoFicheView from './MemoFicheView';
@@ -28,7 +28,19 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
     setGeneratedCase(null);
 
     try {
-      const result = await generateCaseStudyFromText(sourceText, selectedTheme, selectedSystem);
+            const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: sourceText, theme: selectedTheme, system: selectedSystem }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate case study');
+      }
+
+      const result = await response.json();
       const finalCase: CaseStudy = {
         ...result,
         theme: selectedTheme,

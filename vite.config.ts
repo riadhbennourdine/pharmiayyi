@@ -15,6 +15,14 @@ export default defineConfig(({ mode }) => {
       },
       preview: {
         allowedHosts: ['pharmiayyi-production.up.railway.app']
-      }
+      },
+      server: {
+        proxy: {
+          '/api': {
+            target: 'http://localhost:3001',
+            changeOrigin: true,
+          },
+        },
+      },
     };
 });
