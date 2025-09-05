@@ -1,89 +1,40 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import type { CaseStudy, ChatMessage, QuizQuestion } from '../types';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
+import type { CaseStudy, ChatMessage } from '../types';
 
-// FIX: Initialize the Google GenAI client according to guidelines.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// WARNING: Storing API keys in client-side code is not secure.
+// This is for development purposes only. In production, you should
+// use a server-side proxy to handle API requests.
+const API_KEY = "YOUR_API_KEY";
 
-// FIX: Use the recommended model 'gemini-2.5-flash'.
-const model = 'gemini-2.5-flash';
+const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// Define response schemas for structured outputs
-const caseStudySchema = {
-    type: Type.OBJECT,
-    properties: {
-        title: { type: Type.STRING, description: "Titre concis et informatif du cas clinique." },
-        patientSituation: { type: Type.STRING, description: "Description de la situation du patient, incluant ses symptômes et sa demande." },
-        pathologyOverview: { type: Type.STRING, description: "Un bref aperçu de la pathologie concernée, expliquant ses mécanismes de base et ses manifestations." },
-        keyQuestions: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Liste des questions clés à poser au patient pour évaluer la situation." },
-        recommendations: {
-            type: Type.OBJECT,
-            description: "Recommandations structurées en quatre catégories distinctes.",
-            properties: {
-                mainTreatment: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Conseils sur le traitement principal." },
-                associatedProducts: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Suggestions de produits complémentaires." },
-                lifestyleAdvice: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Conseils sur l'hygiène de vie." },
-                dietaryAdvice: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Conseils alimentaires." },
-            },
-            required: ['mainTreatment', 'associatedProducts', 'lifestyleAdvice', 'dietaryAdvice'],
-        },
-        redFlags: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Liste des signaux d'alerte nécessitant une consultation médicale." },
-        keyPoints: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Liste de 3-4 points clés très concis qui résument les informations les plus critiques du cas." },
-        references: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Liste de 1 à 3 références bibliographiques ou sources." },
-        flashcards: {
-            type: Type.ARRAY,
-            description: "Liste de 10 flashcards (question/réponse) pour réviser les points clés.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    question: { type: Type.STRING },
-                    answer: { type: Type.STRING }
-                },
-                required: ['question', 'answer']
-            }
-        },
-        glossary: {
-            type: Type.ARRAY,
-            description: "Liste de 10 termes techniques ou importants avec leur définition.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    term: { type: Type.STRING },
-                    definition: { type: Type.STRING }
-                },
-                required: ['term', 'definition']
-            }
-        },
-        media: {
-            type: Type.ARRAY,
-            description: "Liste de 1-2 suggestions de médias (vidéo, infographie) avec titre et description.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    title: { type: Type.STRING },
-                    description: { type: Type.STRING },
-                    type: { type: Type.STRING, enum: ['video', 'infographic'] }
-                },
-                required: ['title', 'description', 'type']
-            }
-        },
-        quiz: {
-            type: Type.ARRAY,
-            description: "Liste de 10 questions de quiz (QCM ou Vrai/Faux) sur le cas clinique.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    question: { type: Type.STRING },
-                    options: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    correctAnswerIndex: { type: Type.INTEGER },
-                    explanation: { type: Type.STRING, description: "Brève explication de la bonne réponse." },
-                    type: { type: Type.STRING, enum: ['single-choice', 'true-false'] }
-                },
-                required: ['question', 'options', 'correctAnswerIndex', 'explanation', 'type']
-            }
-        }
-    },
-    required: ['title', 'patientSituation', 'pathologyOverview', 'keyQuestions', 'recommendations', 'redFlags', 'keyPoints', 'references', 'flashcards', 'glossary', 'media', 'quiz']
+const generationConfig: GenerationConfig = {
+    temperature: 0.5,
+    topK: 1,
+    topP: 1,
+    maxOutputTokens: 2048,
+    responseMimeType: "application/json",
 };
+
+const safetySettings = [
+    {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+];
 
 export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
     const prompt = `
@@ -108,22 +59,22 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       ${text}
       ---
 
-      Génère la réponse au format JSON en respectant le schéma fourni.
+      Génère la réponse au format JSON.
     `;
 
+    const parts = [
+        { text: prompt },
+    ];
+
     try {
-        const response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: caseStudySchema,
-                temperature: 0.5,
-            },
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts }],
+            generationConfig,
+            safetySettings,
         });
-        
-        // FIX: Extract JSON string from response.text property as per guidelines.
-        const jsonText = response.text.trim();
+
+        const response = result.response;
+        const jsonText = response.text();
         const generatedCase: CaseStudy = JSON.parse(jsonText);
         return generatedCase;
     } catch (error) {
@@ -133,9 +84,6 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
 };
 
 export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy): Promise<string> => {
-    const lastUserMessage = messages[messages.length - 1].content;
-    const history = messages.slice(0, -1);
-
     const caseStudyText = `
         Voici le contexte de l'étude de cas sur laquelle tu dois te baser :
         - Titre: ${caseContext.title}
@@ -144,7 +92,10 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
         - Signaux d'alerte: ${caseContext.redFlags.join(', ')}
     `;
 
-    const systemInstruction = `
+    const systemInstruction = {
+        role: "system",
+        parts: [{
+            text: `
         Tu es "PharmIA", un assistant pédagogique expert en pharmacie.
         Ton rôle est d'aider un étudiant à approfondir sa compréhension d'un cas de comptoir.
         ${caseStudyText}
@@ -152,30 +103,25 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
         Base tes réponses UNIQUEMENT sur les informations fournies dans le cas. Ne spécule pas et n'ajoute pas d'informations extérieures.
         Si une question sort du cadre du cas, réponds poliment que tu ne peux répondre qu'aux questions relatives à la mémofiche.
         Adopte un ton amical et professionnel. Ne te présente pas à nouveau.
-    `;
+    `}]
+    };
 
-    const historyString = history.map(m => `${m.role === 'user' ? 'Étudiant' : 'PharmIA'}: ${m.content}`).join('\n\n');
-    
-    const promptWithHistory = `
-        Historique de la conversation:
-        ---
-        ${historyString}
-        ---
-        Nouvelle question de l'étudiant: "${lastUserMessage}"
-    `;
+    const history: Content[] = messages.map(m => ({
+        role: m.role,
+        parts: [{ text: m.content }]
+    }));
+
 
     try {
-        const response = await ai.models.generateContent({
-            model,
-            contents: promptWithHistory,
-            config: {
-                systemInstruction,
-                temperature: 0.6,
-            }
+        const chat = model.startChat({
+            generationConfig,
+            safetySettings,
+            history: [systemInstruction, ...history.slice(0, -1)],
         });
 
-        // FIX: Extract text response from response.text property.
-        return response.text;
+        const result = await chat.sendMessage(history.slice(-1)[0].parts);
+        const response = result.response;
+        return response.text();
 
     } catch (error) {
         console.error("Error getting assistant response:", error);
