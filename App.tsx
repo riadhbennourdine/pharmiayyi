@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewState>(ViewState.DASHBOARD);
   const [userRole, setUserRole] = useState<UserRole>(UserRole.USER);
   const [currentCase, setCurrentCase] = useState<CaseStudy | null>(null);
-  const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
+  
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,10 +64,7 @@ const App: React.FC = () => {
     setView(ViewState.MEMO_FICHE);
   }, []);
   
-  const handleSaveCaseStudy = useCallback((caseToSave: CaseStudy) => {
-      setCaseStudies(prev => [...prev, caseToSave]);
-      setView(ViewState.DASHBOARD);
-  }, []);
+  
 
   const handleGoHome = useCallback(() => {
     resetState();
@@ -106,7 +103,7 @@ const App: React.FC = () => {
         );
       case ViewState.DASHBOARD:
       default:
-        return <Dashboard caseStudies={caseStudies} onSelectCase={handleSelectCase} />;
+        return <Dashboard onSelectCase={handleSelectCase} />;
     }
   };
 
