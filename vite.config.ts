@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      preview: {
+        allowedHosts: ['pharmiayyi-production.up.railway.app']
       }
     };
 });
