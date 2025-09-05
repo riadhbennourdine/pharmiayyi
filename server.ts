@@ -8,6 +8,15 @@ const port = process.env.PORT || 3001;
 
 app.use(express.json());
 
+// Serve index.html for the root path
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
+
+// Serve static assets from the 'dist' folder
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// All other API routes
 app.get('/api/mongo-test', async (req, res) => {
   try {
     const client = await clientPromise;
@@ -53,11 +62,8 @@ app.get('/api/memofiches', async (req, res) => {
   }
 });
 
-// Serve the frontend
-app.use(express.static(path.join(__dirname, '../dist')));
-
-// For any other request, serve the frontend's index.html
-app.get(/.* /, (req, res) => {
+// For any other request (client-side routing), serve index.html
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
