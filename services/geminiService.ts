@@ -4,7 +4,7 @@ import type { CaseStudy, ChatMessage } from '../types';
 // WARNING: Storing API keys in client-side code is not secure.
 // This is for development purposes only. In production, you should
 // use a server-side proxy to handle API requests.
-const API_KEY = "YOUR_API_KEY";
+const API_KEY = process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY_HERE"; // Replace with your actual Gemini API Key or set as environment variable
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
