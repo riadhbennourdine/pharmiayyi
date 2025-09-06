@@ -86,6 +86,29 @@ const App: React.FC = () => {
     setQuizQuestions([]);
   }, []);
 
+  const handleSaveCaseStudy = useCallback(async (caseStudy: CaseStudy) => {
+    try {
+      const response = await fetch('/api/memofiches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(caseStudy),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save memo fiche');
+      }
+
+      // Optionally, show a success message
+      alert('Mémofiche sauvegardée avec succès !');
+      setView(ViewState.DASHBOARD); // Go back to dashboard after saving
+    } catch (err) {
+      console.error('Error saving memo fiche:', err);
+      setError('Erreur lors de la sauvegarde de la mémofiche.');
+    }
+  }, []);
+
 
   const renderContent = () => {
     switch (view) {
