@@ -12,7 +12,7 @@ const Dashboard: React.FC = () => {
     const fetchMemofiches = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/memofiches', { cache: 'no-cache' });
+        const response = await fetch('/api/memofiches', { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('Failed to fetch memofiches');
         }
