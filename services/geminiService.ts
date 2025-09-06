@@ -85,6 +85,22 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
             }));
         }
 
+        // Ensure recommendation sub-sections are arrays
+        if (generatedCase.recommendations) {
+            if (typeof generatedCase.recommendations.mainTreatment === 'string') {
+                generatedCase.recommendations.mainTreatment = [generatedCase.recommendations.mainTreatment];
+            }
+            if (typeof generatedCase.recommendations.associatedProducts === 'string') {
+                generatedCase.recommendations.associatedProducts = [generatedCase.recommendations.associatedProducts];
+            }
+            if (typeof generatedCase.recommendations.lifestyleAdvice === 'string') {
+                generatedCase.recommendations.lifestyleAdvice = [generatedCase.recommendations.lifestyleAdvice];
+            }
+            if (typeof generatedCase.recommendations.dietaryAdvice === 'string') {
+                generatedCase.recommendations.dietaryAdvice = [generatedCase.recommendations.dietaryAdvice];
+            }
+        }
+
         console.log("Raw JSON from Gemini:", jsonText);
         console.log("Parsed CaseStudy object (after transformation):", generatedCase);
         return generatedCase;
