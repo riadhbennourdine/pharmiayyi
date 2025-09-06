@@ -76,6 +76,8 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
         const response = result.response;
         const jsonText = response.text();
         const generatedCase: CaseStudy = JSON.parse(jsonText);
+        console.log("Raw JSON from Gemini:", jsonText);
+        console.log("Parsed CaseStudy object:", generatedCase);
         return generatedCase;
     } catch (error) {
         console.error("Error generating case study:", error);
