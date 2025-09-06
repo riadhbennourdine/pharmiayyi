@@ -76,8 +76,17 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
         const response = result.response;
         const jsonText = response.text();
         const generatedCase: CaseStudy = JSON.parse(jsonText);
+
+        // Transform glossary if it's an object
+        if (generatedCase.glossary && typeof generatedCase.glossary === 'object' && !Array.isArray(generatedCase.glossary)) {
+            generatedCase.glossary = Object.entries(generatedCase.glossary).map(([term, definition]) => ({
+                term: term,
+                definition: definition as string
+            }));
+        }
+
         console.log("Raw JSON from Gemini:", jsonText);
-        console.log("Parsed CaseStudy object:", generatedCase);
+        console.log("Parsed CaseStudy object (after transformation):", generatedCase);
         return generatedCase;
     } catch (error) {
         console.error("Error generating case study:", error);
