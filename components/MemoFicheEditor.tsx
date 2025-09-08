@@ -117,7 +117,8 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to generate sections from AI: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({})); // Gérer le cas où la réponse n'est pas du JSON
+        throw new Error(errorData.details || `Failed to generate sections from AI: ${response.statusText}`);
       }
 
       const generatedCaseStudy: CaseStudy = await response.json();
