@@ -56,7 +56,25 @@ const AccordionSection: React.FC<{
     </div>
 );
 
-const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStartQuiz, onEdit, isPreview = false }) => {
+const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, onBack, onStartQuiz, onEdit, isPreview = false }) => {
+  const caseStudy = useMemo(() => ({
+    ...rawCaseStudy,
+    keyQuestions: rawCaseStudy.keyQuestions || [],
+    redFlags: rawCaseStudy.redFlags || [],
+    references: rawCaseStudy.references || [],
+    recommendations: rawCaseStudy.recommendations || {
+        mainTreatment: [],
+        associatedProducts: [],
+        lifestyleAdvice: [],
+        dietaryAdvice: [],
+    },
+    glossary: rawCaseStudy.glossary || [],
+    flashcards: rawCaseStudy.flashcards || [],
+    media: rawCaseStudy.media || [],
+    quiz: rawCaseStudy.quiz || [],
+    keyPoints: rawCaseStudy.keyPoints || [],
+  }), [rawCaseStudy]);
+
   const [openSection, setOpenSection] = useState<string | null>('patientSituation');
   const [activeTab, setActiveTab] = useState<TabName>('memo');
 
