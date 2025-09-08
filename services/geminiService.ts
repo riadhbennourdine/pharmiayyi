@@ -48,20 +48,20 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       - "title": Titre concis de la mémofiche.
       - "patientSituation": Scénario patient détaillé.
       - "pathologyOverview": Aperçu de la pathologie.
-      - "keyQuestions": Tableau de questions clés à poser au patient.
-      - "redFlags": Tableau de signaux d'alerte.
+      - "keyQuestions": Tableau de chaînes de caractères (string[]) de questions clés à poser au patient.
+      - "redFlags": Tableau de chaînes de caractères (string[]) de signaux d'alerte.
       - "recommendations": Objet avec 4 sous-sections (tableaux de chaînes de caractères):
         - "mainTreatment": Traitement principal.
         - "associatedProducts": Produits associés.
         - "lifestyleAdvice": Conseils d'hygiène de vie.
         - "dietaryAdvice": Conseils alimentaires.
       - "keyPoints": Tableau de 3 à 4 points clés ultra-concis.
-      - "references": Tableau de 1 à 3 références bibliographiques pertinentes.
+      - "references": Tableau de chaînes de caractères (string[]) de 1 à 3 références bibliographiques pertinentes.
       - "flashcards": Tableau de 10 flashcards (objets avec "question" et "answer").
       - "glossary": Tableau de 10 termes techniques (objets avec "term" et "definition").
       - "media": Tableau de 1 à 2 supports médias (objets avec "title", "type" ('video' ou 'infographic'), et "url" - utilise des URLs de placeholder si tu ne peux pas générer de vraies URLs).
-      - "coverImageUrl": URL d'une image de couverture pertinente (utilise une URL de placeholder si tu ne peux pas générer de vraie URL).
-      - "youtubeUrl": URL d'une vidéo YouTube pertinente (utilise une URL de placeholder si tu ne peux pas générer de vraie URL).
+      - "coverImageUrl": URL d'une image de couverture pertinente. Utilise une URL de placeholder de https://picsum.photos si tu ne peux pas générer de vraie URL (par exemple, https://picsum.photos/1200/600).
+      - "youtubeUrl": URL d'une vidéo YouTube pertinente. Utilise une URL de placeholder si tu ne peux pas générer de vraie URL (par exemple, https://www.youtube.com/watch?v=dQw4w9WgXcQ).
       - "quiz": Tableau de 10 questions de quiz (objets QuizQuestion avec "question", "options", "correctAnswerIndex", "explanation", "type" ('single-choice' ou 'true-false')). Pour Vrai/Faux, correctAnswerIndex est 0 pour "Vrai" et 1 pour "Faux".
 
       Texte source:

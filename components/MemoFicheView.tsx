@@ -100,7 +100,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             return [text];
         }
         
-        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&'));
         const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
         
         const parts = text.split(regex);
@@ -123,19 +123,19 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
     };
 
     return [
-        { 
+        {
             id: 'patientSituation', 
             title: 'Cas comptoir', 
             icon: <DocumentTextIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: <p>{highlightGlossaryTerms(caseStudy.patientSituation)}</p>
         },
-        { 
+        {
             id: 'keyQuestions', 
             title: 'Questions clés à poser',
             icon: <QuestionMarkCircleIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1">
-                {caseStudy.keyQuestions.map((q, i) => <li key={i}>{highlightGlossaryTerms(q)}</li>)}
+                {caseStudy.keyQuestions.map((q: any, i: number) => <li key={i}>{highlightGlossaryTerms(q.question || q)}</li>)}
                 </ul>
             )
         },
@@ -152,11 +152,11 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             isAlert: true,
             content: (
                 <ul className="list-disc pl-5 space-y-1 text-red-700 font-medium">
-                {caseStudy.redFlags.map((flag, i) => <li key={i}>{highlightGlossaryTerms(flag)}</li>)}
+                {caseStudy.redFlags.map((flag: any, i: number) => <li key={i}>{highlightGlossaryTerms(flag.redFlag || flag)}</li>)}
                 </ul>
             )
         },
-        { 
+        {
             id: 'mainTreatment',
             title: 'Traitement principal',
             icon: <HeartIcon className="h-6 w-6 text-teal-600 mr-3" />,
@@ -166,7 +166,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
                 </ul>
             )
         },
-        { 
+        {
             id: 'associatedProducts',
             title: 'Produits associés',
             icon: <BeakerIcon className="h-6 w-6 text-teal-600 mr-3" />,
@@ -176,7 +176,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
                 </ul>
             )
         },
-        { 
+        {
             id: 'lifestyleAdvice',
             title: 'Hygiène de vie',
             icon: <SunIcon className="h-6 w-6 text-teal-600 mr-3" />,
@@ -186,7 +186,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
                 </ul>
             )
         },
-        { 
+        {
             id: 'dietaryAdvice',
             title: 'Conseils alimentaires',
             icon: <UsersIcon className="h-6 w-6 text-teal-600 mr-3" />,
@@ -202,7 +202,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             icon: <AcademicCapIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1 text-sm">
-                {caseStudy.references.map((ref, i) => <li key={i}>{highlightGlossaryTerms(ref)}</li>)}
+                {caseStudy.references.map((ref: any, i: number) => <li key={i}>{highlightGlossaryTerms(ref.reference || ref)}</li>)}
                 </ul>
             )
         }
@@ -347,7 +347,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
         `}</style>
         {caseStudy.coverImageUrl ? (
             <div className="mb-8 rounded-lg overflow-hidden shadow-lg relative h-64 flex items-end p-8 text-white bg-slate-800">
-                <img src={caseStudy.coverImageUrl} alt={`Image de couverture pour ${caseStudy.title}`} className="absolute inset-0 w-full h-full object-cover z-0" />
+                <img src={caseStudy.coverImageUrl} alt={`Image de couverture pour ${caseStudy.title}`} className="absolute inset-0 w-full h-full object-cover z-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10"></div>
                 <div className="relative z-20">
                     <h2 className="text-4xl font-extrabold tracking-tight" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
@@ -393,7 +393,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
                        <button
                          key={item.id}
                          onClick={() => setActiveTab(item.id)}
-                         className={`flex items-center space-x-2 px-3 sm:px-4 py-3 text-sm sm:text-base font-medium rounded-t-md transition-colors duration-300 focus:outline-none ${
+                         className={`flex items-center space-x-2 px-3 sm:px-4 py-3 text-sm sm:text-base font-medium rounded-t-md transition-colors duration-300 focus:outline-none ${ 
                              activeTab === item.id
                              ? 'border-b-2 border-teal-600 text-teal-600 bg-teal-50/50'
                              : 'text-slate-500 hover:text-teal-500 hover:bg-slate-100/50'
@@ -409,14 +409,14 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
                   {renderContent()}
                 </div>
 
-                 <div className="mt-8 flex items-center justify-center space-x-4"> {/* Ajout de space-x-4 */}
+                 <div className="mt-8 flex items-center justify-center space-x-4"> 
                     <button 
                         onClick={onBack} 
                         className="px-6 py-3 text-base font-bold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors"
                     >
                       {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
                     </button>
-                    {!isPreview && ( // Afficher le bouton Modifier seulement si ce n'est pas un aperçu
+                    {!isPreview && ( 
                         <button
                             onClick={onEdit}
                             className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
