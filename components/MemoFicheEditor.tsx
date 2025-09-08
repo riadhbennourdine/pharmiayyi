@@ -10,6 +10,9 @@ interface MemoFicheEditorProps {
 const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onSave, onCancel }) => {
   const [caseStudy, setCaseStudy] = useState<CaseStudy>(initialCaseStudy ? {
     ...initialCaseStudy,
+    keyQuestions: initialCaseStudy.keyQuestions || [],
+    redFlags: initialCaseStudy.redFlags || [],
+    references: initialCaseStudy.references || [],
     recommendations: initialCaseStudy.recommendations || { // Assurer que recommendations est un objet
         mainTreatment: [],
         associatedProducts: [],
