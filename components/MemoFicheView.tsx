@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { CaseStudy, GlossaryTerm } from '../types';
-import { BookOpenIcon, QuestionMarkCircleIcon, SparklesIcon, DocumentTextIcon, DocumentDuplicateIcon, VideoCameraIcon, BookmarkIcon, KeyIcon, CheckCircleIcon, AcademicCapIcon, HeartIcon, BeakerIcon, SunIcon, UsersIcon, EyeIcon } from './icons';
+import { BookOpenIcon, QuestionMarkCircleIcon, SparklesIcon, DocumentTextIcon, DocumentDuplicateIcon, VideoCameraIcon, BookmarkIcon, KeyIcon, CheckCircleIcon, AcademicCapIcon, HeartIcon, BeakerIcon, SunIcon, UsersIcon, EyeIcon, PencilIcon } from './icons';
 import ChatAssistant from './ChatAssistant';
 import FlashcardDeck from './FlashcardDeck';
 
@@ -8,6 +8,7 @@ interface MemoFicheViewProps {
   caseStudy: CaseStudy;
   onBack: () => void;
   onStartQuiz: () => void;
+  onEdit: () => void; // Nouvelle prop
   isPreview?: boolean;
 }
 
@@ -55,8 +56,8 @@ const AccordionSection: React.FC<{
     </div>
 );
 
-const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStartQuiz, isPreview = false }) => {
-  const [openSection, setOpenSection] = useState<string | null>('Cas comptoir');
+const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStartQuiz, onEdit, isPreview = false }) => {
+  const [openSection, setOpenSection] = useState<string | null>('patientSituation');
   const [activeTab, setActiveTab] = useState<TabName>('memo');
 
   const handleToggle = (title: string) => {
@@ -123,13 +124,13 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
 
     return [
         { 
-            id: 'Cas comptoir', 
+            id: 'patientSituation', 
             title: 'Cas comptoir', 
             icon: <DocumentTextIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: <p>{highlightGlossaryTerms(caseStudy.patientSituation)}</p>
         },
         { 
-            id: 'Questions clés à poser', 
+            id: 'keyQuestions', 
             title: 'Questions clés à poser',
             icon: <QuestionMarkCircleIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
@@ -139,13 +140,13 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             )
         },
         {
-            id: "Aperçu pathologie",
+            id: "pathologyOverview",
             title: "Aperçu pathologie",
             icon: <EyeIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: <p>{highlightGlossaryTerms(caseStudy.pathologyOverview)}</p>
         },
         {
-            id: "Signaux d'alerte",
+            id: "redFlags",
             title: "Signaux d'alerte",
             icon: <SparklesIcon className="h-6 w-6 text-red-500 mr-3" />,
             isAlert: true,
@@ -156,7 +157,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             )
         },
         { 
-            id: 'Traitement principal',
+            id: 'mainTreatment',
             title: 'Traitement principal',
             icon: <HeartIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
@@ -166,7 +167,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             )
         },
         { 
-            id: 'Produits associés',
+            id: 'associatedProducts',
             title: 'Produits associés',
             icon: <BeakerIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
@@ -176,7 +177,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             )
         },
         { 
-            id: 'Hygiène de vie',
+            id: 'lifestyleAdvice',
             title: 'Hygiène de vie',
             icon: <SunIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
@@ -186,7 +187,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             )
         },
         { 
-            id: 'Conseils alimentaires',
+            id: 'dietaryAdvice',
             title: 'Conseils alimentaires',
             icon: <UsersIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
@@ -196,7 +197,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
             )
         },
         {
-            id: "Références bibliographiques",
+            id: "references",
             title: "Références bibliographiques",
             icon: <AcademicCapIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
@@ -408,13 +409,21 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy, onBack, onStar
                   {renderContent()}
                 </div>
 
-                 <div className="mt-8 flex items-center justify-center">
+                 <div className="mt-8 flex items-center justify-center space-x-4"> {/* Ajout de space-x-4 */}
                     <button 
                         onClick={onBack} 
                         className="px-6 py-3 text-base font-bold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors"
                     >
                       {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
                     </button>
+                    {!isPreview && ( // Afficher le bouton Modifier seulement si ce n'est pas un aperçu
+                        <button
+                            onClick={onEdit}
+                            className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                        >
+                            <PencilIcon className="h-5 w-5 mr-2" /> Modifier
+                        </button>
+                    )}
                 </div>
             </div>
             

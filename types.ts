@@ -4,6 +4,7 @@ export enum ViewState {
   MEMO_FICHE = 'MEMO_FICHE',
   GENERATOR = 'GENERATOR',
   QUIZ = 'QUIZ',
+  EDIT_MEMO_FICHE = 'EDIT_MEMO_FICHE',
 }
 
 export enum UserRole {
@@ -36,28 +37,36 @@ export interface MediaSuggestion {
 }
 
 export interface CaseStudy {
+  _id: any;
   title: string;
   theme: string;
   system: string;
   patientSituation: string;
-  pathologyOverview: string;
   keyQuestions: string[];
+  pathologyOverview: string;
+  redFlags: string[];
   recommendations: {
     mainTreatment: string[];
     associatedProducts: string[];
     lifestyleAdvice: string[];
     dietaryAdvice: string[];
   };
-  redFlags: string[];
   keyPoints: string[];
   references: string[];
-  flashcards: Flashcard[];
-  glossary: GlossaryTerm[];
-  media: MediaSuggestion[];
-  quiz: QuizQuestion[];
+  flashcards: { question: string; answer: string; }[];
+  glossary: { term: string; definition: string; }[];
+  media: {
+    type: 'video' | 'podcast' | 'infographic' | string;
+    title: string;
+    url: string;
+  }[];
+  quiz: any[];
   coverImageUrl?: string;
-  youtubeUrl?: string;
-  creationDate?: string;
+  creationDate: string;
+  level?: string;
+  shortDescription?: string;
+  kahootUrl?: string;
+  sourceText?: string; // Nouveau champ pour le texte source complet
 }
 
 export interface ChatMessage {

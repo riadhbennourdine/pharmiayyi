@@ -3,7 +3,9 @@ import { MongoClient } from 'mongodb';
 const uri = process.env.MONGO_URL;
 
 if (!uri) {
-  throw new Error('Please define the MONGO_URL environment variable');
+  console.error('FATAL ERROR: MONGO_URL environment variable is not defined.');
+  console.error('Please set the MONGO_URL environment variable to your MongoDB connection string.');
+  process.exit(1);
 }
 
 let client: MongoClient;

@@ -3,7 +3,7 @@ import { TOPIC_CATEGORIES } from '../constants';
 import { CapsuleIcon } from './icons';
 import { CaseStudy } from '../types';
 
-const Dashboard: React.FC = () => {
+const Dashboard: React.FC<{ onSelectCase: (caseStudy: CaseStudy) => void }> = ({ onSelectCase }) => {
   const [memofiches, setMemofiches] = useState<CaseStudy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

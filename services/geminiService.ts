@@ -36,7 +36,6 @@ const safetySettings = [
     },
 ];
 
-export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
     const prompt = `
       À partir du texte suivant, génère une mémofiche de cas de comptoir pour un étudiant en pharmacie.
       La mémofiche doit être pertinente pour le thème "${theme}" et le système/organe "${system}".
@@ -44,15 +43,25 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       Identifie un scénario patient plausible à partir du texte.
       Le ton doit être professionnel et didactique.
 
-      Inclus les sections suivantes:
-      - "title", "patientSituation", "pathologyOverview", "keyQuestions", "redFlags".
-      - "recommendations": Structure cette section en 4 sous-sections : "mainTreatment", "associatedProducts", "lifestyleAdvice", "dietaryAdvice".
-      - "keyPoints": Crée 3 à 4 points clés ultra-concis.
-      - "references": Fournis 1 à 3 références bibliographiques pertinentes.
-      - "flashcards": Crée 10 flashcards (question/réponse).
-      - "glossary": Définis 10 termes techniques.
-      - "media": Suggère 1 à 2 supports médias (vidéo, infographie). Ne génère pas d'URL.
-      - "quiz": Génère un quiz de 10 questions pertinentes (mélange de QCM à 4 options et Vrai/Faux). Pour Vrai/Faux, correctAnswerIndex est 0 pour "Vrai" et 1 pour "Faux".
+      Inclus les sections suivantes, en t'assurant que les tableaux sont bien des tableaux de chaînes de caractères ou d'objets selon le type:
+      - "title": Titre concis de la mémofiche.
+      - "patientSituation": Scénario patient détaillé.
+      - "pathologyOverview": Aperçu de la pathologie.
+      - "keyQuestions": Tableau de questions clés à poser au patient.
+      - "redFlags": Tableau de signaux d'alerte.
+      - "recommendations": Objet avec 4 sous-sections (tableaux de chaînes de caractères):
+        - "mainTreatment": Traitement principal.
+        - "associatedProducts": Produits associés.
+        - "lifestyleAdvice": Conseils d'hygiène de vie.
+        - "dietaryAdvice": Conseils alimentaires.
+      - "keyPoints": Tableau de 3 à 4 points clés ultra-concis.
+      - "references": Tableau de 1 à 3 références bibliographiques pertinentes.
+      - "flashcards": Tableau de 10 flashcards (objets avec "question" et "answer").
+      - "glossary": Tableau de 10 termes techniques (objets avec "term" et "definition").
+      - "media": Tableau de 1 à 2 supports médias (objets avec "title", "type" ('video' ou 'infographic'), et "url" - utilise des URLs de placeholder si tu ne peux pas générer de vraies URLs).
+      - "coverImageUrl": URL d'une image de couverture pertinente (utilise une URL de placeholder si tu ne peux pas générer de vraie URL).
+      - "youtubeUrl": URL d'une vidéo YouTube pertinente (utilise une URL de placeholder si tu ne peux pas générer de vraie URL).
+      - "quiz": Tableau de 10 questions de quiz (objets QuizQuestion avec "question", "options", "correctAnswerIndex", "explanation", "type" ('single-choice' ou 'true-false')). Pour Vrai/Faux, correctAnswerIndex est 0 pour "Vrai" et 1 pour "Faux".
 
       Texte source:
       ---
@@ -61,6 +70,8 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
 
       Génère la réponse au format JSON.
     `;
+
+    console.log("Prompt sent to Gemini:", prompt); // Log la prompt
 
     const parts = [
         { text: prompt },
@@ -75,6 +86,7 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
 
         const response = result.response;
         const jsonText = response.text();
+        console.log("Raw JSON from Gemini:", jsonText); // Log la réponse brute de Gemini
         const generatedCase: CaseStudy = JSON.parse(jsonText);
 
         // Transform glossary if it's an object
@@ -101,14 +113,12 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
             }
         }
 
-        console.log("Raw JSON from Gemini:", jsonText);
         console.log("Parsed CaseStudy object (after transformation):", generatedCase);
         return generatedCase;
     } catch (error) {
-        console.error("Error generating case study:", error);
+        console.error("Error generating case study:", error); // Log l'erreur ici aussi
         throw new Error("Failed to generate case study from text.");
     }
-};
 
 export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy): Promise<string> => {
     const caseStudyText = `
