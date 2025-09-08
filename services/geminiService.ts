@@ -36,6 +36,7 @@ const safetySettings = [
     },
 ];
 
+export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
     const prompt = `
       À partir du texte suivant, génère une mémofiche de cas de comptoir pour un étudiant en pharmacie.
       La mémofiche doit être pertinente pour le thème "${theme}" et le système/organe "${system}".
@@ -119,6 +120,7 @@ const safetySettings = [
         console.error("Error generating case study:", error); // Log l'erreur ici aussi
         throw new Error("Failed to generate case study from text.");
     }
+};
 
 export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy): Promise<string> => {
     const caseStudyText = `
