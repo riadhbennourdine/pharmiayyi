@@ -50,7 +50,11 @@ app.post('/api/generate-case-study-from-text', async (req, res) => {
         res.json(generatedCaseStudy);
     } catch (error) {
         console.error('Error generating case study from text:', error);
-        res.status(500).json({ error: 'Failed to generate case study from text.' });
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        res.status(500).json({ 
+            error: 'Failed to generate case study from text.',
+            details: errorMessage
+        });
     }
 });
 
