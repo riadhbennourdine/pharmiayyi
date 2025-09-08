@@ -124,29 +124,32 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
 
       // Fusionner les champs générés par l'IA avec les champs existants de la mémofiche
       // Prioriser les champs générés par l'IA s'ils ne sont pas vides
-      setCaseStudy(prev => ({
-        ...prev,
-        title: generatedCaseStudy.title || prev.title,
-        patientSituation: generatedCaseStudy.patientSituation || prev.patientSituation,
-        keyQuestions: generatedCaseStudy.keyQuestions.length > 0 ? generatedCaseStudy.keyQuestions : prev.keyQuestions,
-        pathologyOverview: generatedCaseStudy.pathologyOverview || prev.pathologyOverview,
-        redFlags: generatedCaseStudy.redFlags.length > 0 ? generatedCaseStudy.redFlags : prev.redFlags,
-        recommendations: {
-          mainTreatment: generatedCaseStudy.recommendations.mainTreatment.length > 0 ? generatedCaseStudy.recommendations.mainTreatment : prev.recommendations.mainTreatment,
-          associatedProducts: generatedCaseStudy.recommendations.associatedProducts.length > 0 ? generatedCaseStudy.recommendations.associatedProducts : prev.recommendations.associatedProducts,
-          lifestyleAdvice: generatedCaseStudy.recommendations.lifestyleAdvice.length > 0 ? generatedCaseStudy.recommendations.lifestyleAdvice : prev.recommendations.lifestyleAdvice,
-          dietaryAdvice: generatedCaseStudy.recommendations.dietaryAdvice.length > 0 ? generatedCaseStudy.recommendations.dietaryAdvice : prev.recommendations.dietaryAdvice,
-        },
-        keyPoints: generatedCaseStudy.keyPoints.length > 0 ? generatedCaseStudy.keyPoints : prev.keyPoints,
-        references: generatedCaseStudy.references.length > 0 ? generatedCaseStudy.references : prev.references,
-        flashcards: generatedCaseStudy.flashcards.length > 0 ? generatedCaseStudy.flashcards : prev.flashcards,
-        glossary: generatedCaseStudy.glossary.length > 0 ? generatedCaseStudy.glossary : prev.glossary,
-        media: generatedCaseStudy.media.length > 0 ? generatedCaseStudy.media : prev.media,
-        quiz: generatedCaseStudy.quiz.length > 0 ? generatedCaseStudy.quiz : prev.quiz,
-        coverImageUrl: generatedCaseStudy.coverImageUrl || prev.coverImageUrl,
-        youtubeUrl: generatedCaseStudy.youtubeUrl || prev.youtubeUrl,
-        // Ne pas modifier theme, system, level, shortDescription, kahootUrl, creationDate car ils sont déjà définis par l'utilisateur
-      }));
+      setCaseStudy(prev => {
+        const newRecommendations = generatedCaseStudy.recommendations ? {
+          mainTreatment: generatedCaseStudy.recommendations.mainTreatment?.length > 0 ? generatedCaseStudy.recommendations.mainTreatment : prev.recommendations.mainTreatment,
+          associatedProducts: generatedCaseStudy.recommendations.associatedProducts?.length > 0 ? generatedCaseStudy.recommendations.associatedProducts : prev.recommendations.associatedProducts,
+          lifestyleAdvice: generatedCaseStudy.recommendations.lifestyleAdvice?.length > 0 ? generatedCaseStudy.recommendations.lifestyleAdvice : prev.recommendations.lifestyleAdvice,
+          dietaryAdvice: generatedCaseStudy.recommendations.dietaryAdvice?.length > 0 ? generatedCaseStudy.recommendations.dietaryAdvice : prev.recommendations.dietaryAdvice,
+        } : prev.recommendations;
+
+        return {
+          ...prev,
+          title: generatedCaseStudy.title || prev.title,
+          patientSituation: generatedCaseStudy.patientSituation || prev.patientSituation,
+          keyQuestions: generatedCaseStudy.keyQuestions?.length > 0 ? generatedCaseStudy.keyQuestions : prev.keyQuestions,
+          pathologyOverview: generatedCaseStudy.pathologyOverview || prev.pathologyOverview,
+          redFlags: generatedCaseStudy.redFlags?.length > 0 ? generatedCaseStudy.redFlags : prev.redFlags,
+          recommendations: newRecommendations,
+          keyPoints: generatedCaseStudy.keyPoints?.length > 0 ? generatedCaseStudy.keyPoints : prev.keyPoints,
+          references: generatedCaseStudy.references?.length > 0 ? generatedCaseStudy.references : prev.references,
+          flashcards: generatedCaseStudy.flashcards?.length > 0 ? generatedCaseStudy.flashcards : prev.flashcards,
+          glossary: generatedCaseStudy.glossary?.length > 0 ? generatedCaseStudy.glossary : prev.glossary,
+          media: generatedCaseStudy.media?.length > 0 ? generatedCaseStudy.media : prev.media,
+          quiz: generatedCaseStudy.quiz?.length > 0 ? generatedCaseStudy.quiz : prev.quiz,
+          coverImageUrl: generatedCaseStudy.coverImageUrl || prev.coverImageUrl,
+          youtubeUrl: generatedCaseStudy.youtubeUrl || prev.youtubeUrl,
+        }
+      });
       alert("Sections remplies avec l'IA ! Veuillez vérifier et sauvegarder.");
     } catch (error) {
       console.error('Error in handleFillWithAI:', error);
