@@ -79,9 +79,9 @@ app.post('/api/auth/register', async (req, res) => {
 // Login endpoint
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { identifier, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!identifier || !password) {
+    if (!email || !password) {
       return res.status(400).json({ message: 'Identifiant et mot de passe requis.' });
     }
 
@@ -90,7 +90,7 @@ app.post('/api/auth/login', async (req, res) => {
     const usersCollection = db.collection<User>('users');
 
     // Find user by email or username
-    const user = await usersCollection.findOne({ $or: [{ email: identifier }, { username: identifier }] });
+    const user = await usersCollection.findOne({ $or: [{ email: email }, { username: email }] });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
