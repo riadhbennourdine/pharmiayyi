@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for PharmIA */
+
+/* Animated gradient text for Header */
+.animated-gradient-text {
+  background-size: 200% auto;
+  animation: gradient-shift 3s linear infinite;
+}
+
+@keyframes gradient-shift {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Animated glow for PharmIA on Landing Page */
+.animated-pharmia {
+  color: #065f46; /* Dark teal for the text */
+  text-shadow: 
+    0 0 5px rgba(6, 185, 150, 0.5), /* Light teal glow */
+    0 0 10px rgba(6, 185, 150, 0.5), /* Medium teal glow */
+    0 0 15px rgba(6, 185, 150, 0.5); /* Strong teal glow */
+  animation: pulse-glow 2s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from {
+    text-shadow: 
+      0 0 5px rgba(6, 185, 150, 0.5), 
+      0 0 10px rgba(6, 185, 150, 0.5), 
+      0 0 15px rgba(6, 185, 150, 0.5);
+  }
+  to {
+    text-shadow: 
+      0 0 10px rgba(6, 185, 150, 0.8), 
+      0 0 20px rgba(6, 185, 150, 0.8), 
+      0 0 30px rgba(6, 185, 150, 0.8);
+  }
+}
