@@ -106,48 +106,17 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
     : null;
 
   const memoContent = useMemo(() => {
-    const highlightedTerms = new Set<string>();
-
     const highlightGlossaryTerms = (text: any): React.ReactNode[] => {
-        const textAsString = String(text || ''); // Ensure text is a string
-
+        const textAsString = String(text || '');
         if (!caseStudy.glossary || caseStudy.glossary.length === 0 || !textAsString) {
             return [textAsString];
         }
-        
-        const termsToFind = caseStudy.glossary.filter(g => !highlightedTerms.has(g.term.toLowerCase()));
-        if (termsToFind.length === 0) {
-            return [textAsString];
-        }
-        
-        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\const highlightGlossaryTerms = (text: any): React.ReactNode[] => {
-        const textAsString = String(text || ''); // Ensure text is a string
 
-        if (!caseStudy.glossary || caseStudy.glossary.length === 0 || !textAsString) {
-            return [textAsString];
-        }
-        
-        const termsToFind = caseStudy.glossary.filter(g => !highlightedTerms.has(g.term.toLowerCase()));
-        if (termsToFind.length === 0) {
-            return [textAsString];
-        }
-        
-        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\const highlightGlossaryTerms = (text: string): React.ReactNode[] => {
-        if (!caseStudy.glossary || caseStudy.glossary.length === 0 || !text) {
-            return [text];
-        }
-        
-        const termsToFind = caseStudy.glossary.filter(g => !highlightedTerms.has(g.term.toLowerCase()));
-        if (termsToFind.length === 0) {
-            return [text];
-        }
+        const termsToFind = caseStudy.glossary;
         
         const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&'));
         const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
         
-        const parts = text.split(regex);'));
-        const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
-        
         const parts = textAsString.split(regex);
         
         return parts.map((part, index) => {
@@ -155,28 +124,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             const lowerPart = part.toLowerCase();
             const match = termsToFind.find(g => g.term.toLowerCase() === lowerPart);
             
-            if (match && !highlightedTerms.has(lowerPart)) {
-                highlightedTerms.add(lowerPart);
-                return (
-                    <GlossaryTermWrapper key={`${match.term}-${index}`} term={match.term} definition={match.definition}>
-                        {part}
-                    </GlossaryTermWrapper>
-                );
-            }
-            return part;
-        });
-    };'));
-        const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
-        
-        const parts = textAsString.split(regex);
-        
-        return parts.map((part, index) => {
-            if (!part) return null;
-            const lowerPart = part.toLowerCase();
-            const match = termsToFind.find(g => g.term.toLowerCase() === lowerPart);
-            
-            if (match && !highlightedTerms.has(lowerPart)) {
-                highlightedTerms.add(lowerPart);
+            if (match) {
                 return (
                     <GlossaryTermWrapper key={`${match.term}-${index}`} term={match.term} definition={match.definition}>
                         {part}
@@ -481,7 +429,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     >
                       {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
                     </button>
-                    {!isPreview && ( 
+                    {!isPreview && (
                         <button
                             onClick={onEdit}
                             className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
