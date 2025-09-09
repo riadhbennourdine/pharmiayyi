@@ -6,6 +6,9 @@
 
 /* Animated gradient text for Header */
 .animated-gradient-text {
+  background-image: linear-gradient(to right, #0D9488, #0F766E, #0D9488); /* Green gradient */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   background-size: 200% auto;
   animation: gradient-shift 3s linear infinite;
 }
@@ -18,9 +21,30 @@
 
 /* Animated glow for PharmIA on Landing Page */
 .animated-pharmia {
-  font-family: 'Google Sans', 'Roboto', sans-serif; /* Assuming Google Sans or Roboto for a Google-like feel */
-  font-weight: 700; /* Bold */
-  color: #1a73e8; /* A common Google blue */
+  background-image: linear-gradient(to right, #0D9488, #0F766E, #0D9488); /* Green gradient */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: gradient-shift-pharmia 4s ease-in-out infinite, pulse-glow-pharmia 2.5s infinite alternate;
+}
+
+@keyframes gradient-shift-pharmia {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-glow-pharmia {
+  from {
+    text-shadow:
+      0 0 8px rgba(13, 148, 136, 0.7), /* Brighter green glow */
+      0 0 15px rgba(13, 148, 136, 0.7);
+  }
+  to {
+    text-shadow:
+      0 0 15px rgba(13, 148, 136, 1),
+      0 0 25px rgba(13, 148, 136, 1);
+  }
 }
 
 @keyframes gradient-shift-pharmia {

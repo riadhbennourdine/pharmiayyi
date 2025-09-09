@@ -44,10 +44,7 @@ const LandingPage: React.FC = () => {
             <header className="bg-white shadow-sm sticky top-0 z-50">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center">
-                        <LogoIcon className="h-8 w-8 text-teal-600 mr-3" />
-                        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-                        Pharm<span className="text-teal-600">IA</span>
-                        </h1>
+                        <span className="animated-gradient-text text-2xl font-bold tracking-tight">PharmIA</span>
                     </div>
                     <button
                         onClick={handleStartLearning}

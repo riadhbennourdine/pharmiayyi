@@ -358,95 +358,97 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                 opacity: 1;
             }
         `}</style>
-        {caseStudy.coverImageUrl ? (
-            <div className="mb-8 rounded-lg overflow-hidden shadow-lg relative h-64 flex items-end p-8 text-white bg-slate-800">
-                <img src={caseStudy.coverImageUrl} alt={`Image de couverture pour ${caseStudy.title}`} className="absolute inset-0 w-full h-full object-cover z-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10"></div>
-                <div className="relative z-20">
-                    <h2 className="text-4xl font-extrabold tracking-tight" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-                        {caseStudy.title}
-                    </h2>
-                    <div className="mt-2 text-sm font-medium opacity-90" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
-                        <span>{caseStudy.theme}</span>
-                        <span className="mx-2">&bull;</span>
-                        <span>{caseStudy.system}</span>
-                        {formattedDate && (
-                            <>
-                                <span className="mx-2">&bull;</span>
-                                <span>{`Créé le ${formattedDate}`}</span>
-                            </>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {caseStudy.coverImageUrl ? (
+                <div className="mb-8 rounded-lg overflow-hidden shadow-lg relative h-64 flex items-end p-8 text-white bg-slate-800">
+                    <img src={caseStudy.coverImageUrl} alt={`Image de couverture pour ${caseStudy.title}`} className="absolute inset-0 w-full h-full object-cover z-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10"></div>
+                    <div className="relative z-20">
+                        <h2 className="text-4xl font-extrabold tracking-tight" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                            {caseStudy.title}
+                        </h2>
+                        <div className="mt-2 text-sm font-medium opacity-90" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                            <span>{caseStudy.theme}</span>
+                            <span className="mx-2">&bull;</span>
+                            <span>{caseStudy.system}</span>
+                            {formattedDate && (
+                                <>
+                                    <span className="mx-2">&bull;</span>
+                                    <span>{`Créé le ${formattedDate}`}</span>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                 <div className="text-center mb-8">
+                    <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">{caseStudy.title}</h2>
+                 </div>
+            )}
+
+            {caseStudy.keyPoints && caseStudy.keyPoints.length > 0 && (
+                <div className="mb-8 p-6 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg shadow-sm">
+                    <h3 className="text-xl font-bold text-amber-800 mb-3 flex items-center">
+                        <KeyIcon className="h-6 w-6 mr-3" />
+                        Points Clés à Retenir
+                    </h3>
+                    <ul className="space-y-2 pl-5 list-disc text-amber-900">
+                        {caseStudy.keyPoints.map((point, i) => (
+                            <li key={i} className="text-base">{point}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                    <div className="mb-6 border-b border-slate-200 flex space-x-1 sm:space-x-2 overflow-x-auto pb-px">
+                       {menuItems.map(item => (
+                           <button
+                             key={item.id}
+                             onClick={() => setActiveTab(item.id)}
+                             className={`flex items-center space-x-2 px-3 sm:px-4 py-3 text-sm sm:text-base font-medium rounded-t-md transition-colors duration-300 focus:outline-none ${ 
+                                 activeTab === item.id
+                                 ? 'border-b-2 border-teal-600 text-teal-600 bg-teal-50/50'
+                                 : 'text-slate-500 hover:text-teal-500 hover:bg-slate-100/50'
+                             }`}
+                             aria-current={activeTab === item.id ? 'page' : undefined}
+                           >
+                               {item.icon} <span>{item.label}</span>
+                           </button>
+                       ))}
+                    </div>
+                    
+                    <div className="min-h-[300px]">
+                      {renderContent()}
+                    </div>
+
+                     <div className="mt-8 flex items-center justify-center space-x-4"> 
+                        <button 
+                            onClick={onBack} 
+                            className="px-6 py-3 text-base font-bold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors"
+                        >
+                          {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
+                        </button>
+                        {!isPreview && ( 
+                            <button
+                                onClick={onEdit}
+                                className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                            >
+                                <PencilIcon className="h-5 w-5 mr-2" /> Modifier
+                            </button>
                         )}
                     </div>
                 </div>
-            </div>
-        ) : (
-             <div className="text-center mb-8">
-                <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">{caseStudy.title}</h2>
-             </div>
-        )}
-
-        {caseStudy.keyPoints && caseStudy.keyPoints.length > 0 && (
-            <div className="mb-8 p-6 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg shadow-sm">
-                <h3 className="text-xl font-bold text-amber-800 mb-3 flex items-center">
-                    <KeyIcon className="h-6 w-6 mr-3" />
-                    Points Clés à Retenir
-                </h3>
-                <ul className="space-y-2 pl-5 list-disc text-amber-900">
-                    {caseStudy.keyPoints.map((point, i) => (
-                        <li key={i} className="text-base">{point}</li>
-                    ))}
-                </ul>
-            </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-                <div className="mb-6 border-b border-slate-200 flex space-x-1 sm:space-x-2 overflow-x-auto pb-px">
-                   {menuItems.map(item => (
-                       <button
-                         key={item.id}
-                         onClick={() => setActiveTab(item.id)}
-                         className={`flex items-center space-x-2 px-3 sm:px-4 py-3 text-sm sm:text-base font-medium rounded-t-md transition-colors duration-300 focus:outline-none ${ 
-                             activeTab === item.id
-                             ? 'border-b-2 border-teal-600 text-teal-600 bg-teal-50/50'
-                             : 'text-slate-500 hover:text-teal-500 hover:bg-slate-100/50'
-                         }`}
-                         aria-current={activeTab === item.id ? 'page' : undefined}
-                       >
-                           {item.icon} <span>{item.label}</span>
-                       </button>
-                   ))}
-                </div>
                 
-                <div className="min-h-[300px]">
-                  {renderContent()}
-                </div>
-
-                 <div className="mt-8 flex items-center justify-center space-x-4"> 
-                    <button 
-                        onClick={onBack} 
-                        className="px-6 py-3 text-base font-bold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors"
-                    >
-                      {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
-                    </button>
-                    {!isPreview && ( 
-                        <button
-                            onClick={onEdit}
-                            className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-                        >
-                            <PencilIcon className="h-5 w-5 mr-2" /> Modifier
-                        </button>
+                <aside className="lg:col-span-1">
+                    {!isPreview && (
+                        <div className="sticky top-24">
+                            <ChatAssistant caseContext={caseStudy} />
+                        </div>
                     )}
-                </div>
+                </aside>
             </div>
-            
-            <aside className="lg:col-span-1">
-                {!isPreview && (
-                    <div className="sticky top-24">
-                        <ChatAssistant caseContext={caseStudy} />
-                    </div>
-                )}
-            </aside>
         </div>
     </div>
   );

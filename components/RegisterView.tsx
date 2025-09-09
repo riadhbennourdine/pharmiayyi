@@ -40,10 +40,7 @@ const RegisterView: React.FC = () => {
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
                 <div className="text-center">
                     <button onClick={() => navigate('/')} className="inline-flex items-center mb-4 focus:outline-none group" aria-label="Retour à l'accueil">
-                        <LogoIcon className="h-12 w-12 text-teal-600 mr-3 transition-transform duration-300 group-hover:scale-110" />
-                        <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
-                            Pharm<span className="text-teal-600">IA</span>
-                        </h1>
+                        <span className="animated-gradient-text text-4xl font-bold tracking-tight">PharmIA</span>
                     </button>
                     <h2 className="mt-2 text-xl text-slate-600">
                         Créez votre compte

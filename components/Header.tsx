@@ -13,8 +13,8 @@ const Header: React.FC = () => {
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium px-3 py-2 rounded-md transition-colors ${
       isActive
-        ? 'text-green-600 font-semibold'
-        : 'text-gray-500 hover:text-green-600'
+        ? 'text-teal-600 font-semibold'
+        : 'text-gray-500 hover:text-teal-600'
     }`;
 
   const handleLogout = () => {
@@ -65,7 +65,7 @@ const Header: React.FC = () => {
         <NavLink to="/learner-space" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Mon espace
         </NavLink>
-        <button onClick={() => { handleLogout(); isMobile && setIsMenuOpen(false); }} className="text-sm font-medium px-3 py-2 rounded-md transition-colors text-gray-500 hover:text-green-600">
+        <button onClick={() => { handleLogout(); isMobile && setIsMenuOpen(false); }} className="text-sm font-medium px-3 py-2 rounded-md transition-colors text-gray-500 hover:text-teal-600">
             Déconnexion
         </button>
       </>
@@ -76,7 +76,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to={isAuthenticated ? "/fiches" : "/"} className="text-2xl font-bold">
-            <span className="animated-gradient-text font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-600 to-green-800">PharmIA</span>
+            <span className="animated-gradient-text font-extrabold text-transparent">PharmIA</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -86,7 +86,7 @@ const Header: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-500 hover:text-green-600 focus:outline-none">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-500 hover:text-teal-600 focus:outline-none">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 {isMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
