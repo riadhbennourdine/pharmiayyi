@@ -18,11 +18,9 @@
 
 /* Animated glow for PharmIA on Landing Page */
 .animated-pharmia {
-  background-image: linear-gradient(to right, #10b981, #065f46, #10b981); /* More vibrant gradient */
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-size: 200% auto;
-  animation: gradient-shift-pharmia 4s ease-in-out infinite, pulse-glow-pharmia 2.5s infinite alternate;
+  font-family: 'Google Sans', 'Roboto', sans-serif; /* Assuming Google Sans or Roboto for a Google-like feel */
+  font-weight: 700; /* Bold */
+  color: #1a73e8; /* A common Google blue */
 }
 
 @keyframes gradient-shift-pharmia {
