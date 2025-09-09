@@ -21,7 +21,7 @@ const GlossaryTermWrapper: React.FC<{ term: string; definition: string; children
     </span>
 );
 
-const AccordionSection: React.FC<{
+const AccordionSection: React.FC<{ 
     title: string;
     icon: React.ReactNode;
     children: React.ReactNode;
@@ -114,7 +114,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
 
         const termsToFind = caseStudy.glossary;
         
-        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&'));
+        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
         const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
         
         const parts = textAsString.split(regex);
@@ -143,7 +143,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             content: <p>{highlightGlossaryTerms(caseStudy.patientSituation)}</p>
         },
         {
-            id: 'keyQuestions', 
+            id: 'keyQuestions',
             title: 'Questions clés à poser',
             icon: <QuestionMarkCircleIcon className="h-6 w-6 text-teal-600 mr-3" />,
             content: (
@@ -429,7 +429,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     >
                       {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
                     </button>
-                    {!isPreview && (
+                    {!isPreview && ( 
                         <button
                             onClick={onEdit}
                             className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
