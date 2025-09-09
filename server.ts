@@ -79,18 +79,18 @@ app.post('/api/auth/register', async (req, res) => {
 // Login endpoint
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required.' });
+    if (!identifier || !password) {
+      return res.status(400).json({ message: 'Identifiant et mot de passe requis.' });
     }
 
     const client = await clientPromise;
     const db = client.db('pharmia');
     const usersCollection = db.collection<User>('users');
 
-    // Find user by email
-    const user = await usersCollection.findOne({ email });
+    // Find user by email or username
+    const user = await usersCollection.findOne({ $or: [{ email: identifier }, { username: identifier }] });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
