@@ -12,7 +12,7 @@ const RegisterView: React.FC = () => {
     const navigate = useNavigate();
     const { register } = useAuth();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (password !== confirmPassword) {
             setError("Les mots de passe ne correspondent pas.");
@@ -20,12 +20,19 @@ const RegisterView: React.FC = () => {
         }
         setError(null);
         setIsLoading(true);
-        // Simule un appel réseau pour l'inscription
-        setTimeout(() => {
-            register(); // Call the register function from context
+        try {
+            const success = await register(email, password); // Call the register function from context
+            if (success) {
+                navigate('/login'); // Navigate to login after successful registration
+            } else {
+                setError("L'inscription a échoué. Veuillez réessayer.");
+            }
+        } catch (err) {
+            setError("Une erreur est survenue lors de l'inscription.");
+            console.error(err);
+        } finally {
             setIsLoading(false);
-            navigate('/login'); // Navigate to login after successful registration
-        }, 1500);
+        }
     };
 
     return (

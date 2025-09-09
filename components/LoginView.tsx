@@ -7,18 +7,27 @@ const LoginView: React.FC = () => {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null); // Add error state
     const navigate = useNavigate();
     const { login } = useAuth();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simule un appel réseau
-        setTimeout(() => {
-            login(identifier, password);
+        setError(null); // Clear previous errors
+        try {
+            const success = await login(identifier, password);
+            if (success) {
+                navigate('/dashboard'); // Redirect to dashboard after successful login
+            } else {
+                setError('Identifiants invalides. Veuillez réessayer.'); // Set error message
+            }
+        } catch (err) {
+            setError('Une erreur est survenue lors de la connexion.'); // Catch network or other errors
+            console.error(err);
+        } finally {
             setIsLoading(false);
-            navigate('/dashboard'); // Redirect to dashboard after login
-        }, 1000);
+        }
     };
 
     return (
@@ -36,6 +45,11 @@ const LoginView: React.FC = () => {
                     </h2>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative" role="alert">
+                            <span className="block sm:inline">{error}</span>
+                        </div>
+                    )}
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="identifier" className="sr-only">Email ou Pseudo</label>

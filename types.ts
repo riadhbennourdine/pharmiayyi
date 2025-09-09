@@ -8,8 +8,20 @@ export enum ViewState {
 }
 
 export enum UserRole {
-  USER = 'USER',
+  PREPARATEUR = 'PREPARATEUR',
+  PHARMACIEN = 'PHARMACIEN',
+  FORMATEUR = 'FORMATEUR',
   ADMIN = 'ADMIN',
+}
+
+export interface User {
+  _id?: string;
+  email: string;
+  password?: string; // Only for registration/login, not stored
+  passwordHash?: string; // Stored in DB
+  role: UserRole;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Flashcard {

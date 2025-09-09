@@ -190,7 +190,7 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
           <textarea name="pathologyOverview" value={caseStudy.pathologyOverview} onChange={handleChange} rows={3} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Signaux d\'Alerte (un par ligne)</label>
+          <label className="block text-sm font-medium text-gray-700">Signaux d'Alerte (un par ligne)</label>
           <textarea name="redFlags" value={caseStudy.redFlags.map(f => (typeof f === 'string' ? f : f.redFlag)).join('\n')} onChange={(e) => handleArrayChange('redFlags', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         
@@ -273,7 +273,7 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
           <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
             Annuler
           </button>
-          <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">
+          <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
             Sauvegarder
           </button>
         </div>
