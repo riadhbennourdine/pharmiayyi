@@ -7,10 +7,39 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
 
+// Extend the Request type to include the user property
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
+
 const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(express.json());
+
+// Middleware to protect routes
+const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'No token, authorization denied' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  const jwtSecret = process.env.JWT_SECRET || 'supersecretjwtkey'; // TODO: Use a strong, environment-variable-based secret
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret) as { _id: string; email: string; role: UserRole };
+    req.user = { _id: decoded._id, email: decoded.email, role: decoded.role }; // Attach user info to request
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Token is not valid' });
+  }
+};
 
 // Serve index.html for the root path
 app.get('/', (req, res) => {
@@ -116,6 +145,60 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (error) {
     console.error('Error during user login:', error);
     res.status(500).json({ message: 'Internal server error during login.' });
+  }
+});
+
+// Profile update endpoint
+app.put('/api/user/profile', authMiddleware, async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const userId = req.user?._id; // Get user ID from authenticated request
+
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const updateFields: any = { updatedAt: new Date() };
+
+    if (email) {
+      // Check if new email is already taken by another user
+      const existingUserWithEmail = await usersCollection.findOne({ email, _id: { $ne: new ObjectId(userId) } });
+      if (existingUserWithEmail) {
+        return res.status(409).json({ message: 'Email already in use by another account.' });
+      }
+      updateFields.email = email;
+    }
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updateFields.passwordHash = await bcrypt.hash(password, salt);
+    }
+
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: updateFields }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Fetch updated user to return (excluding passwordHash)
+    const updatedUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if (updatedUser) {
+      const { passwordHash: _, ...userWithoutPassword } = updatedUser;
+      res.status(200).json({ message: 'Profile updated successfully.', user: userWithoutPassword });
+    } else {
+      res.status(500).json({ message: 'Failed to retrieve updated user data.' });
+    }
+
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ message: 'Internal server error during profile update.' });
   }
 });
 

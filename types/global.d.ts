@@ -1,5 +1,9 @@
-import { MongoClient } from 'mongodb';
+import { User } from '../types';
 
 declare global {
-  var _mongoClientPromise: Promise<MongoClient>;
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
 }

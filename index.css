@@ -6,11 +6,10 @@
 
 /* Animated gradient text for Header */
 .animated-gradient-text {
-  background-image: linear-gradient(to right, #0D9488, #0F766E, #0D9488); /* Green gradient */
+  background-image: linear-gradient(to right, #007bff, #28a745); /* Blue to Green gradient */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-size: 200% auto;
-  animation: gradient-shift 3s linear infinite;
+  animation: pulse 2s infinite alternate; /* New pulse animation */
 }
 
 @keyframes gradient-shift {
@@ -21,11 +20,10 @@
 
 /* Animated glow for PharmIA on Landing Page */
 .animated-pharmia {
-  background-image: linear-gradient(to right, #0D9488, #0F766E, #0D9488); /* Green gradient */
+  background-image: linear-gradient(to right, #007bff, #28a745); /* Blue to Green gradient */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-size: 200% auto;
-  animation: gradient-shift-pharmia 4s ease-in-out infinite, pulse-glow-pharmia 2.5s infinite alternate;
+  animation: pulse 2s infinite alternate; /* New pulse animation */
 }
 
 @keyframes gradient-shift-pharmia {
@@ -45,6 +43,22 @@
       0 0 15px rgba(13, 148, 136, 1),
       0 0 25px rgba(13, 148, 136, 1);
   }
+}
+
+/* New pulse animation */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 @keyframes gradient-shift-pharmia {
