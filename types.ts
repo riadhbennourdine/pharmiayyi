@@ -14,8 +14,10 @@ export enum UserRole {
   ADMIN = 'ADMIN',
 }
 
+import { ObjectId } from 'mongodb'; // Add this import
+
 export interface User {
-  _id?: string;
+  _id?: ObjectId; // Change to ObjectId
   email: string;
   password?: string; // Only for registration/login, not stored
   passwordHash?: string; // Stored in DB

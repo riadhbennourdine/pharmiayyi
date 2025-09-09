@@ -1,4 +1,5 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import { IncomingHttpHeaders } from 'http';
 import path from 'path';
 import { generateCaseStudyFromText, getAssistantResponse } from './services/geminiService';
 import clientPromise from './services/mongo';
@@ -23,7 +24,7 @@ app.use(express.json());
 
 // Middleware to protect routes
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = (req.headers as IncomingHttpHeaders).authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'No token, authorization denied' });
@@ -34,7 +35,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as { _id: string; email: string; role: UserRole };
-    req.user = { _id: decoded._id, email: decoded.email, role: decoded.role }; // Attach user info to request
+    req.user = { _id: new ObjectId(decoded._id), email: decoded.email, role: decoded.role }; // Attach user info to request
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
