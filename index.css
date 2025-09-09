@@ -18,28 +18,28 @@
 
 /* Animated glow for PharmIA on Landing Page */
 .animated-pharmia {
-  background-image: linear-gradient(to right, #065f46, #34d399, #065f46); /* Gradient from dark teal to light green */
+  background-image: linear-gradient(to right, #10b981, #065f46, #10b981); /* More vibrant gradient */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-size: 200% auto;
-  animation: gradient-shift-pharmia 3s linear infinite, pulse-glow-pharmia 2s infinite alternate;
+  animation: gradient-shift-pharmia 4s ease-in-out infinite, pulse-glow-pharmia 2.5s infinite alternate;
 }
 
 @keyframes gradient-shift-pharmia {
-  to {
-    background-position: 200% center;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes pulse-glow-pharmia {
   from {
     text-shadow: 
-      0 0 5px rgba(52, 211, 153, 0.5), /* Light green glow */
-      0 0 10px rgba(52, 211, 153, 0.5);
+      0 0 8px rgba(16, 185, 129, 0.7), /* Brighter green glow */
+      0 0 15px rgba(16, 185, 129, 0.7);
   }
   to {
     text-shadow: 
-      0 0 10px rgba(52, 211, 153, 0.8), 
-      0 0 20px rgba(52, 211, 153, 0.8);
+      0 0 15px rgba(16, 185, 129, 1), 
+      0 0 25px rgba(16, 185, 129, 1);
   }
 }
