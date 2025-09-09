@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../App';
 import { LogoIcon } from './icons';
 
-interface LoginViewProps {
-    onLogin: (identifier: string, password: string) => void;
-    onSwitchToRegister: () => void;
-    onGoHome: () => void;
-}
-
-const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSwitchToRegister, onGoHome }) => {
+const LoginView: React.FC = () => {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         // Simule un appel réseau
         setTimeout(() => {
-            onLogin(identifier, password);
+            login(identifier, password);
             setIsLoading(false);
+            navigate('/dashboard'); // Redirect to dashboard after login
         }, 1000);
     };
 
@@ -26,7 +25,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSwitchToRegister, onGo
         <div className="flex items-center justify-center min-h-screen bg-slate-50 font-sans">
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
                 <div className="text-center">
-                    <button onClick={onGoHome} className="inline-flex items-center mb-4 focus:outline-none group" aria-label="Retour à l'accueil">
+                    <button onClick={() => navigate('/')} className="inline-flex items-center mb-4 focus:outline-none group" aria-label="Retour à l'accueil">
                         <LogoIcon className="h-12 w-12 text-teal-600 mr-3 transition-transform duration-300 group-hover:scale-110" />
                         <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
                             Pharm<span className="text-teal-600">IA</span>
@@ -79,7 +78,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin, onSwitchToRegister, onGo
                     <div className="text-sm text-center">
                         <button
                             type="button"
-                            onClick={onSwitchToRegister}
+                            onClick={() => navigate('/register')}
                             className="font-medium text-teal-600 hover:text-teal-500"
                         >
                             Pas encore de compte ? S'inscrire

@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../App';
 import { LogoIcon } from './icons';
 
-interface RegisterViewProps {
-    onRegisterSuccess: () => void;
-    onSwitchToLogin: () => void;
-    onGoHome: () => void;
-}
-
-const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitchToLogin, onGoHome }) => {
+const RegisterView: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
+    const { register } = useAuth();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,9 +22,9 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
         setIsLoading(true);
         // Simule un appel réseau pour l'inscription
         setTimeout(() => {
-            console.log("Inscription réussie pour:", email);
+            register(); // Call the register function from context
             setIsLoading(false);
-            onRegisterSuccess(); // This will trigger the navigation back to login
+            navigate('/login'); // Navigate to login after successful registration
         }, 1500);
     };
 
@@ -34,7 +32,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
         <div className="flex items-center justify-center min-h-screen bg-slate-50 font-sans">
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg">
                 <div className="text-center">
-                    <button onClick={onGoHome} className="inline-flex items-center mb-4 focus:outline-none group" aria-label="Retour à l'accueil">
+                    <button onClick={() => navigate('/')} className="inline-flex items-center mb-4 focus:outline-none group" aria-label="Retour à l'accueil">
                         <LogoIcon className="h-12 w-12 text-teal-600 mr-3 transition-transform duration-300 group-hover:scale-110" />
                         <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
                             Pharm<span className="text-teal-600">IA</span>
@@ -104,7 +102,7 @@ const RegisterView: React.FC<RegisterViewProps> = ({ onRegisterSuccess, onSwitch
                      <div className="text-sm text-center">
                         <button
                             type="button"
-                            onClick={onSwitchToLogin}
+                            onClick={() => navigate('/login')}
                             className="font-medium text-teal-600 hover:text-teal-500"
                         >
                             Déjà un compte ? Se connecter

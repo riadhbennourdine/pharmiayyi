@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useData } from './contexts/DataContext'; // Import the hook
 import { TOPIC_CATEGORIES } from '../constants';
 import { CapsuleIcon } from './icons';
 import { CaseStudy } from '../types';
 
-const Dashboard: React.FC<{ onSelectCase: (caseStudy: CaseStudy) => void }> = ({ onSelectCase }) => {
+const Dashboard: React.FC = () => {
+  const { selectCase } = useData(); // Use the context
   const [memofiches, setMemofiches] = useState<CaseStudy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +33,6 @@ const Dashboard: React.FC<{ onSelectCase: (caseStudy: CaseStudy) => void }> = ({
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
   const activeCategory = TOPIC_CATEGORIES[activeCategoryIndex];
-  console.log('TOPIC_CATEGORIES:', TOPIC_CATEGORIES);
-  console.log('activeCategory:', activeCategory);
   
   const getCasesForTopic = (topic: string) => {
       const isSystemTopic = TOPIC_CATEGORIES[1].topics.includes(topic);
@@ -89,7 +89,7 @@ const Dashboard: React.FC<{ onSelectCase: (caseStudy: CaseStudy) => void }> = ({
                 return topicCases.map(study => (
                     <div
                         key={study.title}
-                        onClick={() => onSelectCase(study)}
+                        onClick={() => selectCase(study)} // Use selectCase from context
                         className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
                     >
                         {study.coverImageUrl ? (

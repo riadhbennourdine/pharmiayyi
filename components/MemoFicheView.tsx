@@ -108,7 +108,31 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   const memoContent = useMemo(() => {
     const highlightedTerms = new Set<string>();
 
-    const highlightGlossaryTerms = (text: string): React.ReactNode[] => {
+    const highlightGlossaryTerms = (text: any): React.ReactNode[] => {
+        const textAsString = String(text || ''); // Ensure text is a string
+
+        if (!caseStudy.glossary || caseStudy.glossary.length === 0 || !textAsString) {
+            return [textAsString];
+        }
+        
+        const termsToFind = caseStudy.glossary.filter(g => !highlightedTerms.has(g.term.toLowerCase()));
+        if (termsToFind.length === 0) {
+            return [textAsString];
+        }
+        
+        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\const highlightGlossaryTerms = (text: any): React.ReactNode[] => {
+        const textAsString = String(text || ''); // Ensure text is a string
+
+        if (!caseStudy.glossary || caseStudy.glossary.length === 0 || !textAsString) {
+            return [textAsString];
+        }
+        
+        const termsToFind = caseStudy.glossary.filter(g => !highlightedTerms.has(g.term.toLowerCase()));
+        if (termsToFind.length === 0) {
+            return [textAsString];
+        }
+        
+        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\const highlightGlossaryTerms = (text: string): React.ReactNode[] => {
         if (!caseStudy.glossary || caseStudy.glossary.length === 0 || !text) {
             return [text];
         }
@@ -121,7 +145,30 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&'));
         const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
         
-        const parts = text.split(regex);
+        const parts = text.split(regex);'));
+        const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
+        
+        const parts = textAsString.split(regex);
+        
+        return parts.map((part, index) => {
+            if (!part) return null;
+            const lowerPart = part.toLowerCase();
+            const match = termsToFind.find(g => g.term.toLowerCase() === lowerPart);
+            
+            if (match && !highlightedTerms.has(lowerPart)) {
+                highlightedTerms.add(lowerPart);
+                return (
+                    <GlossaryTermWrapper key={`${match.term}-${index}`} term={match.term} definition={match.definition}>
+                        {part}
+                    </GlossaryTermWrapper>
+                );
+            }
+            return part;
+        });
+    };'));
+        const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
+        
+        const parts = textAsString.split(regex);
         
         return parts.map((part, index) => {
             if (!part) return null;

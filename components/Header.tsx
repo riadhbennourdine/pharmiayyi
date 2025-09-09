@@ -1,62 +1,142 @@
-import React from 'react';
-import { LogoIcon, SparklesIcon } from './icons';
-import { UserRole } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext'; // Corrected import path
+import { UserRole } from '../../types';
 
-interface HeaderProps {
-  userRole: UserRole;
-  isAuthenticated: boolean;
-  onSwitchRole: (role: UserRole) => void;
-  onNavigateToGenerator: () => void;
-  onGoHome: () => void;
-  onLogout: () => void;
-}
+const Header: React.FC = () => {
+  const { isAuthenticated, logout, userRole } = useAuth();
+  const isAdmin = userRole === UserRole.ADMIN;
+  const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+      isActive
+        ? 'text-green-600 font-semibold'
+        : 'text-gray-500 hover:text-green-600'
+    }`;
 
-const Header: React.FC<HeaderProps> = ({ userRole, isAuthenticated, onSwitchRole, onNavigateToGenerator, onGoHome, onLogout }) => {
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <header className="bg-white shadow-md">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <button onClick={onGoHome} className="flex items-center" aria-label="Retour à l'accueil">
-          <LogoIcon className="h-8 w-8 text-teal-600 mr-3" />
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-            Pharm<span className="text-teal-600">IA</span>
-          </h1>
-        </button>
-        <div className="flex items-center space-x-4">
-          {isAuthenticated && userRole === UserRole.ADMIN && (
-            <button 
-              onClick={onNavigateToGenerator} 
-              className="hidden sm:inline-flex items-center bg-slate-100 text-slate-700 font-semibold px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors duration-200"
-            >
-              <SparklesIcon className="h-5 w-5 mr-2" />
-              Générateur
+    <header className="bg-white/80 backdrop-blur-sm sticky top-0 z-50 h-16 border-b border-gray-200">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <Link to="/" className="text-2xl font-bold">
+            <span className="animated-gradient-text font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-600 to-green-800">PharmIA</span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
+            <NavLink to="/" className={navLinkClass} end>
+              Accueil
+            </NavLink>
+            <NavLink to="/fiches" className={navLinkClass}>
+              Mémofiches
+            </NavLink>
+            <NavLink to="/tarifs" className={navLinkClass}>
+              Tarifs
+            </NavLink>
+            {isAuthenticated && (
+              <NavLink to="/coach-accueil" className={navLinkClass}>
+                Coach IA
+              </NavLink>
+            )}
+            {isAdmin && (
+              <NavLink to="/generateur" className={navLinkClass}>
+                Générateur
+              </NavLink>
+            )}
+            {isAuthenticated ? (
+              <>
+                <NavLink to="/learner-space" className={navLinkClass}>
+                  Mon espace
+                </NavLink>
+                
+                <button onClick={handleLogout} className="text-sm font-medium px-3 py-2 rounded-md transition-colors text-gray-500 hover:text-green-600">
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <NavLink to="/connexion" className={navLinkClass}>
+                Connexion
+              </NavLink>
+            )}
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-500 hover:text-green-600 focus:outline-none">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                {isMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                )}
+              </svg>
             </button>
-          )}
-          {isAuthenticated && (
-            <>
-              <div className="relative">
-                <select 
-                  onChange={(e) => onSwitchRole(e.target.value as UserRole)} 
-                  value={userRole} 
-                  className="appearance-none bg-white border border-slate-300 rounded-md py-2 pl-3 pr-8 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  aria-label="Changer de rôle utilisateur"
-                >
-                  <option value={UserRole.USER}>Utilisateur</option>
-                  <option value={UserRole.ADMIN}>Admin</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                </div>
-              </div>
-              <button
-                onClick={onLogout}
-                className="text-sm font-semibold bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors duration-200"
-              >
-                Déconnexion
-              </button>
-            </>
-          )}
+          </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-200" ref={menuRef}>
+          <nav className="flex flex-col space-y-1 px-2 pt-2 pb-3">
+            <NavLink to="/" className={navLinkClass} onClick={() => setIsMenuOpen(false)} end>
+              Accueil
+            </NavLink>
+            <NavLink to="/fiches" className={navLinkClass} onClick={() => setIsMenuOpen(false)}>
+              Mémofiches
+            </NavLink>
+            <NavLink to="/tarifs" className={navLinkClass} onClick={() => setIsMenuOpen(false)}>
+              Tarifs
+            </NavLink>
+            {isAuthenticated && (
+              <NavLink to="/coach-accueil" className={navLinkClass} onClick={() => setIsMenuOpen(false)}>
+                Coach IA
+              </NavLink>
+            )}
+            {isAdmin && (
+              <NavLink to="/generateur" className={navLinkClass} onClick={() => setIsMenuOpen(false)}>
+                Générateur
+              </NavLink>
+            )}
+            {isAuthenticated ? (
+              <>
+                <NavLink to="/learner-space" className={navLinkClass} onClick={() => setIsMenuOpen(false)}>
+                  Mon espace
+                </NavLink>
+                
+                <button onClick={() => { handleLogout(); setIsMenuOpen(false); }} className="text-sm font-medium px-3 py-2 rounded-md transition-colors text-gray-500 hover:text-green-600">
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <NavLink to="/connexion" className={navLinkClass} onClick={() => setIsMenuOpen(false)}>
+                Connexion
+              </NavLink>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
