@@ -24,7 +24,7 @@ const ThemeCard: React.FC<{ title: string; imageUrl: string }> = ({ title, image
 
 const LandingPage: React.FC = () => {
     const navigate = useNavigate();
-    const learningThemes = TOPIC_CATEGORIES[0].topics.slice(0, 6);
+    const learningThemes = TOPIC_CATEGORIES[0].topics.slice(0, 8);
 
     const trainers = [
         { name: "Riadh Barhoumi", imageUrl: "https://pharmaconseilbmb.com/photos/site/formateur/1.png", title: "Pharmacien Coach & Formateur", phone: "+216 52 847 241", email: "contact@pharmaconseilbmb.com" },
