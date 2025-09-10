@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { TOPIC_CATEGORIES } from '../constants';
 import { LogoIcon, CapsuleIcon, BookOpenIcon, DocumentTextIcon, CheckCircleIcon, SparklesIcon, QuestionMarkCircleIcon, CommunicationIcon } from './icons';
 
-const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
+const FeatureCard: React.FC<{ step: number; title: string; children: React.ReactNode }> = ({ step, title, children }) => (
     <div className="bg-white rounded-xl shadow-md p-6 text-center flex flex-col items-center h-full border border-slate-200/80">
-        <div className="bg-teal-100 text-teal-600 rounded-full p-4 mb-4">
-            {icon}
+        <div className="bg-teal-100 text-teal-600 rounded-full p-4 mb-4 w-12 h-12 flex items-center justify-center text-xl font-bold">
+            {step}
         </div>
         <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
         <p className="text-slate-600 text-base flex-grow">{children}</p>
@@ -71,7 +71,7 @@ const LandingPage: React.FC = () => {
                         >
                             Commencez votre essai gratuit de 14 jours
                         </button>
-                        <p className="text-sm text-slate-500">Sans engagement. Sans carte de crédit requise.</p>
+                        <p className="text-sm text-slate-500">Sans engagement. Sans paiement préalable</p>
                     </div>
                 </div>
             </section>
@@ -83,13 +83,13 @@ const LandingPage: React.FC = () => {
                         <h2 className="text-3xl md:text-4xl font-bold">Un Apprentissage Simple en 3 Étapes</h2>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <FeatureCard icon={<BookOpenIcon className="w-10 h-10"/>} title="1. Choisissez un Cas">
+                        <FeatureCard step={1} title="Choisissez un Cas">
                             Sélectionnez un sujet parmi une vaste bibliothèque de thèmes pertinents pour la pratique quotidienne en officine.
                         </FeatureCard>
-                        <FeatureCard icon={<DocumentTextIcon className="w-10 h-10"/>} title="2. Analysez la Mémofiche">
-                            Étudiez un scénario patient réaliste, les questions clés à poser, les recommandations et les signaux d'alerte, le tout généré par l'IA.
+                        <FeatureCard step={2} title="Analysez la Mémofiche">
+                            Étudiez un scénario patient réaliste, les questions clés à poser, les recommandations et les signaux d'alerte.
                         </FeatureCard>
-                        <FeatureCard icon={<CheckCircleIcon className="w-10 h-10"/>} title="3. Testez vos Connaissances">
+                        <FeatureCard step={3} title="Testez vos Connaissances">
                             Validez votre compréhension avec un quiz interactif et recevez des explications détaillées pour chaque réponse.
                         </FeatureCard>
                     </div>
@@ -181,13 +181,13 @@ const LandingPage: React.FC = () => {
                         </p>
                     </div>
                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <FeatureCard icon={<SparklesIcon className="w-10 h-10"/>} title="Scénarios Illimités">
-                            Générez des études de cas uniques à la demande pour ne jamais cesser d'apprendre. Chaque session est une nouvelle expérience.
+                        <FeatureCard step={1} title="Scénarios Illimités">
+                            de cas uniques à la demande pour ne jamais cesser d'apprendre. Chaque session est une nouvelle expérience.
                         </FeatureCard>
-                        <FeatureCard icon={<QuestionMarkCircleIcon className="w-10 h-10"/>} title="Quiz Interactifs">
+                        <FeatureCard step={2} title="Quiz Interactifs">
                             Renforcez vos acquis avec des quiz sur mesure qui ciblent les points essentiels de chaque cas de comptoir.
                         </FeatureCard>
-                        <FeatureCard icon={<CommunicationIcon className="w-10 h-10"/>} title="Assistant Pédagogique">
+                        <FeatureCard step={3} title="Assistant Pédagogique">
                             Approfondissez votre analyse en posant des questions à notre assistant IA, disponible pour vous guider à chaque étape.
                         </FeatureCard>
                    </div>
@@ -199,7 +199,7 @@ const LandingPage: React.FC = () => {
                  <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                      <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Prêt à booster vos compétences ?</h2>
                     <p className="max-w-xl mx-auto text-md text-slate-600 mb-8">
-                         Rejoignez des centaines de pharmaciens et préparateurs qui se forment avec PharmIA.
+                         Rejoignez des dizaines de pharmaciens et préparateurs qui se forment avec PharmIA.
                     </p>
                     <button
                         onClick={handleStartLearning}
@@ -207,7 +207,7 @@ const LandingPage: React.FC = () => {
                     >
                         Démarrer mon essai de 14 jours
                     </button>
-                     <p className="mt-4 text-sm text-slate-500">Accès complet. Sans carte de crédit requise.</p>
+                     <p className="mt-4 text-sm text-slate-500">Sans engagement. Sans paiement préalable</p>
                 </div>
             </section>
 
