@@ -22,6 +22,7 @@ export interface User {
   password?: string; // Only for registration/login, not stored
   passwordHash?: string; // Stored in DB
   role: UserRole;
+  pharmacistId?: ObjectId; // New field
   createdAt?: Date;
   updatedAt?: Date;
   resetPasswordToken?: string; // New field

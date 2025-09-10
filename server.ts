@@ -66,10 +66,10 @@ app.get('/api/mongo-test', async (req, res) => {
 // Register endpoint
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role, pharmacistId } = req.body; // Added role and pharmacistId
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required.' });
+    if (!email || !password || !role) { // role is now mandatory
+      return res.status(400).json({ message: 'Email, password, and role are required.' });
     }
 
     const client = await clientPromise;
@@ -82,6 +82,18 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(409).json({ message: 'User with this email already exists.' });
     }
 
+    // Validate pharmacistId if role is PREPARATEUR
+    if (role === UserRole.PREPARATEUR) {
+        if (!pharmacistId) {
+            return res.status(400).json({ message: 'Pharmacien référent est requis pour les préparateurs.' });
+        }
+        // Optional: Verify if pharmacistId corresponds to an existing PHARMACIEN user
+        const pharmacist = await usersCollection.findOne({ _id: new ObjectId(pharmacistId), role: UserRole.PHARMACIEN });
+        if (!pharmacist) {
+            return res.status(400).json({ message: 'Pharmacien référent invalide.' });
+        }
+    }
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
@@ -90,7 +102,8 @@ app.post('/api/auth/register', async (req, res) => {
     const newUser: User = {
       email,
       passwordHash,
-      role: UserRole.PREPARATEUR, // Default role for new registrations
+      role, // Use the provided role
+      pharmacistId: role === UserRole.PREPARATEUR ? new ObjectId(pharmacistId) : undefined, // Store pharmacistId if preparateur
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -162,8 +175,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const user = await usersCollection.findOne({ email });
 
     if (!user) {
-      // Send a generic success message to prevent email enumeration
-      return res.status(200).json({ message: 'Si votre adresse e-mail est enregistrée, vous recevrez un lien de réinitialisation de mot de passe.' });
+      return res.status(404).json({ message: 'Adresse e-mail non trouvée.' }); // Explicit error
     }
 
     // Generate a reset token
@@ -304,6 +316,25 @@ app.put('/api/user/profile', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error updating user profile:', error);
     res.status(500).json({ message: 'Internal server error during profile update.' });
+  }
+});
+
+// Get list of pharmacists
+app.get('/api/users/pharmacists', async (req, res) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const pharmacists = await usersCollection.find(
+      { role: UserRole.PHARMACIEN },
+      { projection: { _id: 1, email: 1 } } // Only return _id and email
+    ).toArray();
+
+    res.status(200).json(pharmacists);
+  } catch (error) {
+    console.error('Error fetching pharmacists:', error);
+    res.status(500).json({ message: 'Failed to fetch pharmacists.' });
   }
 });
 

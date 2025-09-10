@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { LogoIcon } from './icons';
+import { UserRole, User } from '../types';
 
 const RegisterView: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -9,6 +10,28 @@ const RegisterView: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [role, setRole] = useState<UserRole>(UserRole.PREPARATEUR);
+    const [pharmacistId, setPharmacistId] = useState('');
+    const [pharmacists, setPharmacists] = useState<User[]>([]);
+
+    useEffect(() => {
+        if (role === UserRole.PREPARATEUR) {
+          const fetchPharmacists = async () => {
+            try {
+              const response = await fetch('/api/users/pharmacists');
+              if (!response.ok) {
+                throw new Error('Failed to fetch pharmacists');
+              }
+              const data: User[] = await response.json();
+              setPharmacists(data);
+            } catch (err) {
+              console.error('Error fetching pharmacists:', err);
+              setError('Impossible de charger la liste des pharmaciens.');
+            }
+          };
+          fetchPharmacists();
+        }
+      }, [role]);
     const navigate = useNavigate();
     const { register } = useAuth();
 
@@ -21,7 +44,7 @@ const RegisterView: React.FC = () => {
         setError(null);
         setIsLoading(true);
         try {
-            const success = await register(email, password); // Call the register function from context
+            const success = await register(email, password, role, pharmacistId); // Call the register function from context
             if (success) {
                 navigate('/login'); // Navigate to login after successful registration
             } else {
@@ -53,6 +76,23 @@ const RegisterView: React.FC = () => {
                         </div>
                     )}
                     <div className="rounded-md shadow-sm -space-y-px">
+                        {/* Role Selection */}
+                        <div>
+                            <label htmlFor="role-select" className="sr-only">Je suis</label>
+                            <select
+                                id="role-select"
+                                name="role"
+                                required
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-t-md focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                value={role}
+                                onChange={(e) => setRole(e.target.value as UserRole)}
+                            >
+                                <option value="">Je suis...</option>
+                                <option value={UserRole.PHARMACIEN}>Pharmacien</option>
+                                <option value={UserRole.PREPARATEUR}>Préparateur</option>
+                            </select>
+                        </div>
+                        {/* Email Field */}
                         <div>
                             <label htmlFor="email-address-register" className="sr-only">Adresse email</label>
                             <input
@@ -61,12 +101,31 @@ const RegisterView: React.FC = () => {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-t-md focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
                                 placeholder="Adresse email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
+                        {role === UserRole.PREPARATEUR && (
+                            <div>
+                                <label htmlFor="pharmacist-select" className="sr-only">Pharmacien Référent</label>
+                                <select
+                                    id="pharmacist-select"
+                                    name="pharmacistId"
+                                    required
+                                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                    value={pharmacistId}
+                                    onChange={(e) => setPharmacistId(e.target.value)}
+                                    disabled={pharmacists.length === 0}
+                                >
+                                    <option value="">Sélectionnez un pharmacien référent</option>
+                                    {pharmacists.map(p => (
+                                        <option key={p._id?.toString()} value={p._id?.toString()}>{p.email}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                         <div>
                             <label htmlFor="password-register" className="sr-only">Mot de passe</label>
                             <input
