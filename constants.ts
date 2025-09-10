@@ -8,8 +8,8 @@ export const TOPIC_CATEGORIES = [
       "Dermocosmétique",
       "Dispositifs Médicaux",
       "Pharmacie vétérinaire",
-      "Communication",
       "Pharmacologie",
+      "Communication",
     ],
   },
   {
