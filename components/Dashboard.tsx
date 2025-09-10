@@ -128,33 +128,69 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="mb-8 flex flex-col sm:flex-row justify-center items-center gap-4">
-            <input
-                type="text"
-                placeholder="Rechercher une mémofiche..."
-                className="w-full sm:w-1/2 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <select
-                className="w-full sm:w-1/4 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                value={selectedTheme}
-                onChange={(e) => { setSelectedTheme(e.target.value); setSelectedSystem(''); }} // Clear system when theme is selected
-            >
-                <option value="">Filtrer par Thème</option>
-                {TOPIC_CATEGORIES[0].topics.map(theme => (
-                    <option key={theme} value={theme}>{theme}</option>
-                ))}
-            </select>
-            <select
-                className="w-full sm:w-1/4 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                value={selectedSystem}
-                onChange={(e) => { setSelectedSystem(e.target.value); setSelectedTheme(''); }} // Clear theme when system is selected
-            >
-                <option value="">Filtrer par Système/Organe</option>
-                {TOPIC_CATEGORIES[1].topics.map(system => (
-                    <option key={system} value={system}>{system}</option>
-                ))}
-            </select>
+            <div className="relative w-full sm:w-1/2">
+                <input
+                    type="text"
+                    placeholder="Rechercher une mémofiche..."
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 pr-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                    <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                )}
+            </div>
+            <div className="relative w-full sm:w-1/4">
+                <select
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 pr-10"
+                    value={selectedTheme}
+                    onChange={(e) => { setSelectedTheme(e.target.value); setSelectedSystem(''); }} // Clear system when theme is selected
+                >
+                    <option value="">Filtrer par Thème</option>
+                    {TOPIC_CATEGORIES[0].topics.map(theme => (
+                        <option key={theme} value={theme}>{theme}</option>
+                    ))}
+                </select>
+                {selectedTheme && (
+                    <button
+                        onClick={() => setSelectedTheme('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                )}
+            </div>
+            <div className="relative w-full sm:w-1/4">
+                <select
+                    className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 pr-10"
+                    value={selectedSystem}
+                    onChange={(e) => { setSelectedSystem(e.target.value); setSelectedTheme(''); }} // Clear theme when system is selected
+                >
+                    <option value="">Filtrer par Système/Organe</option>
+                    {TOPIC_CATEGORIES[1].topics.map(system => (
+                        <option key={system} value={system}>{system}</option>
+                    ))}
+                </select>
+                {selectedSystem && (
+                    <button
+                        onClick={() => setSelectedSystem('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                )}
+            </div>
         </div>
 
         {/* Removed category buttons div */}
