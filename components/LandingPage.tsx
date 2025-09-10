@@ -13,10 +13,10 @@ const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: Re
     </div>
 );
 
-const ThemeCard: React.FC<{ title: string }> = ({ title }) => (
+const ThemeCard: React.FC<{ title: string; imageUrl: string }> = ({ title, imageUrl }) => (
     <div className="bg-white border border-gray-200/75 rounded-xl p-5 text-center flex flex-col items-center justify-center space-y-3 transition-all duration-300 hover:border-teal-400 hover:shadow-lg hover:-translate-y-1 h-full">
         <div className="text-teal-600">
-            <CapsuleIcon className="w-10 h-10"/>
+            <img src={imageUrl} alt={title} className="w-10 h-10"/>
         </div>
         <span className="font-semibold text-slate-800 text-sm">{title}</span>
     </div>
@@ -124,8 +124,8 @@ const LandingPage: React.FC = () => {
                     </div>
                     <div className="max-w-4xl mx-auto">
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                            {learningThemes.map(theme => (
-                                <ThemeCard key={theme} title={theme.split(' (')[0]} />
+                            {learningThemes.map((theme, index) => (
+                                <ThemeCard key={theme} title={theme.split(' (')[0]} imageUrl={`https://pharmaconseilbmb.com/photos/site/icone/png/${index + 1}.png`} />
                             ))}
                         </div>
                     </div>
