@@ -45,7 +45,7 @@ const PricingPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Nos Formules d\'Abonnement</h1>
+      <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Nos Formules d'Abonnement</h1>
 
       <div className="flex justify-center mb-8">
         <div className="relative p-1 bg-gray-200 rounded-full">

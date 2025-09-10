@@ -51,7 +51,7 @@ const Header: React.FC = () => {
 
   const LoggedInLinks: React.FC<{isMobile?: boolean}> = ({ isMobile }) => (
       <>
-        <NavLink to="/fiches" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
+        <NavLink to="/dashboard" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Mémofiches
         </NavLink>
         <NavLink to="/tarifs" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
@@ -75,7 +75,7 @@ const Header: React.FC = () => {
     <header className="bg-white/80 backdrop-blur-sm sticky top-0 z-50 h-16 border-b border-gray-200">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to={isAuthenticated ? "/fiches" : "/"} className="text-2xl font-bold">
+          <Link to="/" className="text-2xl font-bold">
             <span className="animated-gradient-text font-extrabold text-transparent">PharmIA</span>
           </Link>
 

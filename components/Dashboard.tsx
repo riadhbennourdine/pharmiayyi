@@ -30,16 +30,43 @@ const Dashboard: React.FC = () => {
 
     fetchMemofiches();
   }, []);
+
+  const filteredMemofiches = useMemo(() => {
+      let filtered = memofiches;
+
+      if (searchTerm) {
+          filtered = filtered.filter(cs =>
+              cs.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              cs.shortDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              cs.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              cs.system.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+      }
+
+      if (selectedTheme) {
+          filtered = filtered.filter(cs => cs.theme === selectedTheme);
+      }
+
+      if (selectedSystem) {
+          filtered = filtered.filter(cs => cs.system === selectedSystem);
+      }
+
+      return filtered;
+  }, [memofiches, searchTerm, selectedTheme, selectedSystem]);
+
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState('');
+  const [selectedSystem, setSelectedSystem] = useState('');
 
   const activeCategory = TOPIC_CATEGORIES[activeCategoryIndex];
   
   const getCasesForTopic = (topic: string) => {
       const isSystemTopic = TOPIC_CATEGORIES[1].topics.includes(topic);
       if (isSystemTopic) {
-        return memofiches.filter(cs => cs.system === topic);
+        return filteredMemofiches.filter(cs => cs.system === topic);
       }
-      return memofiches.filter(cs => cs.theme === topic);
+      return filteredMemofiches.filter(cs => cs.theme === topic);
   };
 
   if (isLoading) {
@@ -64,6 +91,36 @@ const Dashboard: React.FC = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Bienvenue sur PharmIA</h2>
           <p className="text-lg text-slate-600">Explorez les thèmes disponibles et consultez les mémofiches générées.</p>
+        </div>
+
+        <div className="mb-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+            <input
+                type="text"
+                placeholder="Rechercher une mémofiche..."
+                className="w-full sm:w-1/2 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <select
+                className="w-full sm:w-1/4 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                value={selectedTheme}
+                onChange={(e) => setSelectedTheme(e.target.value)}
+            >
+                <option value="">Filtrer par Thème</option>
+                {TOPIC_CATEGORIES[0].topics.map(theme => (
+                    <option key={theme} value={theme}>{theme}</option>
+                ))}
+            </select>
+            <select
+                className="w-full sm:w-1/4 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                value={selectedSystem}
+                onChange={(e) => setSelectedSystem(e.target.value)}
+            >
+                <option value="">Filtrer par Système/Organe</option>
+                {TOPIC_CATEGORIES[1].topics.map(system => (
+                    <option key={system} value={system}>{system}</option>
+                ))}
+            </select>
         </div>
 
         <div className="mb-8 flex justify-center border-b border-slate-200">

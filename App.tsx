@@ -79,10 +79,9 @@ const App: React.FC = () => (
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginView />} />
                 <Route path="/register" element={<RegisterView />} />
-                <Route path="/tarifs" element={<PricingPage />} />
-
                 <Route element={<LoggedInRoute />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/tarifs" element={<PricingPage />} />
                     <Route path="/memofiche/:id" element={<MemoFichePage />} />
                     <Route path="/quiz/:id" element={<QuizPage />} />
                     <Route path="/coach-accueil" element={<div className="container mx-auto p-8">Coach IA Page - Coming Soon</div>} />
