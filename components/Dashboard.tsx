@@ -9,10 +9,9 @@ const Dashboard: React.FC = () => {
   const [memofiches, setMemofiches] = useState<CaseStudy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('');
-  const [selectedSystem, setSelectedSystem] = useState(''); // Dummy comment to force rebuild
+  const [selectedSystem, setSelectedSystem] = useState('');
 
   useEffect(() => {
     const fetchMemofiches = async () => {
@@ -56,28 +55,53 @@ const Dashboard: React.FC = () => {
       currentFilteredMemofiches = currentFilteredMemofiches.filter(cs => cs.system === selectedSystem);
   }
 
-  const activeCategory = TOPIC_CATEGORIES[activeCategoryIndex];
-
   const displayTopics = useMemo(() => {
       const topics = new Set<string>();
-      currentFilteredMemofiches.forEach(cs => { // Use currentFilteredMemofiches here
-          if (activeCategory.name === "Par Thèmes de la Formation") {
+      // If a specific theme or system is selected, only show that one as a "topic"
+      if (selectedTheme) {
+          topics.add(selectedTheme);
+      } else if (selectedSystem) {
+          topics.add(selectedSystem);
+      } else {
+          // If no specific theme or system is selected, group by all themes and systems present in filtered data
+          currentFilteredMemofiches.forEach(cs => {
               topics.add(cs.theme);
-          } else if (activeCategory.name === "Par Systèmes et Organes") {
               topics.add(cs.system);
-          }
-      });
+          });
+      }
       // Sort topics alphabetically for consistent display
       return Array.from(topics).sort();
-  }, [currentFilteredMemofiches, activeCategory]); // Dependency changed
+  }, [currentFilteredMemofiches, selectedTheme, selectedSystem]); // Dependencies changed
 
   const getCasesForTopic = (topic: string) => {
+      // This function now needs to decide if the topic is a theme or a system
+      // based on whether selectedTheme or selectedSystem is active, or by checking TOPIC_CATEGORIES
       const isSystemTopic = TOPIC_CATEGORIES[1].topics.includes(topic);
-      if (isSystemTopic) {
-        return currentFilteredMemofiches.filter(cs => cs.system === topic); // Use currentFilteredMemofiches here
+      const isThemeTopic = TOPIC_CATEGORIES[0].topics.includes(topic);
+
+      if (selectedTheme && topic === selectedTheme) {
+          return currentFilteredMemofiches.filter(cs => cs.theme === topic);
+      } else if (selectedSystem && topic === selectedSystem) {
+          return currentFilteredMemofiches.filter(cs => cs.system === topic);
+      } else if (!selectedTheme && !selectedSystem) {
+          // If no specific filter is active, group by both theme and system
+          if (isThemeTopic) {
+              return currentFilteredMemofiches.filter(cs => cs.theme === topic);
+          } else if (isSystemTopic) {
+              return currentFilteredMemofiches.filter(cs => cs.system === topic);
+          }
       }
-      return currentFilteredMemofiches.filter(cs => cs.theme === topic); // Use currentFilteredMemofiches here
+      return []; // Should not happen if displayTopics is correct
   };
+
+  // Logic for "9 most recent memo fiches" if no filters are applied
+  const recentMemofiches = useMemo(() => {
+      if (!selectedTheme && !selectedSystem && !searchTerm) {
+          return [...memofiches].sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime()).slice(0, 9);
+      }
+      return [];
+  }, [memofiches, selectedTheme, selectedSystem, searchTerm]);
+
 
   if (isLoading) {
     return (
@@ -114,7 +138,7 @@ const Dashboard: React.FC = () => {
             <select
                 className="w-full sm:w-1/4 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 value={selectedTheme}
-                onChange={(e) => setSelectedTheme(e.target.value)}
+                onChange={(e) => { setSelectedTheme(e.target.value); setSelectedSystem(''); }} // Clear system when theme is selected
             >
                 <option value="">Filtrer par Thème</option>
                 {TOPIC_CATEGORIES[0].topics.map(theme => (
@@ -124,7 +148,7 @@ const Dashboard: React.FC = () => {
             <select
                 className="w-full sm:w-1/4 p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
                 value={selectedSystem}
-                onChange={(e) => setSelectedSystem(e.target.value)}
+                onChange={(e) => { setSelectedSystem(e.target.value); setSelectedTheme(''); }} // Clear theme when system is selected
             >
                 <option value="">Filtrer par Système/Organe</option>
                 {TOPIC_CATEGORIES[1].topics.map(system => (
@@ -133,81 +157,93 @@ const Dashboard: React.FC = () => {
             </select>
         </div>
 
-        <div className="mb-8 flex justify-center border-b border-slate-200">
-          {TOPIC_CATEGORIES.map((category, index) => (
-            <button
-              key={category.name}
-              onClick={() => setActiveCategoryIndex(index)}
-              className={`px-4 sm:px-6 py-3 text-base sm:text-lg font-medium transition-colors duration-300 focus:outline-none ${
-                activeCategoryIndex === index
-                  ? 'border-b-2 border-teal-600 text-teal-600'
-                  : 'text-slate-500 hover:text-teal-500'
-              }`}
-              aria-current={activeCategoryIndex === index ? 'page' : undefined}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
+        {/* Removed category buttons div */}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-          {displayTopics.map((topic) => {
-              const topicCases = getCasesForTopic(topic);
-              if (topicCases.length > 0) {
-                  return topicCases.map(study => (
-                      <div
-                          key={study.title}
-                          onClick={() => selectCase(study)} // Use selectCase from context
-                          className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
-                      >
-                          {study.coverImageUrl ? (
-                              <div className="relative w-full h-40">
-                                  <img src={study.coverImageUrl} alt={study.title} className="w-full h-full object-cover" />
-                                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
-                              </div>
-                          ) : (
-                              <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
-                                  <CapsuleIcon className="h-6 w-6 text-teal-600" />
-                              </div>
-                          )}
-                           <div className="p-6 pt-4 flex-grow flex flex-col w-full">
-                              <h3 className="text-lg font-semibold text-slate-800 flex-grow group-hover:text-teal-600 transition-colors">{study.title}</h3>
-                              <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
-                              {activeCategory.name === "Par Thèmes de la Formation" && study.system && (
-                                  <p className="text-xs text-slate-500">Système: {study.system}</p>
-                              )}
-                              {activeCategory.name === "Par Systèmes et Organes" && study.theme && (
-                                  <p className="text-xs text-slate-500">Thème: {study.theme}</p>
-                              )}
-                              <div className="mt-4 w-full">
-                                  <span className="text-xs font-semibold text-white bg-teal-500 px-3 py-1 rounded-full">
-                                  Consulter
-                                  </span>
-                              </div>
-                          </div>
-                      </div>
-                  ));
-              } else {
-                  return (
-                      <div
-                          key={topic}
-                          className="group bg-white p-6 rounded-lg shadow-md text-left flex flex-col items-start h-full opacity-60"
-                          aria-label={`Les fiches sur ${topic} ne sont pas encore disponibles.`}
-                      >
-                          <div className="bg-teal-100 p-3 rounded-full mb-4">
-                          <CapsuleIcon className="h-6 w-6 text-teal-600" />
-                          </div>
-                          <h3 className="text-lg font-semibold text-slate-800 flex-grow">{topic}</h3>
-                          <div className="mt-4 w-full">
-                              <span className="text-xs font-semibold text-white bg-slate-400 px-3 py-1 rounded-full">
-                              Bientôt disponible
-                              </span>
-                          </div>
-                      </div>
-                  );
-              }
-          })}
-        </div>
+        {/* Conditional rendering based on filters */}
+        {recentMemofiches.length > 0 ? (
+            <>
+                <h3 className="text-2xl font-bold text-slate-800 mb-4 mt-8 text-center">Mémofiches Récentes</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                    {recentMemofiches.map(study => (
+                        <div
+                            key={study.title}
+                            onClick={() => selectCase(study)} // Use selectCase from context
+                            className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
+                        >
+                            {study.coverImageUrl ? (
+                                <div className="relative w-full h-40">
+                                    <img src={study.coverImageUrl} alt={study.title} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
+                                </div>
+                            ) : (
+                                <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
+                                    <CapsuleIcon className="h-6 w-6 text-teal-600" />
+                                </div>
+                            )}
+                            <div className="p-6 pt-4 flex-grow flex flex-col w-full">
+                                <h3 className="text-lg font-semibold text-slate-800 flex-grow group-hover:text-teal-600 transition-colors">{study.title}</h3>
+                                <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
+                                {study.theme && (<p className="text-xs text-slate-500">Thème: {study.theme}</p>)}
+                                {study.system && (<p className="text-xs text-slate-500">Système: {study.system}</p>)}
+                                <div className="mt-4 w-full">
+                                    <span className="text-xs font-semibold text-white bg-teal-500 px-3 py-1 rounded-full">
+                                    Consulter
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </>
+        ) : (
+            // Render grouped by theme/system if filters are active or if recentMemofiches is empty
+            displayTopics.length > 0 ? (
+                displayTopics.map((topic) => {
+                    const topicCases = getCasesForTopic(topic);
+                    if (topicCases.length > 0) {
+                        return (
+                            <div key={topic} className="mb-8">
+                                <h3 className="text-2xl font-bold text-slate-800 mb-4">{topic}</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                                    {topicCases.map(study => (
+                                        <div
+                                            key={study.title}
+                                            onClick={() => selectCase(study)} // Use selectCase from context
+                                            className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
+                                        >
+                                            {study.coverImageUrl ? (
+                                                <div className="relative w-full h-40">
+                                                    <img src={study.coverImageUrl} alt={study.title} className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
+                                                    <CapsuleIcon className="h-6 w-6 text-teal-600" />
+                                                </div>
+                                            )}
+                                            <div className="p-6 pt-4 flex-grow flex flex-col w-full">
+                                                <h3 className="text-lg font-semibold text-slate-800 flex-grow group-hover:text-teal-600 transition-colors">{study.title}</h3>
+                                                <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
+                                                {study.theme && (<p className="text-xs text-slate-500">Thème: {study.theme}</p>)}
+                                                {study.system && (<p className="text-xs text-slate-500">Système: {study.system}</p>)}
+                                                <div className="mt-4 w-full">
+                                                    <span className="text-xs font-semibold text-white bg-teal-500 px-3 py-1 rounded-full">
+                                                    Consulter
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    }
+                    return null; // Don't render topic if no cases
+                })
+            ) : (
+                <div className="text-center text-slate-600 mt-8">Aucune mémofiche trouvée pour les filtres sélectionnés.</div>
+            )
+        )}
       </div>
     </div>
   );
