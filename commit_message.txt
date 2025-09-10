@@ -1,8 +1,0 @@
-feat: Mises à jour textuelles et UI sur la page d'atterrissage
-
-- Remplace "Sans carte de crédit requise" par "Sans paiement préalable".
-- Convertit les icônes des étapes "Un Apprentissage Simple en 3 Étapes" en numéros (1, 2, 3).
-- Supprime les préfixes numériques des titres des étapes.
-- Raccourcit la description de la mémofiche dans la section "Comment ça marche".
-- Change "centaines" en "dizaines" pour le nombre d'utilisateurs.
-- Met à jour les `FeatureCard` de la section "Pourquoi choisir PharmIA ?" pour utiliser des numéros d'étape.
