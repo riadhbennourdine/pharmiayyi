@@ -7,6 +7,7 @@ import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
+import crypto from 'crypto';
 
 // Extend the Request type to include the user property
 declare global {
@@ -146,6 +147,109 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (error) {
     console.error('Error during user login:', error);
     res.status(500).json({ message: 'Internal server error during login.' });
+  }
+});
+
+// Forgot password endpoint
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const user = await usersCollection.findOne({ email });
+
+    if (!user) {
+      // Send a generic success message to prevent email enumeration
+      return res.status(200).json({ message: 'Si votre adresse e-mail est enregistrée, vous recevrez un lien de réinitialisation de mot de passe.' });
+    }
+
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
+
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { $set: { resetPasswordToken: resetToken, resetPasswordExpires: resetExpires } }
+    );
+
+    // --- Email Sending Placeholder ---
+    // In a real application, you would send an email here.
+    // You would need to configure a nodemailer transporter or a service like SendGrid/Mailgun.
+    // Example with Nodemailer (requires nodemailer package and configuration):
+    /*
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail', // or your SMTP details
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: 'passwordreset@yourdomain.com',
+      subject: 'Réinitialisation de mot de passe PharmIA',
+      text: `Vous recevez ceci car vous (ou quelqu'un d'autre) avez demandé la réinitialisation du mot de passe de votre compte.\n\n` + 
+            `Veuillez cliquer sur le lien suivant, ou le coller dans votre navigateur pour compléter le processus :\n\n` + 
+            `http://${req.headers.host}/#/reset-password?token=${resetToken}\n\n` + // Adjust URL for your frontend
+            `Si vous ne l'avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.\n`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    */
+    // --- End Email Sending Placeholder ---
+
+    res.status(200).json({ message: 'Si votre adresse e-mail est enregistrée, vous recevrez un lien de réinitialisation de mot de passe.' });
+
+  } catch (error) {
+    console.error('Error during forgot password request:', error);
+    res.status(500).json({ message: 'Internal server error during password recovery.' });
+  }
+});
+
+// Reset password endpoint
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Jeton et nouveau mot de passe requis.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const user = await usersCollection.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() }, // Token not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Jeton de réinitialisation invalide ou expiré.' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    // Update user's password and clear reset token fields
+    await usersCollection.updateOne(
+      { _id: user._id },
+      {
+        $set: { passwordHash: passwordHash, updatedAt: new Date() },
+        $unset: { resetPasswordToken: '', resetPasswordExpires: '' }, // Clear token fields
+      }
+    );
+
+    res.status(200).json({ message: 'Mot de passe réinitialisé avec succès.' });
+
+  } catch (error) {
+    console.error('Error during password reset request:', error);
+    res.status(500).json({ message: 'Internal server error during password reset.' });
   }
 });
 

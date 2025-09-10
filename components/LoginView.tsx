@@ -86,6 +86,15 @@ const LoginView: React.FC = () => {
                             {isLoading ? 'Connexion...' : 'Se connecter'}
                         </button>
                     </div>
+                    <div className="text-sm text-center mt-4">
+                        <button
+                            type="button"
+                            onClick={() => navigate('/forgot-password')}
+                            className="font-medium text-teal-600 hover:text-teal-500"
+                        >
+                            Mot de passe oublié ?
+                        </button>
+                    </div>
                     <div className="text-sm text-center">
                         <button
                             type="button"

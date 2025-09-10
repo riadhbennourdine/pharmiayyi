@@ -18,6 +18,8 @@ import LandingPage from './components/LandingPage';
 import QuizView from './components/QuizView';
 import MemoFicheEditor from './components/MemoFicheEditor';
 import PricingPage from './components/PricingPage';
+import ForgotPasswordView from './components/ForgotPasswordView';
+import ResetPasswordView from './components/ResetPasswordView';
 
 // --- ROUTE GUARDS & LAYOUT ---
 const AppLayout: React.FC = () => (
@@ -79,6 +81,8 @@ const App: React.FC = () => (
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginView />} />
                 <Route path="/register" element={<RegisterView />} />
+                <Route path="/forgot-password" element={<ForgotPasswordView />} />
+                <Route path="/reset-password" element={<ResetPasswordView />} />
                 <Route element={<LoggedInRoute />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/tarifs" element={<PricingPage />} />

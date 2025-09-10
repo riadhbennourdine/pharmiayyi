@@ -24,6 +24,8 @@ export interface User {
   role: UserRole;
   createdAt?: Date;
   updatedAt?: Date;
+  resetPasswordToken?: string; // New field
+  resetPasswordExpires?: Date; // New field
 }
 
 export interface Flashcard {
