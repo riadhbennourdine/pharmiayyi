@@ -9,51 +9,6 @@ const Dashboard: React.FC = () => {
   const [memofiches, setMemofiches] = useState<CaseStudy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchMemofiches = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/memofiches', { cache: 'no-store' });
-        if (!response.ok) {
-          throw new Error('Failed to fetch memofiches');
-        }
-        const data: CaseStudy[] = await response.json();
-        setMemofiches(data);
-      } catch (err) {
-        console.error('Error fetching memofiches:', err);
-        setError('Failed to load memo fiches. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMemofiches();
-  }, []);
-
-  const filteredMemofiches = useMemo(() => {
-      let filtered = memofiches;
-
-      if (searchTerm) {
-          filtered = filtered.filter(cs =>
-              cs.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              cs.shortDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              cs.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              cs.system.toLowerCase().includes(searchTerm.toLowerCase())
-          );
-      }
-
-      if (selectedTheme) {
-          filtered = filtered.filter(cs => cs.theme === selectedTheme);
-      }
-
-      if (selectedSystem) {
-          filtered = filtered.filter(cs => cs.system === selectedSystem);
-      }
-
-      return filtered;
-  }, [memofiches, searchTerm, selectedTheme, selectedSystem]);
-
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('');
