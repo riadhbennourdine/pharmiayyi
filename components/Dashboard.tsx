@@ -14,11 +14,53 @@ const Dashboard: React.FC = () => {
   const [selectedTheme, setSelectedTheme] = useState('');
   const [selectedSystem, setSelectedSystem] = useState(''); // Dummy comment to force rebuild
 
+  useEffect(() => {
+    const fetchMemofiches = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/memofiches', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('Failed to fetch memofiches');
+        }
+        const data: CaseStudy[] = await response.json();
+        setMemofiches(data);
+      } catch (err) {
+        console.error('Error fetching memofiches:', err);
+        setError('Failed to load memo fiches. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMemofiches();
+  }, []);
+
+  // Initialize filteredMemofiches as a mutable variable
+  let currentFilteredMemofiches = memofiches;
+
+  // Apply filters directly
+  if (searchTerm) {
+      currentFilteredMemofiches = currentFilteredMemofiches.filter(cs =>
+          cs.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cs.shortDescription?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cs.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cs.system.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }
+
+  if (selectedTheme) {
+      currentFilteredMemofiches = currentFilteredMemofiches.filter(cs => cs.theme === selectedTheme);
+  }
+
+  if (selectedSystem) {
+      currentFilteredMemofiches = currentFilteredMemofiches.filter(cs => cs.system === selectedSystem);
+  }
+
   const activeCategory = TOPIC_CATEGORIES[activeCategoryIndex];
 
   const displayTopics = useMemo(() => {
       const topics = new Set<string>();
-      filteredMemofiches.forEach(cs => {
+      currentFilteredMemofiches.forEach(cs => { // Use currentFilteredMemofiches here
           if (activeCategory.name === "Par Thèmes de la Formation") {
               topics.add(cs.theme);
           } else if (activeCategory.name === "Par Systèmes et Organes") {
@@ -27,14 +69,14 @@ const Dashboard: React.FC = () => {
       });
       // Sort topics alphabetically for consistent display
       return Array.from(topics).sort();
-  }, [filteredMemofiches, activeCategory]);
-  
+  }, [currentFilteredMemofiches, activeCategory]); // Dependency changed
+
   const getCasesForTopic = (topic: string) => {
       const isSystemTopic = TOPIC_CATEGORIES[1].topics.includes(topic);
       if (isSystemTopic) {
-        return filteredMemofiches.filter(cs => cs.system === topic);
+        return currentFilteredMemofiches.filter(cs => cs.system === topic); // Use currentFilteredMemofiches here
       }
-      return filteredMemofiches.filter(cs => cs.theme === topic);
+      return currentFilteredMemofiches.filter(cs => cs.theme === topic); // Use currentFilteredMemofiches here
   };
 
   if (isLoading) {
