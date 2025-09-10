@@ -15,6 +15,19 @@ const Dashboard: React.FC = () => {
   const [selectedSystem, setSelectedSystem] = useState('');
 
   const activeCategory = TOPIC_CATEGORIES[activeCategoryIndex];
+
+  const displayTopics = useMemo(() => {
+      const topics = new Set<string>();
+      filteredMemofiches.forEach(cs => {
+          if (activeCategory.name === "Par Thèmes de la Formation") {
+              topics.add(cs.theme);
+          } else if (activeCategory.name === "Par Systèmes et Organes") {
+              topics.add(cs.system);
+          }
+      });
+      // Sort topics alphabetically for consistent display
+      return Array.from(topics).sort();
+  }, [filteredMemofiches, activeCategory]);
   
   const getCasesForTopic = (topic: string) => {
       const isSystemTopic = TOPIC_CATEGORIES[1].topics.includes(topic);
@@ -96,7 +109,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-          {activeCategory.topics.map((topic) => {
+          {displayTopics.map((topic) => {
               const topicCases = getCasesForTopic(topic);
               if (topicCases.length > 0) {
                   return topicCases.map(study => (
