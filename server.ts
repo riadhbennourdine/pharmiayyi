@@ -74,20 +74,25 @@ app.get('/api/mongo-test', async (req, res) => {
 // Register endpoint
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, role, pharmacistId } = req.body; // Added role and pharmacistId
+    const { email, username, password, role, pharmacistId } = req.body;
 
-    if (!email || !password || !role) { // role is now mandatory
-      return res.status(400).json({ message: 'Email, password, and role are required.' });
+    if (!email || !username || !password || !role) {
+      return res.status(400).json({ message: 'Email, username, password, and role are required.' });
     }
 
     const client = await clientPromise;
     const db = client.db('pharmia');
     const usersCollection = db.collection<User>('users');
 
-    // Check if user already exists
-    const existingUser = await usersCollection.findOne({ email });
+    // Check if email or username already exists
+    const existingUser = await usersCollection.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(409).json({ message: 'User with this email already exists.' });
+      if (existingUser.email === email) {
+        return res.status(409).json({ message: 'Un utilisateur avec cet email existe déjà.' });
+      }
+      if (existingUser.username === username) {
+        return res.status(409).json({ message: 'Ce pseudo est déjà pris.' });
+      }
     }
 
     // Validate pharmacistId if role is PREPARATEUR
@@ -95,7 +100,6 @@ app.post('/api/auth/register', async (req, res) => {
         if (!pharmacistId) {
             return res.status(400).json({ message: 'Pharmacien référent est requis pour les préparateurs.' });
         }
-        // Optional: Verify if pharmacistId corresponds to an existing PHARMACIEN user
         const pharmacist = await usersCollection.findOne({ _id: new ObjectId(pharmacistId), role: UserRole.PHARMACIEN });
         if (!pharmacist) {
             return res.status(400).json({ message: 'Pharmacien référent invalide.' });
@@ -109,16 +113,16 @@ app.post('/api/auth/register', async (req, res) => {
     // Create new user
     const newUser: User = {
       email,
+      username,
       passwordHash,
-      role, // Use the provided role
-      pharmacistId: role === UserRole.PREPARATEUR ? new ObjectId(pharmacistId) : undefined, // Store pharmacistId if preparateur
+      role,
+      pharmacistId: role === UserRole.PREPARATEUR ? new ObjectId(pharmacistId) : undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     const result = await usersCollection.insertOne(newUser);
     
-    // Exclude passwordHash from the response for security
     const { passwordHash: _, ...userWithoutPassword } = newUser;
 
     res.status(201).json({ message: 'User registered successfully.', user: userWithoutPassword });

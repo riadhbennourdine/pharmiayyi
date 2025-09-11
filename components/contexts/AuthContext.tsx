@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   login: (identifier: string, password: string) => Promise<boolean>;
   logout: () => void;
-  register: (email: string, password: string, role: UserRole, pharmacistId?: string) => Promise<boolean>;
+  register: (email: string, username: string, password: string, role: UserRole, pharmacistId?: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -18,7 +18,7 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => { 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -75,30 +75,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   }, []);
 
-  const register = useCallback(async (email: string, password: string, role: UserRole, pharmacistId?: string): Promise<boolean> => {
-    try {
-      const response = await fetch('/api/auth/register', {
+  const register = useCallback(async (email: string, username: string, password: string, role: UserRole, pharmacistId?: string): Promise<boolean> => {
+    const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role, pharmacistId }),
-      });
+        body: JSON.stringify({ email, username, password, role, pharmacistId }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (response.ok) {
+    if (response.ok) {
         console.log('Registration successful:', data.message);
         return true;
-      } else {
-        console.error('Registration failed:', data.message);
-        return false;
-      }
-    } catch (error) {
-      console.error('Network error during registration:', error);
-      return false;
+    } else {
+        // Throw an error with the message from the backend
+        throw new Error(data.message || 'L\'inscription a échoué.');
     }
-  }, []);
+}, []);
 
   const value = useMemo(() => ({ isAuthenticated, user, login, logout, register }), [isAuthenticated, user, login, logout, register]);
 

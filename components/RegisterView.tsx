@@ -6,6 +6,7 @@ import { UserRole, User } from '../types';
 
 const RegisterView: React.FC = () => {
     const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -44,14 +45,15 @@ const RegisterView: React.FC = () => {
         setError(null);
         setIsLoading(true);
         try {
-            const success = await register(email, password, role, pharmacistId); // Call the register function from context
+            // Pass username to the register function
+            const success = await register(email, username, password, role, pharmacistId);
             if (success) {
-                navigate('/login'); // Navigate to login after successful registration
+                navigate('/login');
             } else {
-                setError("L'inscription a échoué. Veuillez réessayer.");
+                // The error message will be set by the AuthContext now
             }
-        } catch (err) {
-            setError("Une erreur est survenue lors de l'inscription.");
+        } catch (err: any) {
+            setError(err.message || "Une erreur est survenue lors de l'inscription.");
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -105,6 +107,21 @@ const RegisterView: React.FC = () => {
                                 placeholder="Adresse email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                        {/* Username Field */}
+                        <div>
+                            <label htmlFor="username-register" className="sr-only">Pseudo</label>
+                            <input
+                                id="username-register"
+                                name="username"
+                                type="text"
+                                autoComplete="username"
+                                required
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                placeholder="Pseudo"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                             />
                         </div>
                         {role === UserRole.PREPARATEUR && (
