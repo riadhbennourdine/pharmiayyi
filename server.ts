@@ -8,6 +8,54 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
+
+// --- EMAIL SENDING SETUP ---
+// Create a transporter object using SMTP transport.
+// You must configure these environment variables.
+const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST, // e.g., 'smtp.sendgrid.net'
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: (process.env.EMAIL_PORT || '587') === '465', // true for 465, false for other ports
+    auth: {
+        user: process.env.EMAIL_USER, // e.g., 'apikey' for SendGrid
+        pass: process.env.EMAIL_PASS, // Your SendGrid API Key or SMTP password
+    },
+});
+
+interface EmailOptions {
+    to: string;
+    subject: string;
+    text: string;
+    html: string;
+}
+
+const sendEmail = async (options: EmailOptions) => {
+    if (!process.env.EMAIL_HOST) {
+        console.log('****************************************************************');
+        console.log('*** WARNING: Email sending is not configured.             ***');
+        console.log('*** Set EMAIL_HOST in your environment variables.         ***');
+        console.log('*** Email content that would have been sent:             ***');
+        console.log('****************************************************************');
+        console.log(`To: ${options.to}`);
+        console.log(`Subject: ${options.subject}`);
+        console.log(`HTML Body: ${options.html}`);
+        console.log('****************************************************************');
+        return; // Skip sending email if not configured
+    }
+
+    try {
+        const info = await transporter.sendMail({
+            from: `"PharmIA" <${process.env.EMAIL_FROM || 'noreply@pharmia.app'}>`,
+            ...options,
+        });
+        console.log('Message sent: %s', info.messageId);
+    } catch (error) {
+        console.error('Error sending email:', error);
+        // In a real app, you might want to throw this error or handle it differently
+    }
+};
+
 
 // Extend the Request type to include the user property
 declare global {
@@ -190,13 +238,18 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const db = client.db('pharmia');
     const usersCollection = db.collection<User>('users');
 
-    // Find user by email or username
     const user = await usersCollection.findOne({ 
       $or: [{ email: identifier }, { username: identifier }] 
     });
 
+    // Case 1: User exists
     if (user) {
-      // Generate a reset token only if user exists
+      // Case 1a: It's a migrated user without an email -> Trigger activation flow
+      if (!user.email) {
+        return res.status(200).json({ migrationRequired: true, username: user.username });
+      }
+
+      // Case 1b: It's a normal user -> Proceed with standard reset flow
       const resetToken = crypto.randomBytes(20).toString('hex');
       const resetExpires = new Date(Date.now() + 3600000); // 1 hour from now
 
@@ -205,30 +258,86 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         { $set: { resetPasswordToken: resetToken, resetPasswordExpires: resetExpires } }
       );
 
-      // --- Email Sending Placeholder ---
-      // In a real application, you would send an email here.
-      // The link should be constructed carefully.
       const resetUrl = `http://${req.headers.host}/#/reset-password?token=${resetToken}`;
-      console.log(`Password reset link for ${user.email}: ${resetUrl}`); // For debugging
-      /*
-      const transporter = nodemailer.createTransport({ ... });
-      const mailOptions = {
+      
+      // Send the email
+      await sendEmail({
         to: user.email,
-        from: 'passwordreset@yourdomain.com',
-        subject: 'Réinitialisation de mot de passe PharmIA',
-        text: `... Cliquez sur ce lien pour réinitialiser: ${resetUrl} ...`,
-      };
-      await transporter.sendMail(mailOptions);
-      */
-      // --- End Email Sending Placeholder ---
+        subject: 'Réinitialisation de votre mot de passe PharmIA',
+        text: `Bonjour, \n\nVous avez demandé une réinitialisation de mot de passe. Veuillez cliquer sur le lien suivant pour continuer : ${resetUrl}\n\nSi vous n\'êtes pas à l\'origine de cette demande, veuillez ignorer cet email.\n\nL\'équipe PharmIA`,
+        html: `<p>Bonjour,</p><p>Vous avez demandé une réinitialisation de mot de passe. Veuillez cliquer sur le lien suivant pour continuer : <a href="${resetUrl}">${resetUrl}</a></p><p>Si vous n\'êtes pas à l\'origine de cette demande, veuillez ignorer cet email.</p><p>L\'équipe PharmIA</p>`,
+      });
     }
 
-    // Always return a generic success message to prevent email enumeration
-    res.status(200).json({ message: 'Si votre identifiant est enregistré, vous recevrez un lien de réinitialisation de mot de passe.' });
+    // Case 2: User does not exist, or normal user flow was triggered
+    // Always return a generic success message to prevent email/username enumeration.
+    res.status(200).json({ message: 'Si votre identifiant est enregistré, vous recevrez des instructions pour réinitialiser votre mot de passe.' });
 
   } catch (error) {
     console.error('Error during forgot password request:', error);
-    // In case of a server error, still avoid confirming if the user exists.
+    res.status(500).json({ message: 'Une erreur interne est survenue.' });
+  }
+});
+
+// Initiate Activation for Migrated Users
+app.post('/api/auth/initiate-activation', async (req, res) => {
+  try {
+    const { username, email } = req.body;
+
+    if (!username || !email) {
+      return res.status(400).json({ message: 'Pseudo et email sont requis.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const user = await usersCollection.findOne({ username });
+
+    // Security checks
+    if (!user) {
+      return res.status(404).json({ message: 'Pseudo non trouvé.' });
+    }
+    if (user.email) {
+      return res.status(400).json({ message: 'Ce compte est déjà actif.' });
+    }
+
+    // Check if the proposed email is already in use by another account
+    const emailExists = await usersCollection.findOne({ email });
+    if (emailExists) {
+        return res.status(409).json({ message: 'Cette adresse email est déjà utilisée par un autre compte.' });
+    }
+
+    // Proceed with token generation and association
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetExpires = new Date(Date.now() + 3600000); // 1 hour
+
+    await usersCollection.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          email: email, // Associate the new email
+          resetPasswordToken: resetToken,
+          resetPasswordExpires: resetExpires,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    const resetUrl = `http://${req.headers.host}/#/reset-password?token=${resetToken}`;
+    
+    // Send the activation email
+    await sendEmail({
+      to: email,
+      subject: 'Activez votre compte PharmIA',
+      text: `Bonjour, \n\nBienvenue sur PharmIA. Veuillez cliquer sur le lien suivant pour activer votre compte et définir votre mot de passe : ${resetUrl}\n\nL\'équipe PharmIA`,
+      html: `<p>Bonjour,</p><p>Bienvenue sur PharmIA. Veuillez cliquer sur le lien suivant pour activer votre compte et définir votre mot de passe : <a href="${resetUrl}">${resetUrl}</a></p><p>L\'équipe PharmIA</p>`,
+    });
+
+    res.status(200).json({ message: `Un lien d'activation a été envoyé à ${email}.` });
+
+  } catch (error) {
+    console.error('Error during account activation initiation:', error);
     res.status(500).json({ message: 'Une erreur interne est survenue.' });
   }
 });
@@ -392,7 +501,7 @@ app.post('/api/generate-case-study-from-text', async (req, res) => {
     } catch (error) {
         console.error('Error generating case study from text:', error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        res.status(500).json({ 
+        res.status(500).json({
             error: 'Failed to generate case study from text.',
             details: errorMessage
         });

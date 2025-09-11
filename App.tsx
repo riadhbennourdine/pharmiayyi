@@ -20,6 +20,7 @@ import MemoFicheEditor from './components/MemoFicheEditor';
 import PricingPage from './components/PricingPage';
 import ForgotPasswordView from './components/ForgotPasswordView';
 import ResetPasswordView from './components/ResetPasswordView';
+import ActivateAccountView from './components/ActivateAccountView';
 import ProfileCompletionView from './components/ProfileCompletionView';
 
 // --- ROUTE GUARDS & LAYOUT ---
@@ -95,6 +96,7 @@ const App: React.FC = () => (
                 <Route path="/register" element={<RegisterView />} />
                 <Route path="/forgot-password" element={<ForgotPasswordView />} />
                 <Route path="/reset-password" element={<ResetPasswordView />} />
+                <Route path="/activate-account" element={<ActivateAccountView />} />
                 <Route path="/complete-profile" element={<ProfileCompletionView />} />
                 <Route element={<LoggedInRoute />}>
                     <Route path="/dashboard" element={<DashboardPage />} />

@@ -26,7 +26,11 @@ const ForgotPasswordView: React.FC = () => {
             const data = await response.json();
 
             if (response.ok) {
-                setMessage(data.message || 'Si votre adresse e-mail est enregistrée, vous recevrez un lien de réinitialisation de mot de passe.');
+                if (data.migrationRequired) {
+                    navigate('/activate-account', { state: { username: data.username } });
+                } else {
+                    setMessage(data.message || 'Si votre compte est trouvé, des instructions ont été envoyées.');
+                }
             } else {
                 setError(data.message || 'Une erreur est survenue. Veuillez réessayer.');
             }
