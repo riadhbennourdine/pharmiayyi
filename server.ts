@@ -163,6 +163,11 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     res.status(200).json({ message: 'Logged in successfully.', token, user: userWithoutPassword, profileIncomplete });
+  } catch (error) {
+    console.error('Error during user login:', error);
+    res.status(500).json({ message: 'Internal server error during login.' });
+  }
+});
 
 // Forgot password endpoint
 app.post('/api/auth/forgot-password', async (req, res) => {
