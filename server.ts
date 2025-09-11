@@ -43,6 +43,14 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+// Middleware to check for admin role
+const adminOnly = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Accès refusé. Rôle administrateur requis.' });
+  }
+  next();
+};
+
 // Serve index.html for the root path
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
@@ -178,7 +186,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const db = client.db('pharmia');
     const usersCollection = db.collection<User>('users');
 
-    const user = await usersCollection.findOne({ email });
+    const user = await usersCollection.findOne({ $or: [{ email: email }, { username: email }] });
 
     if (!user) {
       return res.status(404).json({ message: 'Adresse e-mail non trouvée.' }); // Explicit error
@@ -437,7 +445,7 @@ app.post('/api/memofiches', async (req, res) => {
   }
 });
 
-app.put('/api/memofiches/:id', async (req, res) => {
+app.put('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { id } = req.params;
     const updatedCase = req.body;
@@ -463,6 +471,24 @@ app.put('/api/memofiches/:id', async (req, res) => {
   } catch (error) {
     console.error('Error updating memo fiche:', error);
     res.status(500).json({ error: 'Failed to update memo fiche.' });
+  }
+});
+
+app.delete('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const result = await db.collection('memofiches_v2').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Mémofiche non trouvée.' });
+    }
+
+    res.status(200).json({ message: 'Mémofiche supprimée avec succès.' });
+  } catch (error) {
+    console.error('Error deleting memo fiche:', error);
+    res.status(500).json({ error: 'Failed to delete memo fiche.' });
   }
 });
 

@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import type { CaseStudy, GlossaryTerm } from '../types';
-import { BookOpenIcon, QuestionMarkCircleIcon, SparklesIcon, DocumentTextIcon, DocumentDuplicateIcon, VideoCameraIcon, BookmarkIcon, KeyIcon, CheckCircleIcon, AcademicCapIcon, HeartIcon, BeakerIcon, SunIcon, UsersIcon, EyeIcon, PencilIcon } from './icons';
+import { BookOpenIcon, QuestionMarkCircleIcon, SparklesIcon, DocumentTextIcon, DocumentDuplicateIcon, VideoCameraIcon, BookmarkIcon, KeyIcon, CheckCircleIcon, AcademicCapIcon, HeartIcon, BeakerIcon, SunIcon, UsersIcon, EyeIcon, PencilIcon, TrashIcon } from './icons'; // Ajout de TrashIcon
 import ChatAssistant from './ChatAssistant';
 import FlashcardDeck from './FlashcardDeck';
+import { useAuth } from './contexts/AuthContext'; // Ajout de useAuth
 
 interface MemoFicheViewProps {
   caseStudy: CaseStudy;
@@ -57,6 +58,9 @@ const AccordionSection: React.FC<{
 );
 
 const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, onBack, onStartQuiz, onEdit, isPreview = false }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
   const caseStudy = useMemo(() => ({
     ...rawCaseStudy,
     keyQuestions: rawCaseStudy.keyQuestions || [],
@@ -80,6 +84,37 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
 
   const handleToggle = (title: string) => {
     setOpenSection(openSection === title ? null : title);
+  };
+
+  const handleDelete = async () => {
+    // @ts-ignore
+    if (!rawCaseStudy._id) return;
+
+    const isConfirmed = window.confirm("Êtes-vous sûr de vouloir supprimer cette mémofiche ? Cette action est irréversible.");
+
+    if (isConfirmed) {
+      try {
+        const token = localStorage.getItem('token');
+        // @ts-ignore
+        const response = await fetch(`/api/memofiches/${rawCaseStudy._id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          alert('Mémofiche supprimée avec succès.');
+          onBack(); // Go back to the previous view
+        } else {
+          const errorData = await response.json();
+          alert(`Erreur lors de la suppression : ${errorData.message || 'Erreur inconnue'}`);
+        }
+      } catch (error) {
+        console.error('Failed to delete memo fiche:', error);
+        alert('Une erreur réseau est survenue lors de la tentative de suppression.');
+      }
+    }
   };
 
   const getYoutubeEmbedUrl = (url: string | undefined): string | null => {
@@ -430,13 +465,21 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                         >
                           {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
                         </button>
-                        {!isPreview && ( 
-                            <button
-                                onClick={onEdit}
-                                className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-                            >
-                                <PencilIcon className="h-5 w-5 mr-2" /> Modifier
-                            </button>
+                        {!isPreview && isAdmin && (
+                            <>
+                                <button
+                                    onClick={onEdit}
+                                    className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                                >
+                                    <PencilIcon className="h-5 w-5 mr-2" /> Modifier
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="px-6 py-3 text-base font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center"
+                                >
+                                    <TrashIcon className="h-5 w-5 mr-2" /> Supprimer
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>
