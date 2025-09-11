@@ -20,6 +20,7 @@ import MemoFicheEditor from './components/MemoFicheEditor';
 import PricingPage from './components/PricingPage';
 import ForgotPasswordView from './components/ForgotPasswordView';
 import ResetPasswordView from './components/ResetPasswordView';
+import ProfileCompletionView from './components/ProfileCompletionView';
 
 // --- ROUTE GUARDS & LAYOUT ---
 const AppLayout: React.FC = () => (
@@ -33,8 +34,19 @@ const AppLayout: React.FC = () => (
 );
 
 const LoggedInRoute: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <AppLayout /> : <Navigate to="/login" replace />;
+  const { isAuthenticated, user } = useAuth(); // Need user to check profileIncomplete
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check if user profile is incomplete and redirect to complete-profile
+  // This assumes user object from useAuth() is updated after login with profileIncomplete flag
+  if (user && user.profileIncomplete) {
+    return <Navigate to="/complete-profile" replace />;
+  }
+
+  return <AppLayout />;
 };
 
 const AdminRoute: React.FC = () => {
@@ -83,6 +95,7 @@ const App: React.FC = () => (
                 <Route path="/register" element={<RegisterView />} />
                 <Route path="/forgot-password" element={<ForgotPasswordView />} />
                 <Route path="/reset-password" element={<ResetPasswordView />} />
+                <Route path="/complete-profile" element={<ProfileCompletionView />} />
                 <Route element={<LoggedInRoute />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/tarifs" element={<PricingPage />} />

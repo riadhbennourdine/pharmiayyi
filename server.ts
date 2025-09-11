@@ -156,12 +156,13 @@ app.post('/api/auth/login', async (req, res) => {
     // Exclude passwordHash from the response
     const { passwordHash: _, ...userWithoutPassword } = user;
 
-    res.status(200).json({ message: 'Logged in successfully.', token, user: userWithoutPassword });
-  } catch (error) {
-    console.error('Error during user login:', error);
-    res.status(500).json({ message: 'Internal server error during login.' });
-  }
-});
+    // Check if profile is incomplete
+    let profileIncomplete = false;
+    if (!user.email || (user.role === UserRole.PREPARATEUR && !user.pharmacistId)) {
+        profileIncomplete = true;
+    }
+
+    res.status(200).json({ message: 'Logged in successfully.', token, user: userWithoutPassword, profileIncomplete });
 
 // Forgot password endpoint
 app.post('/api/auth/forgot-password', async (req, res) => {

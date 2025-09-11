@@ -18,6 +18,15 @@ const LoginView: React.FC = () => {
         try {
             const success = await login(identifier, password);
             if (success) {
+                // After successful login, check if user profile is incomplete
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    const user = JSON.parse(storedUser);
+                    if (user.profileIncomplete) {
+                        navigate('/complete-profile'); // Redirect to profile completion page
+                        return;
+                    }
+                }
                 navigate('/dashboard'); // Redirect to dashboard after successful login
             } else {
                 setError('Identifiants invalides. Veuillez réessayer.'); // Set error message
