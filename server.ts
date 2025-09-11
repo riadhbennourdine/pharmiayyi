@@ -269,7 +269,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // Profile update endpoint
 app.put('/api/user/profile', authMiddleware, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, pharmacistId } = req.body; // Added pharmacistId
     const userId = req.user?._id; // Get user ID from authenticated request
 
     if (!userId) {
@@ -281,6 +281,12 @@ app.put('/api/user/profile', authMiddleware, async (req, res) => {
     const usersCollection = db.collection<User>('users');
 
     const updateFields: any = { updatedAt: new Date() };
+
+    // Fetch the current user to check their role
+    const currentUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if (!currentUser) {
+        return res.status(404).json({ message: 'User not found.' });
+    }
 
     if (email) {
       // Check if new email is already taken by another user
@@ -296,6 +302,19 @@ app.put('/api/user/profile', authMiddleware, async (req, res) => {
       updateFields.passwordHash = await bcrypt.hash(password, salt);
     }
 
+    // Handle pharmacistId update only if the user is a PREPARATEUR
+    if (currentUser.role === UserRole.PREPARATEUR) {
+        if (!pharmacistId) {
+            return res.status(400).json({ message: 'Pharmacien référent est requis pour les préparateurs.' });
+        }
+        // Verify if pharmacistId corresponds to an existing PHARMACIEN user
+        const pharmacist = await usersCollection.findOne({ _id: new ObjectId(pharmacistId), role: UserRole.PHARMACIEN });
+        if (!pharmacist) {
+            return res.status(400).json({ message: 'Pharmacien référent invalide.' });
+        }
+        updateFields.pharmacistId = new ObjectId(pharmacistId);
+    }
+
     const result = await usersCollection.updateOne(
       { _id: new ObjectId(userId) },
       { $set: updateFields }
@@ -309,7 +328,9 @@ app.put('/api/user/profile', authMiddleware, async (req, res) => {
     const updatedUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
     if (updatedUser) {
       const { passwordHash: _, ...userWithoutPassword } = updatedUser;
-      res.status(200).json({ message: 'Profile updated successfully.', user: userWithoutPassword });
+      // Add profileIncomplete flag to the returned user object
+      const profileIncomplete = !updatedUser.email || (updatedUser.role === UserRole.PREPARATEUR && !updatedUser.pharmacistId);
+      res.status(200).json({ message: 'Profile updated successfully.', user: { ...userWithoutPassword, profileIncomplete } });
     } else {
       res.status(500).json({ message: 'Failed to retrieve updated user data.' });
     }
