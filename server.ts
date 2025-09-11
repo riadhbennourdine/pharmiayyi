@@ -45,7 +45,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
 // Middleware to check for admin role
 const adminOnly = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user?.role !== 'admin') {
+  if (req.user?.role !== UserRole.ADMIN) {
     return res.status(403).json({ message: 'Accès refusé. Rôle administrateur requis.' });
   }
   next();
@@ -180,7 +180,7 @@ app.post('/api/auth/login', async (req, res) => {
 // Forgot password endpoint
 app.post('/api/auth/forgot-password', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { identifier } = req.body; // Changed to identifier
 
     const client = await clientPromise;
     const db = client.db('pharmia');

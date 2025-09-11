@@ -20,7 +20,7 @@ const ForgotPasswordView: React.FC = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ identifier: email }),
             });
 
             const data = await response.json();
@@ -46,7 +46,7 @@ const ForgotPasswordView: React.FC = () => {
                         Mot de passe oublié ?
                     </h2>
                     <p className="text-sm text-slate-500 mt-2">
-                        Entrez votre adresse e-mail pour recevoir un lien de réinitialisation.
+                        Entrez votre adresse e-mail ou votre pseudo pour recevoir un lien de réinitialisation.
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -61,15 +61,15 @@ const ForgotPasswordView: React.FC = () => {
                         </div>
                     )}
                     <div>
-                        <label htmlFor="email" className="sr-only">Adresse email</label>
+                        <label htmlFor="identifier" className="sr-only">Email ou Pseudo</label>
                         <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
+                            id="identifier"
+                            name="identifier"
+                            type="text"
+                            autoComplete="username"
                             required
                             className="appearance-none rounded-md relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
-                            placeholder="Adresse email"
+                            placeholder="Email ou Pseudo"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={isLoading}
