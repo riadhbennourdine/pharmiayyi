@@ -56,7 +56,7 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
         - "lifestyleAdvice": Conseils d'hygiène de vie.
         - "dietaryAdvice": Conseils alimentaires.
       - "keyPoints": Tableau de 3 à 4 points clés ultra-concis.
-      - "references": Tableau de chaînes de caractères (string[]) de 1 à 3 références bibliographiques pertinentes.
+      - "references": Tableau de chaînes de caractères (string[]) de jusqu'à 10 références bibliographiques pertinentes.
       - "flashcards": Tableau de 10 flashcards (objets avec "question" et "answer").
       - "glossary": Tableau de 10 termes techniques (objets avec "term" et "definition").
       - "media": Tableau de 1 à 2 supports médias (objets avec "title", "type" ('video' ou 'infographic'), et "url" - utilise des URLs de placeholder si tu ne peux pas générer de vraies URLs).
