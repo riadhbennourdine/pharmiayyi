@@ -71,9 +71,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [navigate]);
 
   const saveNewCaseStudy = useCallback(async (caseStudy: CaseStudy) => {
-    // In a real app, you'd have API call logic here.
-    console.log("Saving new case", caseStudy);
-    navigate('/dashboard');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/memofiches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(caseStudy),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save the new case study.');
+      }
+
+      // The backend returns the saved case study with its new _id
+      const savedCase = await response.json();
+      console.log("Successfully saved new case study:", savedCase);
+      
+      // After saving, navigate to the dashboard where the new list will be fetched.
+      navigate('/dashboard');
+
+    } catch (error) {
+      console.error("Error saving new case study:", error);
+      // Optionally, handle the error in the UI, e.g., show a notification
+      alert(`Erreur lors de la sauvegarde : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
   }, [navigate]);
 
   const value = useMemo(() => ({
