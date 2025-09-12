@@ -59,7 +59,7 @@ const AccordionSection: React.FC<{
 
 const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, onBack, onStartQuiz, onEdit, isPreview = false }) => {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
 
   const caseStudy = useMemo(() => ({
     ...rawCaseStudy,
