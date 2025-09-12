@@ -244,8 +244,9 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
     // Case 1: User exists
     if (user) {
-      // Case 1a: It's a migrated user without an email -> Trigger activation flow
-      if (!user.email) {
+      // Case 1a: It's a migrated user without a valid email -> Trigger activation flow
+      // A valid email is assumed to contain an '@' character.
+      if (!user.email || !user.email.includes('@')) {
         return res.status(200).json({ migrationRequired: true, username: user.username });
       }
 
