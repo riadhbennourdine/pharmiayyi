@@ -258,17 +258,17 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   }, [caseStudy]);
   
   const menuItems: { id: TabName; label: string; icon: React.ReactNode }[] = [
-      { id: 'memo', label: 'Mémo', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/9.png" className="h-5 w-5" alt="Mémo" /> },
-      { id: 'flashcards', label: 'Flashcards', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/10.png" className="h-5 w-5" alt="Flashcards" /> },
+      { id: 'memo', label: 'Mémo', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/9.png" className="h-7 w-7" alt="Mémo" /> },
+      { id: 'flashcards', label: 'Flashcards', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/10.png" className="h-7 w-7" alt="Flashcards" /> },
   ];
 
   if (!isPreview) {
-      menuItems.push({ id: 'quiz', label: 'Quiz', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/11.png" className="h-5 w-5" alt="Quiz" /> });
+      menuItems.push({ id: 'quiz', label: 'Quiz', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/11.png" className="h-7 w-7" alt="Quiz" /> });
   }
 
   menuItems.push(
-      { id: 'glossary', label: 'Glossaire', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/12.png" className="h-5 w-5" alt="Glossaire" /> },
-      { id: 'media', label: 'Médias', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/13.png" className="h-5 w-5" alt="Médias" /> }
+      { id: 'glossary', label: 'Glossaire', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/12.png" className="h-7 w-7" alt="Glossaire" /> },
+      { id: 'media', label: 'Médias', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/13.png" className="h-7 w-7" alt="Médias" /> }
   );
 
   const renderContent = () => {
