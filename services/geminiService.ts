@@ -98,14 +98,30 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
             }));
         }
 
-        // Ensure recommendation sub-sections are arrays
+        // Ensure recommendation sub-sections are arrays and conform to expected types
         if (generatedCase.recommendations) {
-            if (typeof generatedCase.recommendations.lifestyleAdvice === 'string') {
-                generatedCase.recommendations.lifestyleAdvice = [generatedCase.recommendations.lifestyleAdvice];
-            }
-            if (typeof generatedCase.recommendations.dietaryAdvice === 'string') {
-                generatedCase.recommendations.dietaryAdvice = [generatedCase.recommendations.dietaryAdvice];
-            }
+            const assureArray = (field: any) => {
+                if (typeof field === 'string') {
+                    return [field];
+                }
+                return field || [];
+            };
+
+            generatedCase.recommendations.lifestyleAdvice = assureArray(generatedCase.recommendations.lifestyleAdvice);
+            generatedCase.recommendations.dietaryAdvice = assureArray(generatedCase.recommendations.dietaryAdvice);
+
+            const assureTreatmentArray = (field: any) => {
+                const arr = assureArray(field);
+                return arr.map((item: any) => {
+                    if (typeof item === 'string') {
+                        return { medicament: item, posologie: '', duree: '', conseil_dispensation: '' };
+                    }
+                    return item;
+                });
+            };
+
+            generatedCase.recommendations.mainTreatment = assureTreatmentArray(generatedCase.recommendations.mainTreatment);
+            generatedCase.recommendations.associatedProducts = assureTreatmentArray(generatedCase.recommendations.associatedProducts);
         }
 
         console.log("Parsed CaseStudy object (after transformation):", generatedCase);
