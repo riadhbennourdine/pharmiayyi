@@ -209,9 +209,18 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             title: 'Traitement principal',
             icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/18.png" className="h-6 w-6 mr-3" alt="Traitement principal" />,
             content: (
-                <ul className="list-disc pl-5 space-y-1">
-                    {caseStudy.recommendations.mainTreatment.map((item, i) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
-                </ul>
+                <div className="space-y-4">
+                    {caseStudy.recommendations.mainTreatment.map((t, i) => (
+                        <div key={i} className="p-3 bg-slate-50 rounded-md border border-slate-200">
+                            <p className="font-bold text-slate-800">{highlightGlossaryTerms(t.medicament)}</p>
+                            <ul className="list-disc pl-5 mt-1 text-sm text-slate-600">
+                                <li><strong>Posologie:</strong> {highlightGlossaryTerms(t.posologie)}</li>
+                                <li><strong>Durée:</strong> {highlightGlossaryTerms(t.duree)}</li>
+                                <li><strong>Conseil:</strong> {highlightGlossaryTerms(t.conseil_dispensation)}</li>
+                            </ul>
+                        </div>
+                    ))}
+                </div>
             )
         },
         {
@@ -219,9 +228,18 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             title: 'Produits associés',
             icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/19.png" className="h-6 w-6 mr-3" alt="Produits associés" />,
             content: (
-                <ul className="list-disc pl-5 space-y-1">
-                    {caseStudy.recommendations.associatedProducts.map((item, i) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
-                </ul>
+                <div className="space-y-4">
+                    {caseStudy.recommendations.associatedProducts.map((t, i) => (
+                        <div key={i} className="p-3 bg-slate-50 rounded-md border border-slate-200">
+                            <p className="font-bold text-slate-800">{highlightGlossaryTerms(t.medicament)}</p>
+                            <ul className="list-disc pl-5 mt-1 text-sm text-slate-600">
+                                <li><strong>Posologie:</strong> {highlightGlossaryTerms(t.posologie)}</li>
+                                <li><strong>Durée:</strong> {highlightGlossaryTerms(t.duree)}</li>
+                                <li><strong>Conseil:</strong> {highlightGlossaryTerms(t.conseil_dispensation)}</li>
+                            </ul>
+                        </div>
+                    ))}
+                </div>
             )
         },
         {

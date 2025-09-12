@@ -50,11 +50,11 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       - "pathologyOverview": Aperçu de la pathologie.
       - "keyQuestions": Tableau de chaînes de caractères (string[]) de questions clés à poser au patient.
       - "redFlags": Tableau de chaînes de caractères (string[]) de signaux d'alerte.
-      - "recommendations": Objet avec 4 sous-sections (tableaux de chaînes de caractères):
-        - "mainTreatment": Traitement principal.
-        - "associatedProducts": Produits associés.
-        - "lifestyleAdvice": Conseils d'hygiène de vie.
-        - "dietaryAdvice": Conseils alimentaires.
+      - "recommendations": Objet avec 4 sous-sections:
+        - "mainTreatment": Tableau d'objets Treatment (avec les champs "medicament", "posologie", "duree", "conseil_dispensation").
+        - "associatedProducts": Tableau d'objets Treatment (mêmes champs que mainTreatment).
+        - "lifestyleAdvice": Tableau de chaînes de caractères (string[]) de conseils d'hygiène de vie.
+        - "dietaryAdvice": Tableau de chaînes de caractères (string[]) de conseils alimentaires.
       - "keyPoints": Tableau de 3 à 4 points clés ultra-concis.
       - "references": Tableau de chaînes de caractères (string[]) de jusqu'à 10 références bibliographiques pertinentes.
       - "flashcards": Tableau de 10 flashcards (objets avec "question" et "answer").
@@ -100,12 +100,6 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
 
         // Ensure recommendation sub-sections are arrays
         if (generatedCase.recommendations) {
-            if (typeof generatedCase.recommendations.mainTreatment === 'string') {
-                generatedCase.recommendations.mainTreatment = [generatedCase.recommendations.mainTreatment];
-            }
-            if (typeof generatedCase.recommendations.associatedProducts === 'string') {
-                generatedCase.recommendations.associatedProducts = [generatedCase.recommendations.associatedProducts];
-            }
             if (typeof generatedCase.recommendations.lifestyleAdvice === 'string') {
                 generatedCase.recommendations.lifestyleAdvice = [generatedCase.recommendations.lifestyleAdvice];
             }
@@ -123,12 +117,17 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
 };
 
 export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy): Promise<string> => {
+    const formatTreatments = (treatments: any[] | undefined) => {
+        if (!treatments || treatments.length === 0) return 'Aucun';
+        return treatments.map(t => t.medicament || t).join(', ');
+    };
+
     const caseStudyText = `
         Voici le contexte de l'étude de cas sur laquelle tu dois te baser :
         - Titre: ${caseContext.title}
         - Situation: ${caseContext.patientSituation}
-        - Recommandations: Traitement: ${caseContext.recommendations.mainTreatment.join(', ')}, Produits associés: ${caseContext.recommendations.associatedProducts.join(', ')}, Hygiène de vie: ${caseContext.recommendations.lifestyleAdvice.join(', ')}, Alimentation: ${caseContext.recommendations.dietaryAdvice.join(', ')}
-        - Signaux d'alerte: ${caseContext.redFlags.join(', ')}
+        - Recommandations: Traitement: ${formatTreatments(caseContext.recommendations.mainTreatment)}, Produits associés: ${formatTreatments(caseContext.recommendations.associatedProducts)}, Hygiène de vie: ${caseContext.recommendations.lifestyleAdvice.join(', ') || 'Aucun'}, Alimentation: ${caseContext.recommendations.dietaryAdvice.join(', ') || 'Aucun'}
+        - Signaux d'alerte: ${caseContext.redFlags.join(', ') || 'Aucun'}
     `;
 
     const systemInstruction = {

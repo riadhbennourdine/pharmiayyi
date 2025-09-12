@@ -54,6 +54,13 @@ export interface MediaSuggestion {
   type: 'video' | 'infographic';
 }
 
+export interface Treatment {
+  medicament: string;
+  posologie: string;
+  duree: string;
+  conseil_dispensation: string;
+}
+
 export interface CaseStudy {
   _id: any;
   title: string;
@@ -64,8 +71,8 @@ export interface CaseStudy {
   pathologyOverview: string;
   redFlags: string[];
   recommendations: {
-    mainTreatment: string[];
-    associatedProducts: string[];
+    mainTreatment: Treatment[];
+    associatedProducts: Treatment[];
     lifestyleAdvice: string[];
     dietaryAdvice: string[];
   };
