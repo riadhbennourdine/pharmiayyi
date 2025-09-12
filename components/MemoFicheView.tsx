@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { CaseStudy, GlossaryTerm } from '../types';
-import { QuestionMarkCircleIcon, SparklesIcon, DocumentTextIcon, VideoCameraIcon, KeyIcon, CheckCircleIcon, AcademicCapIcon, HeartIcon, BeakerIcon, SunIcon, UsersIcon, EyeIcon, PencilIcon, TrashIcon } from './icons'; // Ajout de TrashIcon
+import { VideoCameraIcon, KeyIcon, CheckCircleIcon, PencilIcon, TrashIcon } from './icons'; // Ajout de TrashIcon
 import ChatAssistant from './ChatAssistant';
 import FlashcardDeck from './FlashcardDeck';
 import { useAuth } from './contexts/AuthContext'; // Ajout de useAuth
@@ -174,13 +174,13 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         {
             id: 'patientSituation', 
             title: 'Cas comptoir', 
-            icon: <DocumentTextIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/14.png" className="h-6 w-6 mr-3" alt="Cas comptoir" />,
             content: <p>{highlightGlossaryTerms(caseStudy.patientSituation)}</p>
         },
         {
             id: 'keyQuestions',
             title: 'Questions clés à poser',
-            icon: <QuestionMarkCircleIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/15.png" className="h-6 w-6 mr-3" alt="Questions clés" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1">
                 {caseStudy.keyQuestions.map((q: any, i: number) => <li key={i}>{highlightGlossaryTerms(q.question || q)}</li>)}
@@ -190,13 +190,13 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         {
             id: "pathologyOverview",
             title: "Aperçu pathologie",
-            icon: <EyeIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/16.png" className="h-6 w-6 mr-3" alt="Aperçu pathologie" />,
             content: <p>{highlightGlossaryTerms(caseStudy.pathologyOverview)}</p>
         },
         {
             id: "redFlags",
             title: "Signaux d'alerte",
-            icon: <SparklesIcon className="h-6 w-6 text-red-500 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/17.png" className="h-6 w-6 mr-3" alt="Signaux d'alerte" />,
             isAlert: true,
             content: (
                 <ul className="list-disc pl-5 space-y-1 text-red-700 font-medium">
@@ -207,7 +207,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         {
             id: 'mainTreatment',
             title: 'Traitement principal',
-            icon: <HeartIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/18.png" className="h-6 w-6 mr-3" alt="Traitement principal" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1">
                     {caseStudy.recommendations.mainTreatment.map((item, i) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
@@ -217,7 +217,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         {
             id: 'associatedProducts',
             title: 'Produits associés',
-            icon: <BeakerIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/19.png" className="h-6 w-6 mr-3" alt="Produits associés" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1">
                     {caseStudy.recommendations.associatedProducts.map((item, i) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
@@ -227,7 +227,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         {
             id: 'lifestyleAdvice',
             title: 'Hygiène de vie',
-            icon: <SunIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/20.png" className="h-6 w-6 mr-3" alt="Hygiène de vie" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1">
                     {caseStudy.recommendations.lifestyleAdvice.map((item, i) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
@@ -237,7 +237,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         {
             id: 'dietaryAdvice',
             title: 'Conseils alimentaires',
-            icon: <UsersIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/21.png" className="h-6 w-6 mr-3" alt="Conseils alimentaires" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1">
                     {caseStudy.recommendations.dietaryAdvice.map((item, i) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
@@ -247,7 +247,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         {
             id: "references",
             title: "Références bibliographiques",
-            icon: <AcademicCapIcon className="h-6 w-6 text-teal-600 mr-3" />,
+            icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/22.png" className="h-6 w-6 mr-3" alt="Références bibliographiques" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1 text-sm">
                 {caseStudy.references.map((ref: any, i: number) => <li key={i}>{highlightGlossaryTerms(ref.reference || ref)}</li>)}
