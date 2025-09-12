@@ -5,14 +5,10 @@ import { UserRole } from '../types';
 
 const Header: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
-  const isAdmin = user?.role === UserRole.ADMIN;
+  const isAdmin = user?.role?.toUpperCase() === UserRole.ADMIN;
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    console.log('Auth User in Header:', user);
-  }, [user]);
   
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium px-3 py-2 rounded-md transition-colors ${
