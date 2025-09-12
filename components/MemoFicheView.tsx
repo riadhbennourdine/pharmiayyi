@@ -422,12 +422,12 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             )}
 
             {caseStudy.keyPoints && caseStudy.keyPoints.length > 0 && (
-                <div className="mb-8 p-6 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg shadow-sm">
-                    <h3 className="text-xl font-bold text-amber-800 mb-3 flex items-center">
+                <div className="mb-8 p-6 bg-teal-50 border-l-4 border-teal-500 rounded-r-lg shadow-sm">
+                    <h3 className="text-xl font-bold text-teal-800 mb-3 flex items-center">
                         <KeyIcon className="h-6 w-6 mr-3" />
                         Points Clés à Retenir
                     </h3>
-                    <ul className="space-y-2 pl-5 list-disc text-amber-900">
+                    <ul className="space-y-2 pl-5 list-disc text-teal-900">
                         {caseStudy.keyPoints.map((point, i) => (
                             <li key={i} className="text-base">{point}</li>
                         ))}
