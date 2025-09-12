@@ -299,7 +299,8 @@ app.post('/api/auth/initiate-activation', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'Pseudo non trouvé.' });
     }
-    if (user.email) {
+    // A valid email is assumed to contain an '@' character.
+    if (user.email && user.email.includes('@')) {
       return res.status(400).json({ message: 'Ce compte est déjà actif.' });
     }
 
