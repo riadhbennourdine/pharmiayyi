@@ -64,10 +64,35 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [currentCase, navigate]);
 
   const saveEditedCase = useCallback(async (editedCase: CaseStudy) => {
-    // In a real app, you'd have API call logic here.
-    console.log("Saving edited case", editedCase);
-    setCurrentCase(editedCase);
-    navigate(`/memofiche/${editedCase._id}`);
+    if (!editedCase._id) {
+      alert("Cannot save a case study without an ID.");
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/memofiches/${editedCase._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(editedCase),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save the edited case study.');
+      }
+
+      const savedCase = await response.json();
+      console.log("Successfully saved edited case study:", savedCase);
+      setCurrentCase(savedCase);
+      navigate(`/memofiche/${savedCase._id}`);
+
+    } catch (error) {
+      console.error("Error saving edited case study:", error);
+      alert(`Erreur lors de la sauvegarde : ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
   }, [navigate]);
 
   const saveNewCaseStudy = useCallback(async (caseStudy: CaseStudy) => {
