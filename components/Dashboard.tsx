@@ -219,8 +219,13 @@ const Dashboard: React.FC = () => {
                             <div className="p-6 pt-4 flex-grow flex flex-col w-full">
                                 <h3 className="text-lg font-semibold text-slate-800 flex-grow group-hover:text-teal-600 transition-colors">{study.title}</h3>
                                 <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
-                                {study.theme && (<p className="text-xs text-slate-500">Thème: {study.theme}</p>)}
-                                {study.system && (<p className="text-xs text-slate-500">Système: {study.system}</p>)}
+                                {(study.theme || study.system) && (
+                                    <p className="text-xs text-slate-500">
+                                        {study.theme && `"${study.theme}"`}
+                                        {study.theme && study.system && <span className="mx-1">&bull;</span>}
+                                        {study.system && `"${study.system}"`}
+                                    </p>
+                                )}
                                 <div className="mt-4 w-full">
                                     <span className="text-xs font-semibold text-white bg-teal-500 px-3 py-1 rounded-full">
                                     Consulter
@@ -260,8 +265,13 @@ const Dashboard: React.FC = () => {
                                             <div className="p-6 pt-4 flex-grow flex flex-col w-full">
                                                 <h3 className="text-lg font-semibold text-slate-800 flex-grow group-hover:text-teal-600 transition-colors">{study.title}</h3>
                                                 <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
-                                                {study.theme && (<p className="text-xs text-slate-500">Thème: {study.theme}</p>)}
-                                                {study.system && (<p className="text-xs text-slate-500">Système: {study.system}</p>)}
+                                                {(study.theme || study.system) && (
+                                                    <p className="text-xs text-slate-500">
+                                                        {study.theme && `"${study.theme}"`}
+                                                        {study.theme && study.system && <span className="mx-1">&bull;</span>}
+                                                        {study.system && `"${study.system}"`}
+                                                    </p>
+                                                )}
                                                 <div className="mt-4 w-full">
                                                     <span className="text-xs font-semibold text-white bg-teal-500 px-3 py-1 rounded-full">
                                                     Consulter
