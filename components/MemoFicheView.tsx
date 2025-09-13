@@ -149,36 +149,11 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             return [''];
         }
 
-        // First, handle markdown bolding
-        // This regex finds **text** and replaces it with <strong>text</strong>
+        // Handle markdown bolding
         textAsString = textAsString.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-        if (!caseStudy.glossary || caseStudy.glossary.length === 0) {
-            // If no glossary terms, just return the text with bolding applied
-            return [<span dangerouslySetInnerHTML={{ __html: textAsString }} />];
-        }
-
-        const termsToFind = caseStudy.glossary;
-        
-        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&'));
-        const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
-        
-        const parts = textAsString.split(regex);
-        
-        return parts.map((part, index) => {
-            if (!part) return null;
-            const lowerPart = part.toLowerCase();
-            const match = termsToFind.find(g => g.term.toLowerCase() === lowerPart);
-            
-            if (match) {
-                return (
-                    <GlossaryTermWrapper key={`${match.term}-${index}`} term={match.term} definition={match.definition}>
-                        <span dangerouslySetInnerHTML={{ __html: part }} />
-                    </GlossaryTermWrapper>
-                );
-            }
-            return <span dangerouslySetInnerHTML={{ __html: part }} />;
-        });
+        // Return the text with bolding applied
+        return [<span dangerouslySetInnerHTML={{ __html: textAsString }} />];
     };
 
     return [
@@ -411,7 +386,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {caseStudy.coverImageUrl ? (
                 <div className="mb-8 rounded-lg overflow-hidden shadow-lg relative h-64 flex items-end p-8 text-white bg-slate-800">
-                    <img src={caseStudy.coverImageUrl} alt={`Image de couverture pour ${caseStudy.title}`} className="absolute inset-0 w-full h-full object-cover z-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    <img src={caseStudy.coverImageUrl} alt={`Image de couverture pour ${caseStudy.title}`} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent z-10"></div>
                     <div className="relative z-20">
                         <h2 className="text-4xl font-extrabold tracking-tight" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
