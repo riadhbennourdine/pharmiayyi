@@ -57,7 +57,15 @@ const AccordionSection: React.FC<{
     </div>
 );
 
+import React, { useState, useMemo, useEffect } from 'react';
+// ... rest of the imports
+
 const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, onBack, onStartQuiz, onEdit, isPreview = false }) => {
+  // Scroll to top on component mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []); // Empty dependency array ensures this runs only once on mount
+
   const { user } = useAuth();
   const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
   console.log("User:", user);
