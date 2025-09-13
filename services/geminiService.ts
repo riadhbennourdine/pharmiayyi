@@ -47,12 +47,12 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       Inclus les sections suivantes, en t'assurant que les tableaux sont bien des tableaux de chaînes de caractères ou d'objets selon le type:
       - "title": Titre concis de la mémofiche.
       - "patientSituation": Scénario patient détaillé.
-      - "pathologyOverview": Aperçu de la pathologie.
+      - "pathologyOverview": Aperçu de la pathologie en 5-7 points clés (string[]).
       - "keyQuestions": Tableau de chaînes de caractères (string[]) de questions clés à poser au patient.
       - "redFlags": Tableau de chaînes de caractères (string[]) de signaux d'alerte.
       - "recommendations": Objet avec 4 sous-sections:
-        - "mainTreatment": Tableau d'objets Treatment (avec les champs "medicament", "posologie", "duree", "conseil_dispensation").
-        - "associatedProducts": Tableau d'objets Treatment (mêmes champs que mainTreatment).
+        - "mainTreatment": Tableau de 10 chaînes de caractères (string[]) résumant le traitement principal en points clés.
+        - "associatedProducts": Tableau de 10 chaînes de caractères (string[]) résumant les produits associés en points clés.
         - "lifestyleAdvice": Tableau de chaînes de caractères (string[]) de conseils d'hygiène de vie.
         - "dietaryAdvice": Tableau de chaînes de caractères (string[]) de conseils alimentaires.
       - "keyPoints": Tableau de 3 à 4 points clés ultra-concis.
@@ -110,18 +110,8 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
             generatedCase.recommendations.lifestyleAdvice = assureArray(generatedCase.recommendations.lifestyleAdvice);
             generatedCase.recommendations.dietaryAdvice = assureArray(generatedCase.recommendations.dietaryAdvice);
 
-            const assureTreatmentArray = (field: any) => {
-                const arr = assureArray(field);
-                return arr.map((item: any) => {
-                    if (typeof item === 'string') {
-                        return { medicament: item, posologie: '', duree: '', conseil_dispensation: '' };
-                    }
-                    return item;
-                });
-            };
-
-            generatedCase.recommendations.mainTreatment = assureTreatmentArray(generatedCase.recommendations.mainTreatment);
-            generatedCase.recommendations.associatedProducts = assureTreatmentArray(generatedCase.recommendations.associatedProducts);
+            generatedCase.recommendations.mainTreatment = assureArray(generatedCase.recommendations.mainTreatment);
+            generatedCase.recommendations.associatedProducts = assureArray(generatedCase.recommendations.associatedProducts);
         }
 
         console.log("Parsed CaseStudy object (after transformation):", generatedCase);
