@@ -79,18 +79,28 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
   };
 
   const handleArrayChange = (name: keyof CaseStudy | string, value: string) => {
+    console.log(`handleArrayChange: name=${name}, value=`, value);
     const arrayValue = value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+    console.log(`handleArrayChange: arrayValue=`, arrayValue);
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setCaseStudy(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev as any)[parent],
-          [child]: arrayValue,
-        },
-      }));
+      setCaseStudy(prev => {
+        const newState = {
+          ...prev,
+          [parent]: {
+            ...(prev as any)[parent],
+            [child]: arrayValue,
+          },
+        };
+        console.log(`handleArrayChange: new state for ${name}=`, newState);
+        return newState;
+      });
     } else {
-      setCaseStudy(prev => ({ ...prev, [name as keyof CaseStudy]: arrayValue as any }));
+      setCaseStudy(prev => {
+        const newState = { ...prev, [name as keyof CaseStudy]: arrayValue as any };
+        console.log(`handleArrayChange: new state for ${name}=`, newState);
+        return newState;
+      });
     }
   };
 
