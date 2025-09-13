@@ -51,8 +51,8 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       - "keyQuestions": Tableau de chaînes de caractères (string[]) de questions clés à poser au patient.
       - "redFlags": Tableau de chaînes de caractères (string[]) de signaux d'alerte.
       - "recommendations": Objet avec 4 sous-sections:
-        - "mainTreatment": Tableau de 10 chaînes de caractères (string[]) résumant le traitement principal en points clés, incluant le nom du produit/médicament, la posologie, la durée et les conseils de dispensation pour chaque point.
-        - "associatedProducts": Tableau de 10 chaînes de caractères (string[]) résumant les produits associés en points clés, incluant le nom du produit/médicament, la posologie, la durée et les conseils de dispensation pour chaque point.
+        - "mainTreatment": Tableau de 10 chaînes de caractères (string[]) résumant le traitement principal en points clés.
+        - "associatedProducts": Tableau de 10 chaînes de caractères (string[]) résumant les produits associés en points clés.
         - "lifestyleAdvice": Tableau de chaînes de caractères (string[]) de conseils d'hygiène de vie.
         - "dietaryAdvice": Tableau de chaînes de caractères (string[]) de conseils alimentaires.
       - "keyPoints": Tableau de 3 à 4 points clés ultra-concis.
