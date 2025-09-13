@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { CaseStudy, GlossaryTerm } from '../types';
 import { VideoCameraIcon, KeyIcon, CheckCircleIcon, PencilIcon, TrashIcon } from './icons'; // Ajout de TrashIcon
 import ChatAssistant from './ChatAssistant';
@@ -57,9 +57,6 @@ const AccordionSection: React.FC<{
     </div>
 );
 
-import React, { useState, useMemo, useEffect } from 'react';
-// ... rest of the imports
-
 const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, onBack, onStartQuiz, onEdit, isPreview = false }) => {
   // Scroll to top on component mount
   useEffect(() => {
@@ -68,6 +65,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
 
   const { user } = useAuth();
   const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
+  const canEdit = isAdmin && !isPreview;
   console.log("User:", user);
   console.log("isAdmin:", isAdmin);
 
@@ -462,7 +460,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                         >
                           {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
                         </button>
-                        {!isPreview && isAdmin && (
+                        {!isPreview && canEdit && (
                             <>
                                 <button
                                     onClick={onEdit}
