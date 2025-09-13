@@ -144,14 +144,23 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
 
   const memoContent = useMemo(() => {
     const highlightGlossaryTerms = (text: any): React.ReactNode[] => {
-        const textAsString = String(text || '');
-        if (!caseStudy.glossary || caseStudy.glossary.length === 0 || !textAsString) {
-            return [textAsString];
+        let textAsString = String(text || '');
+        if (!textAsString) {
+            return [''];
+        }
+
+        // First, handle markdown bolding
+        // This regex finds **text** and replaces it with <strong>text</strong>
+        textAsString = textAsString.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        if (!caseStudy.glossary || caseStudy.glossary.length === 0) {
+            // If no glossary terms, just return the text with bolding applied
+            return [<span dangerouslySetInnerHTML={{ __html: textAsString }} />];
         }
 
         const termsToFind = caseStudy.glossary;
         
-        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+        const escapedTerms = termsToFind.map(g => g.term.replace(/[-\/\\^$*+?.()|[\\]{}]/g, '\\$&'));
         const regex = new RegExp(`\\b(${escapedTerms.join('|')})\\b`, 'gi');
         
         const parts = textAsString.split(regex);
@@ -164,11 +173,11 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             if (match) {
                 return (
                     <GlossaryTermWrapper key={`${match.term}-${index}`} term={match.term} definition={match.definition}>
-                        {part}
+                        <span dangerouslySetInnerHTML={{ __html: part }} />
                     </GlossaryTermWrapper>
                 );
             }
-            return part;
+            return <span dangerouslySetInnerHTML={{ __html: part }} />;
         });
     };
 
@@ -426,7 +435,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">{caseStudy.title}</h2>
                  </div>
             )}
-
+            
             {caseStudy.keyPoints && caseStudy.keyPoints.length > 0 && (
                 <div className="mb-8 p-6 bg-teal-50 border-l-4 border-teal-500 rounded-r-lg shadow-sm">
                     <h3 className="text-xl font-bold text-teal-800 mb-3 flex items-center">
@@ -440,7 +449,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     </ul>
                 </div>
             )}
-
+            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
                     <div className="mb-6 border-b border-slate-200 flex space-x-1 sm:space-x-2 overflow-x-auto pb-px">
@@ -463,7 +472,6 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     <div className="min-h-[300px]">
                       {renderContent()}
                     </div>
-
                      <div className="mt-8 flex items-center justify-center space-x-4"> 
                         <button 
                             onClick={onBack} 
