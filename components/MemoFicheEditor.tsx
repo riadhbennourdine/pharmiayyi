@@ -80,7 +80,7 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
 
   const handleArrayChange = (name: keyof CaseStudy | string, value: string) => {
     console.log(`handleArrayChange: name=${name}, value=`, value);
-    const arrayValue = value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+    const arrayValue = value.split('\n').map(s => s.trim());
     console.log(`handleArrayChange: arrayValue=`, arrayValue);
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
