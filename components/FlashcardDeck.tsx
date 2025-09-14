@@ -46,7 +46,7 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({ flashcards }) => {
     setShowEncouragement(false);
     setCurrentIndex(prevIndex => {
       const nextIndex = (prevIndex === flashcards.length - 1 ? 0 : prevIndex + 1);
-      if ((nextIndex % 10 === 0) && nextIndex !== 0) { // Show encouragement every 10 cards, but not at the very beginning
+      if (nextIndex % 10 === 0 && flashcards.length > 0) {
         setShowEncouragement(true);
       }
       return nextIndex;
