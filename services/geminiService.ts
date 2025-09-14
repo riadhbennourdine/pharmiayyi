@@ -172,22 +172,20 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
 
 // ...
 
-    const history: Content[] = messages.slice(0, -1).map(toContent);
-    const lastMessage = messages[messages.length - 1];
+    const history: Content[] = messages.map(toContent);
+
 
     try {
-        if (lastMessage) {
-            console.log("Sending message to Gemini:", lastMessage.content); // Log the last message sent
-        }
+        console.log("Sending message to Gemini:", messages.slice(-1)[0].content); // Log the last message sent
         console.log("System instruction sent to Gemini:", systemInstruction.parts[0].text); // Log the system instruction
 
         const chat = model.startChat({
             generationConfig,
             safetySettings,
-            history: [systemInstruction, ...history],
+            history: [systemInstruction, ...history.slice(0, -1)],
         });
 
-        const result = await chat.sendMessage(lastMessage ? lastMessage.content : '');
+        const result = await chat.sendMessage(history.slice(-1)[0].parts);
         const response = result.response;
         console.log("Raw response from Gemini:", response.text()); // Log the raw response
         return response.text();
