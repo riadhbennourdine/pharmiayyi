@@ -185,7 +185,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
             icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/16.png" className="h-6 w-6 mr-3" alt="Aperçu pathologie" />,
             content: (
                 <ul className="list-disc pl-5 space-y-1">
-                    {caseStudy.pathologyOverview.map((item: any, i: number) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
+                    {(Array.isArray(caseStudy.pathologyOverview) ? caseStudy.pathologyOverview : [caseStudy.pathologyOverview]).map((item: any, i: number) => <li key={i}>{highlightGlossaryTerms(item)}</li>)}
                 </ul>
             )
         },
