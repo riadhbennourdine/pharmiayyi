@@ -68,6 +68,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
         <div className="bg-white rounded-lg shadow-lg flex flex-col h-full max-h-[80vh]">
             <div className="p-4 border-b flex items-center bg-slate-50 rounded-t-lg">
                 <CommunicationIcon className="h-6 w-6 text-teal-600 mr-3" />
+                <img src="https://pharmaconseilbmb.com/photos/site/bot.gif" alt="Chatbot GIF" className="h-8 w-8 mr-2" />
                 <h3 className="text-lg font-semibold text-slate-800">Assistant PharmIA</h3>
             </div>
             <div className="flex-grow p-4 overflow-y-auto bg-slate-100/50">
