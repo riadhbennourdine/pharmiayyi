@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CaseStudy } from '../types';
 
 interface MemoFicheEditorProps {
@@ -193,7 +193,7 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Questions Clés (une par ligne)</label>
-          <textarea name="keyQuestions" value={caseStudy.keyQuestions.map(q => (typeof q === 'string' ? q : q.question)).join('\n')} onChange={(e) => handleArrayChange('keyQuestions', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="keyQuestions" value={useMemo(() => caseStudy.keyQuestions.map(q => (typeof q === 'string' ? q : q.question)).join('\n'), [caseStudy.keyQuestions])} onChange={(e) => handleArrayChange('keyQuestions', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Aperçu Pathologie</label>
@@ -201,34 +201,34 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Signaux d'Alerte (un par ligne)</label>
-          <textarea name="redFlags" value={caseStudy.redFlags.map(f => (typeof f === 'string' ? f : f.redFlag)).join('\n')} onChange={(e) => handleArrayChange('redFlags', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="redFlags" value={useMemo(() => caseStudy.redFlags.map(f => (typeof f === 'string' ? f : f.redFlag)).join('\n'), [caseStudy.redFlags])} onChange={(e) => handleArrayChange('redFlags', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         
         <h3 className="text-xl font-bold mt-6 mb-2">Recommandations</h3>
         <div>
           <label className="block text-sm font-medium text-gray-700">Traitement Principal (une par ligne)</label>
-          <textarea name="recommendations.mainTreatment" value={caseStudy.recommendations.mainTreatment.join('\n')} onChange={(e) => handleArrayChange('recommendations.mainTreatment', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="recommendations.mainTreatment" value={useMemo(() => caseStudy.recommendations.mainTreatment.join('\n'), [caseStudy.recommendations.mainTreatment])} onChange={(e) => handleArrayChange('recommendations.mainTreatment', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Produits Associés (une par ligne)</label>
-          <textarea name="recommendations.associatedProducts" value={caseStudy.recommendations.associatedProducts.join('\n')} onChange={(e) => handleArrayChange('recommendations.associatedProducts', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="recommendations.associatedProducts" value={useMemo(() => caseStudy.recommendations.associatedProducts.join('\n'), [caseStudy.recommendations.associatedProducts])} onChange={(e) => handleArrayChange('recommendations.associatedProducts', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Conseils Hygiène de Vie (une par ligne)</label>
-          <textarea name="recommendations.lifestyleAdvice" value={caseStudy.recommendations.lifestyleAdvice.join('\n')} onChange={(e) => handleArrayChange('recommendations.lifestyleAdvice', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="recommendations.lifestyleAdvice" value={useMemo(() => caseStudy.recommendations.lifestyleAdvice.join('\n'), [caseStudy.recommendations.lifestyleAdvice])} onChange={(e) => handleArrayChange('recommendations.lifestyleAdvice', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Conseils Alimentaires (une par ligne)</label>
-          <textarea name="recommendations.dietaryAdvice" value={caseStudy.recommendations.dietaryAdvice.join('\n')} onChange={(e) => handleArrayChange('recommendations.dietaryAdvice', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="recommendations.dietaryAdvice" value={useMemo(() => caseStudy.recommendations.dietaryAdvice.join('\n'), [caseStudy.recommendations.dietaryAdvice])} onChange={(e) => handleArrayChange('recommendations.dietaryAdvice', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Points Clés (un par ligne)</label>
-          <textarea name="keyPoints" value={caseStudy.keyPoints.join('\n')} onChange={(e) => handleArrayChange('keyPoints', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="keyPoints" value={useMemo(() => caseStudy.keyPoints.join('\n'), [caseStudy.keyPoints])} onChange={(e) => handleArrayChange('keyPoints', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Références (une par ligne)</label>
-          <textarea name="references" value={caseStudy.references.map(r => (typeof r === 'string' ? r : r.reference)).join('\n')} onChange={(e) => handleArrayChange('references', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+          <textarea name="references" value={useMemo(() => caseStudy.references.map(r => (typeof r === 'string' ? r : r.reference)).join('\n'), [caseStudy.references])} onChange={(e) => handleArrayChange('references', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
         
         {/* Champs pour flashcards, glossary, media, quiz - simplifiés pour l'édition initiale */}
