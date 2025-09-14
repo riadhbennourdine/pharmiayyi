@@ -62,7 +62,7 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       - "media": Tableau de 1 à 2 supports médias (objets avec "title", "type" ('video' ou 'infographic'), et "url" - utilise des URLs de placeholder si tu ne peux pas générer de vraies URLs).
       - "coverImageUrl": URL d'une image de couverture pertinente. Utilise une URL de placeholder de https://picsum.photos si tu ne peux pas générer de vraie URL (par exemple, https://picsum.photos/1200/600).
       - "youtubeUrl": URL d'une vidéo YouTube pertinente. Utilise une URL de placeholder si tu ne peux pas générer de vraie URL (par exemple, https://www.youtube.com/watch?v=dQw4w9WgXcQ).
-      - "quiz": Tableau de 10 questions de quiz (objets QuizQuestion avec "question", "options", "correctAnswerIndex", "explanation", "type" ('single-choice' ou 'true-false')). Pour Vrai/Faux, correctAnswerIndex est 0 pour "Vrai" et 1 pour "Faux". L'explication doit être synthétique, pertinente et fournir au moins 3 lignes d'informations complémentaires pour éclairer la bonne réponse, en se basant sur le texte source fourni.
+      - "quiz": Tableau de 10 questions de quiz (objets QuizQuestion avec "question", "options", "correctAnswerIndex", "explanation", "type" ('single-choice' ou 'true-false')). Pour Vrai/Faux, correctAnswerIndex est 0 pour "Vrai" et 1 pour "Faux".
 
       Texte source:
       ---
