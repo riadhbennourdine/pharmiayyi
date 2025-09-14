@@ -20,7 +20,7 @@ const FlashcardView: React.FC<{ flashcard: Flashcard }> = ({ flashcard }) => {
                 className={`relative w-full h-full transition-transform duration-700 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}
             >
                 {/* Front */}
-                <div className="absolute w-full h-full backface-hidden bg-white border-2 border-teal-500 rounded-lg shadow-lg flex items-center justify-center p-6 cursor-pointer">
+                <div className="absolute w-full h-full backface-hidden bg-white border-2 border-teal-500 rounded-lg shadow-lg flex items-center justify-center p-6 cursor-pointer transform rotate-y-0">
                     <p className="text-xl font-semibold text-center text-slate-800">{flashcard.question}</p>
                 </div>
                 {/* Back */}
