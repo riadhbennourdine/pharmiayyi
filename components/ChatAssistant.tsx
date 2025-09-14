@@ -29,7 +29,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
     useEffect(() => {
         if (caseContext) {
             // Construct the knowledge base string from caseContext
-            const { title, patientSituation, pathologyOverview, keyQuestions, redFlags, recommendations, keyPoints, references, glossary } = caseContext;
+            const { title, patientSituation, pathologyOverview, keyQuestions, redFlags, recommendations, keyPoints } = caseContext;
 
             const formatTreatments = (treatments: any[] | undefined) => {
                 if (!treatments || treatments.length === 0) return 'Aucun';
@@ -63,12 +63,6 @@ ${recommendations.dietaryAdvice.join('\n')}
 
 Points clés:
 ${keyPoints.join('\n')}
-
-Références:
-${references.join('\n')}
-
-Glossaire:
-${glossary.map(g => `- ${g.term}: ${g.definition}`).join('\n')}
             `;
             setKnowledgeBaseContent(content);
         }
