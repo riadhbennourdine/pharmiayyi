@@ -176,7 +176,7 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
 
         const result = await model.generateContent({
             contents: history,
-            systemInstruction: systemInstruction.parts,
+            systemInstruction: systemInstruction.parts[0].text,
             generationConfig,
             safetySettings,
         });
