@@ -172,11 +172,18 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
 
 // ...
 
-    const history: Content[] = messages.map(toContent);
+    let chatHistory = messages;
+    if (chatHistory.length > 0 && chatHistory[0].role === 'model') {
+        chatHistory = chatHistory.slice(1);
+    }
+
+    const history: Content[] = chatHistory.map(toContent);
 
 
     try {
-        console.log("Sending message to Gemini:", messages.slice(-1)[0].content); // Log the last message sent
+        if (chatHistory.length > 0) {
+            console.log("Sending message to Gemini:", chatHistory.slice(-1)[0].content); // Log the last message sent
+        }
         console.log("System instruction sent to Gemini:", systemInstruction.parts[0].text); // Log the system instruction
 
         const chat = model.startChat({
@@ -184,6 +191,10 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
             safetySettings,
             history: [systemInstruction, ...history.slice(0, -1)],
         });
+
+        if (history.length === 0) {
+            throw new Error("Cannot send an empty message to the assistant.");
+        }
 
         const result = await chat.sendMessage(history.slice(-1)[0].parts);
         const response = result.response;
