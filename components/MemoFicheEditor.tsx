@@ -272,6 +272,11 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-gray-700">URL Base de Connaissances (Google Doc)</label>
+          <input type="text" name="knowledgeBaseUrl" value={caseStudy.knowledgeBaseUrl || ''} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+        </div>
+
+        <div>
           <label className="block text-sm font-medium text-gray-700">Texte Source Complet</label>
           <textarea name="sourceText" value={caseStudy.sourceText || ''} onChange={handleChange} rows={10} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
