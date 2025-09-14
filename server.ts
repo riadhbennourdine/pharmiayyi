@@ -516,7 +516,7 @@ app.post('/api/chat', async (req, res) => {
         const result = await getAssistantResponse(messages, caseContext, knowledgeBaseContent); // Pass knowledgeBaseContent
         res.json({ response: result });
     } catch (error) {
-        console.error(error);
+        console.error('Error in /api/chat:', error);
         res.status(500).json({ error: 'Failed to get assistant response' });
     }
 });

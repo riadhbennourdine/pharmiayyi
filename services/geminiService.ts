@@ -170,6 +170,9 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
 
 
     try {
+        console.log("Sending message to Gemini:", messages.slice(-1)[0].parts); // Log the last message sent
+        console.log("System instruction sent to Gemini:", systemInstruction.parts[0].text); // Log the system instruction
+
         const chat = model.startChat({
             generationConfig,
             safetySettings,
@@ -178,10 +181,11 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
 
         const result = await chat.sendMessage(history.slice(-1)[0].parts);
         const response = result.response;
+        console.log("Raw response from Gemini:", response.text()); // Log the raw response
         return response.text();
 
     } catch (error) {
-        console.error("Error getting assistant response:", error);
+        console.error("Error getting assistant response from Gemini:", error); // More specific error message
         throw new Error("Failed to get assistant response.");
     }
 };
