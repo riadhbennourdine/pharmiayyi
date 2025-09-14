@@ -92,6 +92,7 @@ export interface CaseStudy {
   shortDescription?: string;
   kahootUrl?: string;
   sourceText?: string; // Nouveau champ pour le texte source complet
+  knowledgeBaseUrl?: string; // New field for Google Doc URL
 }
 
 export interface ChatMessage {

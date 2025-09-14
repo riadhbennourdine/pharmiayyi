@@ -512,8 +512,8 @@ app.post('/api/generate-case-study-from-text', async (req, res) => {
 
 app.post('/api/chat', async (req, res) => {
     try {
-        const { messages, caseContext } = req.body;
-        const result = await getAssistantResponse(messages, caseContext);
+        const { messages, caseContext, knowledgeBaseContent } = req.body; // Added knowledgeBaseContent
+        const result = await getAssistantResponse(messages, caseContext, knowledgeBaseContent); // Pass knowledgeBaseContent
         res.json({ response: result });
     } catch (error) {
         console.error(error);
@@ -539,6 +539,10 @@ app.post('/api/memofiches', async (req, res) => {
     if (newCase._id) {
       delete newCase._id;
     }
+    // Handle knowledgeBaseUrl
+    if (newCase.knowledgeBaseUrl) {
+        newCase.knowledgeBaseUrl = newCase.knowledgeBaseUrl;
+    }
     const client = await clientPromise;
     const db = client.db('pharmia');
     const result = await db.collection('memofiches_v2').insertOne(newCase);
@@ -560,6 +564,14 @@ app.put('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) => {
 
     // Retirer le champ _id de l'objet à mettre à jour
     const { _id, ...updateData } = updatedCase; 
+    
+    // Handle knowledgeBaseUrl
+    if (updatedCase.knowledgeBaseUrl) {
+        updateData.knowledgeBaseUrl = updatedCase.knowledgeBaseUrl;
+    } else {
+        // If knowledgeBaseUrl is not provided, ensure it's removed from the document if it existed
+        updateData.knowledgeBaseUrl = null; 
+    } 
 
     const client = await clientPromise;
     const db = client.db('pharmia');

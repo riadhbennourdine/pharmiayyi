@@ -122,7 +122,7 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
     }
 };
 
-export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy): Promise<string> => {
+export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy, knowledgeBaseContent: string): Promise<string> => {
     const formatTreatments = (treatments: any[] | undefined) => {
         if (!treatments || treatments.length === 0) return 'Aucun';
         return treatments.map(t => t.medicament || t).join(', ');
@@ -136,6 +136,18 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
         - Signaux d'alerte: ${caseContext.redFlags.join(', ') || 'Aucun'}
     `;
 
+    let knowledgeBaseInstruction = '';
+    if (knowledgeBaseContent) {
+        knowledgeBaseInstruction = `
+        Voici des informations complémentaires provenant d'une base de connaissances externe. Utilise ces informations pour répondre aux questions de l'étudiant, en les intégrant de manière fluide et pertinente. Priorise ces informations si elles sont plus détaillées ou spécifiques que le contexte de l'étude de cas.
+
+        Base de connaissances:
+        ---
+        ${knowledgeBaseContent}
+        ---
+        `;
+    }
+
     const systemInstruction = {
         role: "system",
         parts: [{
@@ -143,9 +155,10 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
         Tu es "PharmIA", un assistant pédagogique expert en pharmacie.
         Ton rôle est d'aider un étudiant à approfondir sa compréhension d'un cas de comptoir.
         ${caseStudyText}
+        ${knowledgeBaseInstruction}
         Réponds aux questions de l'étudiant de manière concise, claire et encourageante.
-        Base tes réponses UNIQUEMENT sur les informations fournies dans le cas. Ne spécule pas et n'ajoute pas d'informations extérieures.
-        Si une question sort du cadre du cas, réponds poliment que tu ne peux répondre qu'aux questions relatives à la mémofiche.
+        Base tes réponses UNIQUEMENT sur les informations fournies dans le cas ET la base de connaissances externe si elle est présente. Ne spécule pas et n'ajoute pas d'informations extérieures.
+        Si une question sort du cadre du cas et de la base de connaissances, réponds poliment que tu ne peux répondre qu'aux questions relatives à la mémofiche et aux informations fournies.
         Adopte un ton amical et professionnel. Ne te présente pas à nouveau.
     `}]
     };

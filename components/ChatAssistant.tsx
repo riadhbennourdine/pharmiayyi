@@ -16,6 +16,7 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [knowledgeBaseContent, setKnowledgeBaseContent] = useState(''); // New state
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,6 +25,36 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    useEffect(() => {
+        const fetchKnowledgeBase = async () => {
+            if (caseContext.knowledgeBaseUrl) {
+                const docIdMatch = caseContext.knowledgeBaseUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (docIdMatch && docIdMatch[1]) {
+                    const docId = docIdMatch[1];
+                    const exportUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
+                    try {
+                        const response = await fetch(exportUrl);
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch Google Doc: ${response.statusText}`);
+                        }
+                        const text = await response.text();
+                        setKnowledgeBaseContent(text);
+                        console.log("Fetched Google Doc content:", text.substring(0, 100) + "..."); // Log first 100 chars
+                    } catch (error) {
+                        console.error("Error fetching knowledge base content:", error);
+                        setKnowledgeBaseContent(''); // Clear content on error
+                    }
+                } else {
+                    console.warn("Invalid Google Doc URL format:", caseContext.knowledgeBaseUrl);
+                    setKnowledgeBaseContent('');
+                }
+            } else {
+                setKnowledgeBaseContent(''); // Clear if no URL
+            }
+        };
+        fetchKnowledgeBase();
+    }, [caseContext.knowledgeBaseUrl]); // Re-fetch when URL changes
 
     const handleSend = useCallback(async () => {
         if (input.trim() === '' || isLoading) return;
@@ -34,12 +65,12 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
         setIsLoading(true);
 
         try {
-                        const response = await fetch('/api/chat', {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ messages: [...messages, newUserMessage], caseContext }),
+                body: JSON.stringify({ messages: [...messages, newUserMessage], caseContext, knowledgeBaseContent }),
             });
 
             if (!response.ok) {
