@@ -27,34 +27,52 @@ const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
     }, [messages]);
 
     useEffect(() => {
-        const fetchKnowledgeBase = async () => {
-            if (caseContext.knowledgeBaseUrl) {
-                const docIdMatch = caseContext.knowledgeBaseUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (docIdMatch && docIdMatch[1]) {
-                    const docId = docIdMatch[1];
-                    const exportUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
-                    try {
-                        const response = await fetch(exportUrl);
-                        if (!response.ok) {
-                            throw new Error(`Failed to fetch Google Doc: ${response.statusText}`);
-                        }
-                        const text = await response.text();
-                        setKnowledgeBaseContent(text);
-                        console.log("Fetched Google Doc content:", text.substring(0, 100) + "..."); // Log first 100 chars
-                    } catch (error) {
-                        console.error("Error fetching knowledge base content:", error);
-                        setKnowledgeBaseContent(''); // Clear content on error
-                    }
-                } else {
-                    console.warn("Invalid Google Doc URL format:", caseContext.knowledgeBaseUrl);
-                    setKnowledgeBaseContent('');
-                }
-            } else {
-                setKnowledgeBaseContent(''); // Clear if no URL
-            }
-        };
-        fetchKnowledgeBase();
-    }, [caseContext.knowledgeBaseUrl]); // Re-fetch when URL changes
+        if (caseContext) {
+            // Construct the knowledge base string from caseContext
+            const { title, patientSituation, pathologyOverview, keyQuestions, redFlags, recommendations, keyPoints, references, glossary } = caseContext;
+
+            const formatTreatments = (treatments: any[] | undefined) => {
+                if (!treatments || treatments.length === 0) return 'Aucun';
+                return treatments.map(t => `- ${t.medicament || t}: Posologie: ${t.posologie}, Durée: ${t.duree}`).join('\n');
+            };
+
+            const content = `
+Titre: ${title}
+
+Situation du patient:
+${patientSituation}
+
+Aperçu de la pathologie:
+${Array.isArray(pathologyOverview) ? pathologyOverview.join('\n') : pathologyOverview}
+
+Questions clés à poser:
+${keyQuestions.join('\n')}
+
+Signaux d'alerte:
+${redFlags.join('\n')}
+
+Recommandations:
+  Traitement principal:
+${formatTreatments(recommendations.mainTreatment)}
+  Produits associés:
+${formatTreatments(recommendations.associatedProducts)}
+  Conseils d'hygiène de vie:
+${recommendations.lifestyleAdvice.join('\n')}
+  Conseils alimentaires:
+${recommendations.dietaryAdvice.join('\n')}
+
+Points clés:
+${keyPoints.join('\n')}
+
+Références:
+${references.join('\n')}
+
+Glossaire:
+${glossary.map(g => `- ${g.term}: ${g.definition}`).join('\n')}
+            `;
+            setKnowledgeBaseContent(content);
+        }
+    }, [caseContext]); // Re-fetch when caseContext changes
 
     const handleSend = useCallback(async () => {
         if (input.trim() === '' || isLoading) return;

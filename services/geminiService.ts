@@ -123,25 +123,11 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
 };
 
 export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy, knowledgeBaseContent: string): Promise<string> => {
-    const formatTreatments = (treatments: any[] | undefined) => {
-        if (!treatments || treatments.length === 0) return 'Aucun';
-        return treatments.map(t => t.medicament || t).join(', ');
-    };
-
-    const caseStudyText = `
-        Voici le contexte de l'étude de cas sur laquelle tu dois te baser :
-        - Titre: ${caseContext.title}
-        - Situation: ${caseContext.patientSituation}
-        - Recommandations: Traitement: ${formatTreatments(caseContext.recommendations.mainTreatment)}, Produits associés: ${formatTreatments(caseContext.recommendations.associatedProducts)}, Hygiène de vie: ${caseContext.recommendations.lifestyleAdvice.join(', ') || 'Aucun'}, Alimentation: ${caseContext.recommendations.dietaryAdvice.join(', ') || 'Aucun'}
-        - Signaux d'alerte: ${caseContext.redFlags.join(', ') || 'Aucun'}
-    `;
-
     let knowledgeBaseInstruction = '';
     if (knowledgeBaseContent) {
         knowledgeBaseInstruction = `
-        Voici des informations complémentaires provenant d'une base de connaissances externe. Utilise ces informations pour répondre aux questions de l'étudiant, en les intégrant de manière fluide et pertinente. Priorise ces informations si elles sont plus détaillées ou spécifiques que le contexte de l'étude de cas.
+        Voici la mémofiche qui sert de base de connaissances. Base tes réponses exclusivement sur ces informations.
 
-        Base de connaissances:
         ---
         ${knowledgeBaseContent}
         ---
@@ -153,12 +139,11 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
         parts: [{
             text: `
         Tu es "PharmIA", un assistant pédagogique expert en pharmacie.
-        Ton rôle est d'aider un étudiant à approfondir sa compréhension d'un cas de comptoir.
-        ${caseStudyText}
+        Ton rôle est d'aider un étudiant à approfondir sa compréhension d'un cas de comptoir en se basant sur la mémofiche fournie.
         ${knowledgeBaseInstruction}
         Réponds aux questions de l'étudiant de manière concise, claire et encourageante.
-        Base tes réponses UNIQUEMENT sur les informations fournies dans le cas ET la base de connaissances externe si elle est présente. Ne spécule pas et n'ajoute pas d'informations extérieures.
-        Si une question sort du cadre du cas et de la base de connaissances, réponds poliment que tu ne peux répondre qu'aux questions relatives à la mémofiche et aux informations fournies.
+        Base tes réponses UNIQUEMENT sur les informations fournies dans la mémofiche. Ne spécule pas et n'ajoute pas d'informations extérieures.
+        Si une question sort du cadre de la mémofiche, réponds poliment que tu ne peux répondre qu'aux questions relatives à la mémofiche.
         Adopte un ton amical et professionnel. Ne te présente pas à nouveau.
     `}]
     };
