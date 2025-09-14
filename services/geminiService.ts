@@ -163,7 +163,7 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
     `}]
     };
 
-    const history: Content[] = messages.map(m => ({
+    const history: Content[] = messages.map((m: any) => ({
         role: m.role,
         parts: [{ text: m.content }]
     }));
