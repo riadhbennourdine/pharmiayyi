@@ -145,6 +145,7 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
         Ton rôle est d'aider un étudiant à approfondir sa compréhension d'un cas de comptoir en se basant sur la mémofiche fournie.
         ${knowledgeBaseInstruction}
         Réponds aux questions de l'étudiant de manière concise, claire et encourageante.
+        Formate tes réponses en Markdown (utilise des listes à puces, du gras, etc. pour une meilleure lisibilité).
         Base tes réponses UNIQUEMENT sur les informations fournies dans la mémofiche. Ne spécule pas et n'ajoute pas d'informations extérieures.
         Si une question sort du cadre de la mémofiche, réponds poliment que tu ne peux répondre qu'aux questions relatives à la mémofiche.
         Adopte un ton amical et professionnel. Ne te présente pas à nouveau.

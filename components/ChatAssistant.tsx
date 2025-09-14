@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 import type { ChatMessage, CaseStudy } from '../types';
 import { CommunicationIcon, ChevronRightIcon, SparklesIcon } from './icons';
@@ -107,6 +108,18 @@ ${keyPoints.join('\n')}
         }
     };
 
+    const renderContent = (content: string) => {
+        try {
+            const parsed = JSON.parse(content);
+            if (parsed && parsed.response) {
+                return <ReactMarkdown>{parsed.response}</ReactMarkdown>;
+            }
+        } catch (e) {
+            // Not a JSON string, render as is
+        }
+        return <ReactMarkdown>{content}</ReactMarkdown>;
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-lg flex flex-col h-full max-h-[80vh]">
             <div className="p-4 border-b flex items-center bg-slate-50 rounded-t-lg">
@@ -119,10 +132,10 @@ ${keyPoints.join('\n')}
                         <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-xs md:max-w-md lg:max-w-xs xl:max-w-sm px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-teal-500 text-white' : 'bg-slate-200 text-slate-800'}`}>
                                 {msg.role === 'model' && index === 0 && <SparklesIcon className="h-4 w-4 inline-block mr-1 text-amber-500" />}
-                                {msg.content}
+                                {renderContent(msg.content)}
                             </div>
                         </div>
-                    ))}
+                    ))}}
                     {isLoading && (
                         <div className="flex justify-start">
                              <div className="px-4 py-2 rounded-lg bg-slate-200 text-slate-800">
