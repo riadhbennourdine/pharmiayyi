@@ -72,7 +72,7 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({ flashcards }) => {
           </button>
         </div>
       ) : (
-        <FlashcardComponent flashcard={flashcards[currentIndex]} />
+        <FlashcardView flashcard={flashcards[currentIndex]} />
       )}
       
       <div className="flex items-center justify-between mt-4">
