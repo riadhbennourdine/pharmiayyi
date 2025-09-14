@@ -6,7 +6,7 @@ interface FlashcardDeckProps {
   flashcards: Flashcard[];
 }
 
-const FlashcardView: React.FC<{ flashcard: Flashcard }> = ({ flashcard }) => {
+const FlashcardView: React.FC<{ flashcard: Flashcard; onFlip: (question: string) => void }> = ({ flashcard, onFlip }) => {
     const [isFlipped, setIsFlipped] = useState(false);
 
     // Reset flip state when card changes
@@ -14,8 +14,15 @@ const FlashcardView: React.FC<{ flashcard: Flashcard }> = ({ flashcard }) => {
         setIsFlipped(false);
     }, [flashcard]);
 
+    const handleCardClick = () => {
+        setIsFlipped(!isFlipped);
+        if (!isFlipped) { // Only call onFlip when flipping from front to back
+            onFlip(flashcard.question);
+        }
+    };
+
     return (
-        <div className="w-full h-64 perspective-1000" onClick={() => setIsFlipped(!isFlipped)}>
+        <div className="w-full h-64 perspective-1000" onClick={handleCardClick}>
             <div
                 className={`relative w-full h-full transition-transform duration-700 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}
             >
@@ -36,6 +43,11 @@ const FlashcardView: React.FC<{ flashcard: Flashcard }> = ({ flashcard }) => {
 const FlashcardDeck: React.FC<FlashcardDeckProps> = ({ flashcards }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showEncouragement, setShowEncouragement] = useState(false);
+  const [flippedCardIds, setFlippedCardIds] = useState<Set<string>>(new Set());
+
+  const handleFlip = (question: string) => {
+    setFlippedCardIds(prev => new Set(prev.add(question)));
+  };
 
   const goToPrevious = () => {
     setShowEncouragement(false);
@@ -66,13 +78,13 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({ flashcards }) => {
       {showEncouragement ? (
         <div className="bg-white border-2 border-teal-500 rounded-lg shadow-lg flex flex-col items-center justify-center p-6 h-64 text-center">
           <p className="text-2xl font-bold text-teal-700 mb-4">Félicitations !</p>
-          <p className="text-lg text-slate-800 mb-6">Vous avez parcouru {currentIndex === 0 ? flashcards.length : currentIndex} flashcards. Continuez sur cette lancée pour maîtriser le sujet !</p>
+          <p className="text-lg text-slate-800 mb-6">Vous avez parcouru {flippedCardIds.size} flashcards. Continuez sur cette lancée pour maîtriser le sujet !</p>
           <button onClick={continueFlashcards} className="px-6 py-3 bg-teal-600 text-white font-bold rounded-lg shadow-md hover:bg-teal-700 transition-colors">
             Continuer les flashcards
           </button>
         </div>
       ) : (
-        <FlashcardView flashcard={flashcards[currentIndex]} />
+        <FlashcardView flashcard={flashcards[currentIndex]} onFlip={handleFlip} />
       )}
       
       <div className="flex items-center justify-between mt-4">
