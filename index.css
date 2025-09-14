@@ -79,33 +79,3 @@
       0 0 25px rgba(16, 185, 129, 1);
   }
 }
-
-/* Flashcard flipping styles */
-.flashcard-container {
-  perspective: 1000px; /* Add perspective to the container */
-}
-
-.flashcard-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  transition: transform 0.7s;
-  transform-style: preserve-3d;
-}
-
-.flashcard-front, .flashcard-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  -webkit-backface-visibility: hidden; /* Safari */
-  backface-visibility: hidden;
-}
-
-.flashcard-back {
-  transform: rotateY(180deg);
-}
-
-.flashcard-flipped .flashcard-inner {
-  transform: rotateY(180deg);
-}
