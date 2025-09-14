@@ -78,7 +78,12 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({ flashcards }) => {
       {showEncouragement ? (
         <div className="bg-white border-2 border-teal-500 rounded-lg shadow-lg flex flex-col items-center justify-center p-6 h-64 text-center">
           <p className="text-2xl font-bold text-teal-700 mb-4">Félicitations !</p>
-          <p className="text-lg text-slate-800 mb-6">Vous avez parcouru {flippedCardIds.size} flashcards. Continuez sur cette lancée pour maîtriser le sujet !</p>
+          <p className="text-lg text-slate-800 mb-6">
+            {flippedCardIds.size === 0 && "Continuez à explorer les flashcards pour maîtriser le sujet !"}
+            {flippedCardIds.size >= 1 && flippedCardIds.size <= 5 && `Bon début ! Vous avez parcouru ${flippedCardIds.size} flashcards. Continuez sur cette lancée pour maîtriser le sujet !`}
+            {flippedCardIds.size >= 6 && flippedCardIds.size <= 9 && `Très bien ! Vous avez parcouru ${flippedCardIds.size} flashcards. Vous progressez rapidement !`}
+            {flippedCardIds.size >= 10 && `Excellent ! Vous avez parcouru ${flippedCardIds.size} flashcards. Vous êtes un expert sur ce sujet !`}
+          </p>
           <button onClick={continueFlashcards} className="px-6 py-3 bg-teal-600 text-white font-bold rounded-lg shadow-md hover:bg-teal-700 transition-colors">
             Continuer les flashcards
           </button>
