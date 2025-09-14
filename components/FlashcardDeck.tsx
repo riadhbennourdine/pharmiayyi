@@ -1,37 +1,11 @@
 import React, { useState } from 'react';
 import type { Flashcard } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons';
+import FlashcardView from './FlashcardView';
 
 interface FlashcardDeckProps {
   flashcards: Flashcard[];
 }
-
-const FlashcardView: React.FC<{ flashcard: Flashcard }> = ({ flashcard }) => {
-    const [isFlipped, setIsFlipped] = useState(false);
-
-    // Reset flip state when card changes
-    React.useEffect(() => {
-        setIsFlipped(false);
-    }, [flashcard]);
-
-    return (
-        <div className="w-full h-64 perspective-1000" onClick={() => setIsFlipped(!isFlipped)}>
-            <div className="w-full h-64 flashcard-container" onClick={() => setIsFlipped(!isFlipped)}>
-            <div
-                className={`flashcard-inner ${isFlipped ? 'flashcard-flipped' : ''}`}
-            >
-                {/* Front */}
-                <div className="flashcard-front bg-white border-2 border-teal-500 rounded-lg shadow-lg flex items-center justify-center p-6 cursor-pointer">
-                    <p className="text-xl font-semibold text-center text-slate-800">{flashcard.question}</p>
-                </div>
-                {/* Back */}
-                <div className="flashcard-back bg-teal-600 rounded-lg shadow-lg flex items-center justify-center p-6 cursor-pointer">
-                    <p className="text-lg text-center text-white">{flashcard.answer}</p>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 
 const FlashcardDeck: React.FC<FlashcardDeckProps> = ({ flashcards }) => {
