@@ -135,7 +135,7 @@ ${keyPoints.join('\n')}
                                 {renderContent(msg.content)}
                             </div>
                         </div>
-                    ))}}
+                    ))}
                     {isLoading && (
                         <div className="flex justify-start">
                              <div className="px-4 py-2 rounded-lg bg-slate-200 text-slate-800">
