@@ -1,12 +1,15 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
 import type { CaseStudy, ChatMessage } from '../types';
 
-// WARNING: Storing API keys in client-side code is not secure.
-// This is for development purposes only. In production, you should
-// use a server-side proxy to handle API requests.
-const API_KEY = process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY_HERE"; // Replace with your actual Gemini API Key or set as environment variable
+const API_KEY = process.env.GEMINI_API_KEY;
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+if (!API_KEY || API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+    console.error("GEMINI_API_KEY is not configured. Please set it in your environment variables.");
+    // In a server environment, you might want to throw an error to prevent the app from starting
+    // throw new Error("GEMINI_API_KEY is not configured."); 
+}
+
+const genAI = new GoogleGenerativeAI(API_KEY || "");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const generationConfig: GenerationConfig = {
