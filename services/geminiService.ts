@@ -174,17 +174,13 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext:
         }
         console.log("System instruction sent to Gemini:", systemInstruction.parts[0].text); // Log the system instruction
 
-        const chat = model.startChat({
+        const result = await model.generateContent({
+            contents: history,
+            systemInstruction: systemInstruction.parts,
             generationConfig,
             safetySettings,
-            history: [systemInstruction, ...history.slice(0, -1)],
         });
 
-        if (history.length === 0) {
-            throw new Error("Cannot send an empty message to the assistant.");
-        }
-
-        const result = await chat.sendMessage(history.slice(-1)[0].parts);
         const response = result.response;
         console.log("Raw response from Gemini:", response.text()); // Log the raw response
         return response.text();
