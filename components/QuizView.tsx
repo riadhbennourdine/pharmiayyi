@@ -45,16 +45,10 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack }) => 
       <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg animate-fade-in text-center">
         <h2 className="text-3xl font-bold text-slate-800 mb-2">Résultats du Quiz</h2>
         <p className="text-slate-600 mb-6">Pour le cas : "{caseTitle}"</p>
-        <div className={`mb-6 text-6xl font-bold ${percentage >= 80 ? 'text-green-500' : percentage >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+        <div className={`mb-6 text-6xl font-bold ${percentage >= 70 ? 'text-green-500' : 'text-amber-500'}`}>
           {percentage}%
         </div>
-        <p className="text-xl text-slate-700 mb-4">Vous avez répondu correctement à {score} question(s) sur {questions.length}.</p>
-        <p className="text-lg text-slate-600 mb-8">
-          {percentage === 100 && "Parfait ! Vous êtes un expert sur ce sujet !"}
-          {percentage >= 80 && percentage < 100 && "Excellent ! Vous maîtrisez bien le sujet."}
-          {percentage >= 50 && percentage < 80 && "Bon travail ! Continuez à approfondir vos connaissances."}
-          {percentage < 50 && "Continuez à réviser, vous êtes sur la bonne voie !"}
-        </p>
+        <p className="text-xl text-slate-700 mb-8">Vous avez répondu correctement à {score} question(s) sur {questions.length}.</p>
         <div className="text-left space-y-6">
           {questions.map((q, index) => (
             <div key={index} className="p-4 border rounded-md">
