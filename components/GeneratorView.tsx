@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import Spinner from './Spinner';
 import MemoFicheView from './MemoFicheView';
+import DetailedMemoFicheView from './DetailedMemoFicheView';
 import { ChevronLeftIcon, SparklesIcon } from './icons';
 import { TOPIC_CATEGORIES } from '../constants';
 
@@ -105,13 +106,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
         {memoFicheType === 'maladie' ? (
           <MemoFicheView caseStudy={generatedCase as CaseStudy} onStartQuiz={() => {}} onBack={handleReset} isPreview={true} />
         ) : (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-bold text-slate-800 mb-4">Aperçu non disponible</h3>
-            <p className="text-slate-600 mb-4">L'aperçu pour ce type de mémofiche n'est pas encore implémenté. Vous pouvez sauvegarder la mémofiche pour la consulter plus tard.</p>
-            <pre className="bg-slate-100 p-4 rounded-md overflow-x-auto text-sm">
-              {JSON.stringify(generatedCase, null, 2)}
-            </pre>
-          </div>
+          <DetailedMemoFicheView memoFiche={generatedCase as PharmacologyMemoFiche | ExhaustiveMemoFiche} onBack={handleReset} />
         )}
         <div className="text-center mt-8 flex justify-center items-center space-x-4">
              <button 
