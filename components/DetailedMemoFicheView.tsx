@@ -40,13 +40,14 @@ const AccordionSection: React.FC<{
 interface DetailedMemoFicheViewProps {
   memoFiche: PharmacologyMemoFiche | ExhaustiveMemoFiche;
   onBack: () => void;
+  onStartQuiz: () => void;
 }
 
 const isPharmacologyMemoFiche = (fiche: any): fiche is PharmacologyMemoFiche => {
   return 'pharmacologicalClasses' in fiche;
 };
 
-const PharmacologyMemoFicheComponent: React.FC<{ fiche: PharmacologyMemoFiche, onBack: () => void }> = ({ fiche, onBack }) => {
+const PharmacologyMemoFicheComponent: React.FC<{ fiche: PharmacologyMemoFiche, onBack: () => void, onStartQuiz: () => void }> = ({ fiche, onBack, onStartQuiz }) => {
     const [openSection, setOpenSection] = useState<string | null>('introduction');
     const [activeTab, setActiveTab] = useState<'memo' | 'flashcards' | 'quiz' | 'glossary' | 'media'>('memo');
 
@@ -137,7 +138,20 @@ const PharmacologyMemoFicheComponent: React.FC<{ fiche: PharmacologyMemoFiche, o
                     </div>
                 );
             case 'quiz':
-                return <div>Quiz content here</div>; // TODO
+                return (
+                    <div className="text-center bg-white p-8 rounded-lg shadow-md">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-4">Testez vos connaissances !</h3>
+                        <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                            Évaluez votre compréhension de cette mémofiche avec un quiz interactif.
+                        </p>
+                        <button
+                            onClick={onStartQuiz}
+                            className="inline-flex items-center bg-green-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                        >
+                            Démarrer le Quiz
+                        </button>
+                    </div>
+                );
             default:
                 return null;
         }
@@ -175,7 +189,7 @@ const PharmacologyMemoFicheComponent: React.FC<{ fiche: PharmacologyMemoFiche, o
     )
 }
 
-const ExhaustiveMemoFicheComponent: React.FC<{ fiche: ExhaustiveMemoFiche, onBack: () => void }> = ({ fiche, onBack }) => {
+const ExhaustiveMemoFicheComponent: React.FC<{ fiche: ExhaustiveMemoFiche, onBack: () => void, onStartQuiz: () => void }> = ({ fiche, onBack, onStartQuiz }) => {
     const [openSection, setOpenSection] = useState<string | null>('introductionToPathology');
     const [activeTab, setActiveTab] = useState<'memo' | 'flashcards' | 'quiz' | 'glossary' | 'media'>('memo');
 
@@ -302,7 +316,20 @@ const ExhaustiveMemoFicheComponent: React.FC<{ fiche: ExhaustiveMemoFiche, onBac
                     </div>
                 );
             case 'quiz':
-                return <div>Quiz content here</div>; // TODO
+                return (
+                    <div className="text-center bg-white p-8 rounded-lg shadow-md">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-4">Testez vos connaissances !</h3>
+                        <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                            Évaluez votre compréhension de cette synthèse avec un quiz interactif.
+                        </p>
+                        <button
+                            onClick={onStartQuiz}
+                            className="inline-flex items-center bg-green-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+                        >
+                            Démarrer le Quiz
+                        </button>
+                    </div>
+                );
             default:
                 return null;
         }
@@ -341,11 +368,11 @@ const ExhaustiveMemoFicheComponent: React.FC<{ fiche: ExhaustiveMemoFiche, onBac
     )
 }
 
-const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ memoFiche, onBack }) => {
+const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ memoFiche, onBack, onStartQuiz }) => {
   if (isPharmacologyMemoFiche(memoFiche)) {
-    return <PharmacologyMemoFicheComponent fiche={memoFiche} onBack={onBack} />;
+    return <PharmacologyMemoFicheComponent fiche={memoFiche} onBack={onBack} onStartQuiz={onStartQuiz} />;
   } else {
-    return <ExhaustiveMemoFicheComponent fiche={memoFiche as ExhaustiveMemoFiche} onBack={onBack} />;
+    return <ExhaustiveMemoFicheComponent fiche={memoFiche as ExhaustiveMemoFiche} onBack={onBack} onStartQuiz={onStartQuiz} />;
   }
 };
 
