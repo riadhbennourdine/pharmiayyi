@@ -188,6 +188,17 @@ export interface ExhaustiveMemoFiche {
     };
   };
   conclusion: string;
+  glossary: {
+    term: string;
+    definition: string;
+  }[];
+  media: {
+    type: string;
+    title: string;
+    url: string;
+  }[];
+  quiz: QuizQuestion[];
+  flashcards: Flashcard[];
   creationDate: string;
   coverImageUrl?: string;
   youtubeUrl?: string;

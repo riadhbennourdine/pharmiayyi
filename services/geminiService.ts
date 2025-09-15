@@ -239,12 +239,17 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
       "interprofessionalCollaboration": "Travail avec le médecin, communication aux autres professionnels, évaluation des capacités fonctionnelles."
     }
   },
-- "conclusion": "Récapituler l'importance du rôle multidisciplinaire et l'apport essentiel du pharmacien d'officine et du préparateur en pharmacie dans l'éducation, la surveillance et l'optimisation du traitement des patients hypertendus pour améliorer la santé publique."
+- "conclusion": "Récapituler l'importance du rôle multidisciplinaire et l'apport essentiel du pharmacien d'officine et du préparateur en pharmacie dans l'éducation, la surveillance et l'optimisation du traitement des patients hypertendus pour améliorer la santé publique.",
+- "glossary": (array of objects) Une liste de 5 à 10 termes importants avec leur définition (`term` et `definition`).
+- "media": (array of objects) 1 à 2 suggestions de médias (vidéo, infographie), avec `type`, `title`, et `url` (utiliser des placeholders si nécessaire).
+- "quiz": (array of objects) Un quiz de 5 à 10 questions (`question`, `options`, `correctAnswerIndex`, `explanation`, `type`).
+- "flashcards": (array of objects) Une liste de 5 à 10 flashcards (`question` et `answer`).
 
 ---
 Texte source :
 "${sourceText}"
----`;
+---`
+}
 
     console.log("Prompt sent to Gemini for Exhaustive MemoFiche:", prompt);
 
