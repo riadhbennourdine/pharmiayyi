@@ -99,3 +99,42 @@ export interface ChatMessage {
   role: 'user' | 'model';
   content: string;
 }
+
+export interface PharmacologyMemoFiche {
+  _id: any;
+  title: string;
+  theme: string;
+  pathology: string;
+  pathologyOverview: string;
+  introduction: string;
+  pharmacologicalClasses: {
+    className: string;
+    mechanismOfAction: string;
+    differentialAdvantages: string;
+    roleOfDiet: string;
+    drugs: {
+      name: string;
+      dosages: string;
+      precautionsForUse: string;
+    }[];
+  }[];
+  summaryTable: {
+    headers: string[];
+    rows: string[][];
+  };
+  keyPoints: string[];
+  glossary: {
+    term: string;
+    definition: string;
+  }[];
+  media: {
+    type: string;
+    title: string;
+    url: string;
+  }[];
+  quiz: QuizQuestion[];
+  flashcards: Flashcard[];
+  creationDate: string;
+  coverImageUrl?: string;
+  youtubeUrl?: string;
+}

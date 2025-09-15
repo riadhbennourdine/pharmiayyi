@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { IncomingHttpHeaders } from 'http';
 import path from 'path';
-import { generateCaseStudyFromText, getAssistantResponse } from './services/geminiService';
+import { generateCaseStudyFromText, getAssistantResponse, generatePharmacologyMemoFiche } from './services/geminiService';
 import clientPromise from './services/mongo';
 import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
@@ -483,28 +483,25 @@ app.get('/api/users/pharmacists', async (req, res) => {
 
 app.post('/api/generate', async (req, res) => {
     try {
-        const { text, theme, system } = req.body;
-        const result = await generateCaseStudyFromText(text, theme, system);
-        res.json(result);
-    } catch (error) {
-        console.error('Error in /api/generate-case-study-from-text:', error);
-        res.status(500).json({ error: 'Failed to generate case study from text.' });
-    }
-});
+        const { memoFicheType, sourceText, theme, system, pathology } = req.body;
 
-app.post('/api/generate-case-study-from-text', async (req, res) => {
-    try {
-        const { sourceText, theme, system } = req.body;
         if (!sourceText) {
             return res.status(400).json({ error: 'Source text is required.' });
         }
-        const generatedCaseStudy = await generateCaseStudyFromText(sourceText, theme || 'Général', system || 'Général');
-        res.json(generatedCaseStudy);
+
+        let result;
+        if (memoFicheType === 'pharmacologie') {
+            result = await generatePharmacologyMemoFiche(sourceText, theme, pathology);
+        } else {
+            result = await generateCaseStudyFromText(sourceText, theme || 'Général', system || 'Général');
+        }
+        
+        res.json(result);
     } catch (error) {
-        console.error('Error generating case study from text:', error);
+        console.error('Error in /api/generate:', error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         res.status(500).json({
-            error: 'Failed to generate case study from text.',
+            error: 'Failed to generate memo fiche.',
             details: errorMessage
         });
     }

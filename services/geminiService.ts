@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
-import type { CaseStudy, ChatMessage } from '../types';
+import type { CaseStudy, ChatMessage, PharmacologyMemoFiche } from '../types';
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
@@ -122,6 +122,65 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
     } catch (error) {
         console.error("Error generating case study:", error); // Log l'erreur ici aussi
         throw new Error("Failed to generate case study from text.");
+    }
+};
+
+export const generatePharmacologyMemoFiche = async (sourceText: string, theme: string, pathology: string): Promise<PharmacologyMemoFiche> => {
+    const prompt = `À partir du texte source fourni ci-dessous, génère une mémofiche de pharmacologie sur le thème de "${theme}", en te concentrant sur la pathologie de "${pathology}".
+
+La mémofiche doit être structurée, claire et pédagogique, et doit viser à vulgariser les informations pour des étudiants en pharmacie.
+
+La réponse doit être au format JSON, en respectant la structure suivante :
+
+-   "title": (string) Un titre concis et informatif pour la mémofiche.
+-   "pathology": (string) La pathologie principale concernée par ces classes pharmacologiques.
+-   "pathologyOverview": (string) Un bref aperçu de la pathologie en 3 à 5 points clés.
+-   "introduction": (string) Une brève introduction expliquant l'importance de ces classes de médicaments dans le traitement de la pathologie.
+-   "pharmacologicalClasses": (array of objects) Une liste des principales familles pharmacologiques. Chaque objet doit contenir :
+    -   "className": (string) Le nom de la classe pharmacologique.
+    -   "mechanismOfAction": (string) Une explication claire et détaillée du mécanisme d'action.
+    -   "differentialAdvantages": (string) Les avantages de cette classe par rapport à d'autres.
+    -   "roleOfDiet": (string) L'influence de l'alimentation sur le traitement.
+    -   "drugs": (array of objects) Une liste d'exemples de médicaments de cette classe. Chaque objet doit contenir :
+        -   "name": (string) Le nom du médicament (DCI).
+        -   "dosages": (string) Les posologies courantes.
+        -   "precautionsForUse": (string) Les principales précautions d'emploi.
+-   "summaryTable": (object) Un tableau récapitulatif. L'objet doit contenir :
+    -   "headers": (array of strings) Les en-têtes du tableau.
+    -   "rows": (array of arrays of strings) Les lignes du tableau.
+-   "keyPoints": (array of strings) Une liste de 3 à 5 points clés à retenir.
+-   "glossary": (array of objects) Une liste de 5 à 10 termes importants avec leur définition, chaque objet contenant "term" et "definition".
+-   "media": (array of objects) Une liste de 1 à 2 suggestions de médias (vidéo, infographie), chaque objet contenant "type", "title", et "url" (utiliser des placeholders si nécessaire).
+-   "quiz": (array of objects) Un quiz de 5 à 10 questions pour tester les connaissances, chaque objet respectant la structure "QuizQuestion" (avec "question", "options", "correctAnswerIndex", "explanation", "type").
+-   "flashcards": (array of objects) Une liste de 5 à 10 flashcards pour l'auto-évaluation, chaque objet contenant "question" et "answer".
+
+---
+Texte source :
+"${sourceText}"
+---`;
+
+    console.log("Prompt sent to Gemini for Pharmacology MemoFiche:", prompt);
+
+    const parts = [
+        { text: prompt },
+    ];
+
+    try {
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts }],
+            generationConfig,
+            safetySettings,
+        });
+
+        const response = result.response;
+        const jsonText = response.text();
+        console.log("Raw JSON from Gemini:", jsonText);
+        const generatedMemoFiche: PharmacologyMemoFiche = JSON.parse(jsonText);
+
+        return generatedMemoFiche;
+    } catch (error) {
+        console.error("Error generating pharmacology memo fiche:", error);
+        throw new Error("Failed to generate pharmacology memo fiche from text.");
     }
 };
 

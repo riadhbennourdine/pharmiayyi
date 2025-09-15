@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { CaseStudy } from '../types';
+import { CaseStudy, PharmacologyMemoFiche } from '../types';
 import Spinner from './Spinner';
 import MemoFicheView from './MemoFicheView';
 import { ChevronLeftIcon, SparklesIcon } from './icons';
@@ -8,7 +8,7 @@ import { TOPIC_CATEGORIES } from '../constants';
 
 interface GeneratorViewProps {
   onBack: () => void;
-  onSaveCaseStudy: (caseStudy: CaseStudy) => void;
+  onSaveCaseStudy: (caseStudy: CaseStudy | PharmacologyMemoFiche) => void;
 }
 
 const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }) => {
@@ -18,22 +18,36 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedCase, setGeneratedCase] = useState<CaseStudy | null>(null);
+  const [generatedCase, setGeneratedCase] = useState<CaseStudy | PharmacologyMemoFiche | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [memoFicheType, setMemoFicheType] = useState<'maladie' | 'pharmacologie'>('maladie');
+  const [pharmaTheme, setPharmaTheme] = useState('');
+  const [pharmaPathology, setPharmaPathology] = useState('');
 
   const handleGenerate = async () => {
-    if (!sourceText.trim() || !selectedTheme || !selectedSystem) return;
+    if (memoFicheType === 'maladie' && (!sourceText.trim() || !selectedTheme || !selectedSystem)) return;
+    if (memoFicheType === 'pharmacologie' && (!sourceText.trim() || !pharmaTheme.trim() || !pharmaPathology.trim())) return;
+
     setIsLoading(true);
     setError(null);
     setGeneratedCase(null);
 
+    const requestBody = {
+      memoFicheType,
+      sourceText,
+      coverImageUrl: coverImageUrl.trim() || undefined,
+      youtubeUrl: youtubeUrl.trim() || undefined,
+      ...(memoFicheType === 'maladie' && { theme: selectedTheme, system: selectedSystem }),
+      ...(memoFicheType === 'pharmacologie' && { theme: pharmaTheme, pathology: pharmaPathology }),
+    };
+
     try {
-            const response = await fetch('/api/generate', {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: sourceText, theme: selectedTheme, system: selectedSystem }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -41,18 +55,20 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
       }
 
       const result = await response.json();
-      const finalCase: CaseStudy = {
+      
+      const finalMemoFiche = {
         ...result,
-        theme: selectedTheme,
-        system: selectedSystem,
+        theme: memoFicheType === 'maladie' ? selectedTheme : pharmaTheme,
+        ...(memoFicheType === 'maladie' && { system: selectedSystem }),
+        ...(memoFicheType === 'pharmacologie' && { pathology: pharmaPathology }),
         coverImageUrl: coverImageUrl.trim() || undefined,
         youtubeUrl: youtubeUrl.trim() || undefined,
         creationDate: new Date().toISOString(),
       };
-      setGeneratedCase(finalCase);
+      setGeneratedCase(finalMemoFiche as CaseStudy | PharmacologyMemoFiche);
     } catch (err) {
       console.error(err);
-      setError("La génération de la mémofiche a échoué. Vérifiez le texte source et réessayez.");
+      setError("La génération de la mémofiche a échoué. Vérifiez les données d'entrée et réessayez.");
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +94,17 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
     return (
       <div className="animate-fade-in">
         <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">Aperçu de la Mémofiche Générée</h2>
-        <MemoFicheView caseStudy={generatedCase} onStartQuiz={() => {}} onBack={handleReset} isPreview={true} />
+        {memoFicheType === 'maladie' ? (
+          <MemoFicheView caseStudy={generatedCase as CaseStudy} onStartQuiz={() => {}} onBack={handleReset} isPreview={true} />
+        ) : (
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold text-slate-800 mb-4">Mémofiche de Pharmacologie Générée</h3>
+            <p className="text-slate-600 mb-4">L'aperçu pour ce type de mémofiche n'est pas encore implémenté. Vous pouvez sauvegarder la mémofiche pour la consulter plus tard.</p>
+            <pre className="bg-slate-100 p-4 rounded-md overflow-x-auto text-sm">
+              {JSON.stringify(generatedCase, null, 2)}
+            </pre>
+          </div>
+        )}
         <div className="text-center mt-8 flex justify-center items-center space-x-4">
              <button 
                 onClick={handleReset} 
@@ -117,42 +143,93 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
       )}
 
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-                <label htmlFor="theme-select" className="block text-lg font-medium text-slate-700 mb-2">
-                Thème
-                </label>
-                <select
-                id="theme-select"
-                value={selectedTheme}
-                onChange={(e) => setSelectedTheme(e.target.value)}
-                className="w-full border-slate-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-base"
-                disabled={isLoading}
-                >
-                <option value="">Sélectionnez un thème</option>
-                {TOPIC_CATEGORIES[0].topics.map(topic => (
-                    <option key={topic} value={topic}>{topic}</option>
-                ))}
-                </select>
-            </div>
-            <div>
-                <label htmlFor="system-select" className="block text-lg font-medium text-slate-700 mb-2">
-                Système/Organe
-                </label>
-                <select
-                id="system-select"
-                value={selectedSystem}
-                onChange={(e) => setSelectedSystem(e.target.value)}
-                className="w-full border-slate-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-base"
-                disabled={isLoading}
-                >
-                <option value="">Sélectionnez un système/organe</option>
-                {TOPIC_CATEGORIES[1].topics.map(topic => (
-                    <option key={topic} value={topic}>{topic}</option>
-                ))}
-                </select>
-            </div>
+        <div className="mb-6">
+            <label htmlFor="memofiche-type-select" className="block text-lg font-medium text-slate-700 mb-2">
+            Type de Mémofiche
+            </label>
+            <select
+            id="memofiche-type-select"
+            value={memoFicheType}
+            onChange={(e) => setMemoFicheType(e.target.value as any)}
+            className="w-full border-slate-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-base"
+            disabled={isLoading}
+            >
+            <option value="maladie">Maladie courante</option>
+            <option value="pharmacologie">Pharmacologie</option>
+            </select>
         </div>
+
+        {memoFicheType === 'maladie' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label htmlFor="theme-select" className="block text-lg font-medium text-slate-700 mb-2">
+                    Thème
+                    </label>
+                    <select
+                    id="theme-select"
+                    value={selectedTheme}
+                    onChange={(e) => setSelectedTheme(e.target.value)}
+                    className="w-full border-slate-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-base"
+                    disabled={isLoading}
+                    >
+                    <option value="">Sélectionnez un thème</option>
+                    {TOPIC_CATEGORIES[0].topics.map(topic => (
+                        <option key={topic} value={topic}>{topic}</option>
+                    ))}
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="system-select" className="block text-lg font-medium text-slate-700 mb-2">
+                    Système/Organe
+                    </label>
+                    <select
+                    id="system-select"
+                    value={selectedSystem}
+                    onChange={(e) => setSelectedSystem(e.target.value)}
+                    className="w-full border-slate-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-base"
+                    disabled={isLoading}
+                    >
+                    <option value="">Sélectionnez un système/organe</option>
+                    {TOPIC_CATEGORIES[1].topics.map(topic => (
+                        <option key={topic} value={topic}>{topic}</option>
+                    ))}
+                    </select>
+                </div>
+            </div>
+        )}
+
+        {memoFicheType === 'pharmacologie' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label htmlFor="pharma-theme-input" className="block text-lg font-medium text-slate-700 mb-2">
+                    Thème de la mémofiche
+                    </label>
+                    <input
+                    id="pharma-theme-input"
+                    type="text"
+                    value={pharmaTheme}
+                    onChange={(e) => setPharmaTheme(e.target.value)}
+                    placeholder="Ex: Les antiulcéreux"
+                    className="w-full border-slate-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-base"
+                    disabled={isLoading}
+                    />
+                </div>
+                <div>
+                    <label htmlFor="pharma-pathology-input" className="block text-lg font-medium text-slate-700 mb-2">
+                    Pathologie cible
+                    </label>
+                    <input
+                    id="pharma-pathology-input"
+                    type="text"
+                    value={pharmaPathology}
+                    onChange={(e) => setPharmaPathology(e.target.value)}
+                    placeholder="Ex: Le reflux gastro-œsophagien"
+                    className="w-full border-slate-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-base"
+                    disabled={isLoading}
+                    />
+                </div>
+            </div>
+        )}
 
         <div className="mb-6">
             <label htmlFor="source-text" className="block text-lg font-medium text-slate-700 mb-2">
@@ -205,7 +282,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
       <div className="mt-6 text-center">
         <button
           onClick={handleGenerate}
-          disabled={isLoading || !sourceText.trim() || !selectedTheme || !selectedSystem}
+          disabled={isLoading || !sourceText.trim() || (memoFicheType === 'maladie' && (!selectedTheme || !selectedSystem)) || (memoFicheType === 'pharmacologie' && (!pharmaTheme.trim() || !pharmaPathology.trim()))}
           className="text-lg inline-flex items-center bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-teal-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 disabled:bg-slate-400 disabled:shadow-none disabled:transform-none"
         >
           {isLoading ? (
