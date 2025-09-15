@@ -74,7 +74,7 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       ---
 
       Génère la réponse au format JSON.
-    ";
+    `;
 
     console.log("Prompt sent to Gemini:", prompt); 
 
@@ -136,24 +136,24 @@ La réponse doit être au format JSON, en respectant la structure suivante :
 -   'title': 'Un titre concis et informatif pour la mémofiche',
 -   'pathology': 'La pathologie principale concernée par ces classes pharmacologiques',
 -   'pathologyOverview': 'Un bref aperçu de la pathologie en 3 à 5 points clés',
--   'introduction': 'Une brève introduction expliquant l\'importance de ces classes de médicaments dans le traitement de la pathologie',
+-   'introduction': 'Une brève introduction expliquant l'importance de ces classes de médicaments dans le traitement de la pathologie',
 -   'pharmacologicalClasses': [
       {
         'className': 'Le nom de la classe pharmacologique',
-        'mechanismOfAction': 'Une explication claire et détaillée du mécanisme d\'action',
-        'differentialAdvantages': 'Les avantages de cette classe par rapport à d\'autres',
-        'roleOfDiet': 'L\'influence de l\'alimentation sur le traitement',
+        'mechanismOfAction': 'Une explication claire et détaillée du mécanisme d'action',
+        'differentialAdvantages': 'Les avantages de cette classe par rapport à d'autres',
+        'roleOfDiet': 'L'influence de l'alimentation sur le traitement',
         'drugs': [
           {
             'name': 'Le nom du médicament (DCI)',
             'dosages': 'Les posologies précises et courantes. Ne pas dire "selon notice"',
-            'precautionsForUse': 'Les principales précautions d\'emploi, contre-indications et effets indésirables'
+            'precautionsForUse': 'Les principales précautions d'emploi, contre-indications et effets indésirables'
           }
         ]
       }
     ],
 -   'summaryTable': {
-        'headers': ['Classe', 'Mécanisme d\'action', 'Avantages', 'Exemples'],
+        'headers': ['Classe', 'Mécanisme d'action', 'Avantages', 'Exemples'],
         'rows': []
     },
 -   'keyPoints': [],
@@ -203,42 +203,41 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
 - 'targetAudience': 'Public cible (ex: Pharmaciens et Préparateurs)',
 - 'objectives': [ 'Objectif 1', 'Objectif 2', '...' ],
 - 'introductionToPathology': {
-    'title': 'Introduction à l\'Hypertension Artérielle (HTA)',
-    'definitionAndDiagnosis': 'Inclure la définition de l\'HTA (PA ≥ 140/90 mm Hg en consultation, maintenue dans le temps), les objectifs de PA pour différentes populations (générale, diabétiques, > 80 ans).',
-    'prevalenceAndImportance': 'Mentionner que l\'HTA est le premier facteur de risque cardiovasculaire mondial, sa nature souvent asymptomatique, et les statistiques sur le traitement et le contrôle.',
-    'riskFactorsAndCauses': 'Lister les facteurs modifiables (surpoids, alcool, tabac, sédentarité, alimentation, hyperlipidémie, diabète) et les causes spécifiques (grossesse, troubles neurologiques, apnée du sommeil). Différencier l\'HTA primaire et secondaire.',
+    'title': 'Introduction à l'Hypertension Artérielle (HTA)',
+    'definitionAndDiagnosis': 'Inclure la définition de l'HTA (PA ≥ 140/90 mm Hg en consultation, maintenue dans le temps), les objectifs de PA pour différentes populations (générale, diabétiques, > 80 ans).',
+    'prevalenceAndImportance': 'Mentionner que l'HTA est le premier facteur de risque cardiovasculaire mondial, sa nature souvent asymptomatique, et les statistiques sur le traitement et le contrôle.',
+    'riskFactorsAndCauses': 'Lister les facteurs modifiables (surpoids, alcool, tabac, sédentarité, alimentation, hyperlipidémie, diabète) et les causes spécifiques (grossesse, troubles neurologiques, apnée du sommeil). Différencier l'HTA primaire et secondaire.',
     'complications': 'Décrire les risques liés à une HTA non traitée (AVC, insuffisance cardiaque, infarctus, etc.).',
-    'treatmentGoals': 'Rappeler l\'objectif principal de diminution de la morbimortalité cardiovasculaire et les cibles de PA.',
-    'lifestyleMeasures': 'Détailler ces mesures essentielles (perte de poids, réduction du sel, modération de l\'alcool, arrêt du tabac, activité physique, gestion du stress) et leur importance dans la prise en charge.'
+    'treatmentGoals': 'Rappeler l'objectif principal de diminution de la morbimortalité cardiovasculaire et les cibles de PA.',
+    'lifestyleMeasures': 'Détailler ces mesures essentielles (perte de poids, réduction du sel, modération de l'alcool, arrêt du tabac, activité physique, gestion du stress) et leur importance dans la prise en charge.'
   },
 - 'drugClasses': {
     'title': 'Les Antihypertenseurs : Classes et Détails',
-    'generalPrinciples': 'Indiquer que le traitement est généralement à vie, l\'importance de la formation continue et des ouvrages de référence. Expliquer que le choix initial peut se faire entre différentes classes et que les associations sont envisagées en cas d\'efficacité insuffisante (avec les associations à éviter comme IEC-ARA2 ou thiazidique-diurétique de l\'anse).',
+    'generalPrinciples': 'Indiquer que le traitement est généralement à vie, l'importance de la formation continue et des ouvrages de référence. Expliquer que le choix initial peut se faire entre différentes classes et que les associations sont envisagées en cas d'efficacité insuffisante (avec les associations à éviter comme IEC-ARA2 ou thiazidique-diurétique de l'anse).',
     'classes': [
       {
-        'name': 'Antagonistes des Récepteurs de l\'Angiotensine II (ARA II)',
+        'name': 'Antagonistes des Récepteurs de l'Angiotensine II (ARA II)',
         'examples': 'Noms génériques et commerciaux (avec des exemples).',
-        'mechanismOfAction': 'Mécanisme d\'action.',
+        'mechanismOfAction': 'Mécanisme d'action.',
         'mainSideEffects': 'Effets secondaires principaux.',
-        'patientAdvice': 'Conseils pour le patient (si spécifiques à la classe, comme la prise des diurétiques ou les précautions d\'hypotension orthostatique).',
-        'contraindications': 'Contre-indications (y compris la grossesse et l\'allaitement si applicable).',
+        'patientAdvice': 'Conseils pour le patient (si spécifiques à la classe, comme la prise des diurétiques ou les précautions d'hypotension orthostatique).',n        'contraindications': 'Contre-indications (y compris la grossesse et l'allaitement si applicable).',
         'drugInteractions': 'Interactions médicamenteuses importantes (notamment AINS, substituts de sel, lithium, cocaïne).',
       }
     ]
   },
 - 'dispensingAndCounseling': {
-    'title': 'Conseil Associé à l\'Ordonnance et Rôle du Pharmacien',
+    'title': 'Conseil Associé à l'Ordonnance et Rôle du Pharmacien',
     'essentialDispensingAdvice': {
       'title': 'A. Conseils Essentiels à la délivrance',
-      'medicationExplanation': 'Explication du traitement médicamenteux : Nom, rôle, posologie, durée (traitement à vie), effets secondaires (insister sur l\'hypotension orthostatique et les conseils associés), interactions et contre-indications clés (AINS, alcool, substituts de sel, produits naturels, grossesse/allaitement, cocaïne, marijuana).',
-      'lifestyleReminder': 'Rappel des Mesures Hygiéno-diététiques (MHD) : Importance fondamentale, conseils sur l\'alimentation (sel, régime DASH, produits effervescents), poids, activité physique, tabac, alcool.',
-      'monitoringAndSelfMeasurement': 'Encourager l\'automesure tensionnelle (AMT), l\'utilisation d\'autotensiomètres (plus de 60% des patients), la reconnaissance des signes d\'alerte, et le contrôle en pharmacie.',
+      'medicationExplanation': 'Explication du traitement médicamenteux : Nom, rôle, posologie, durée (traitement à vie), effets secondaires (insister sur l'hypotension orthostatique et les conseils associés), interactions et contre-indications clés (AINS, alcool, substituts de sel, produits naturels, grossesse/allaitement, cocaïne, marijuana).',
+      'lifestyleReminder': 'Rappel des Mesures Hygiéno-diététiques (MHD) : Importance fondamentale, conseils sur l'alimentation (sel, régime DASH, produits effervescents), poids, activité physique, tabac, alcool.',
+      'monitoringAndSelfMeasurement': 'Encourager l'automesure tensionnelle (AMT), l'utilisation d'autotensiomètres (plus de 60% des patients), la reconnaissance des signes d'alerte, et le contrôle en pharmacie.',
       'intercurrentEventManagement': 'Avertir des risques de déshydratation (chaleurs, diarrhée, vomissements) surtout sous diurétiques.',
     },
     'additionalSalesAndServices': {
       'title': 'B. Ventes Additionnelles et Services Associés (Valorisation Commerciale et Clinique)',
-      'products': [ 'Autotensiomètres : Produit phare, formation à l\'utilisation, interprétation des mesures.', 'Piluliers et dispositifs d\'aide à l\'observance.', 'Produits liés aux MHD : Substituts de sel (précautions), guides de régime DASH, aides au sevrage tabagique, produits de gestion du poids, compléments de potassium (si hypokaliémie).', 'Autres produits pertinents : Brosses à dents à soies souples/rasoirs électriques pour patients sous anticoagulants, produits d\'hydratation.' ],
-      'services': [ 'Services de suivi pharmaceutique : Entretiens pharmaceutiques pour suivi d\'observance, tolérance, efficacité.' ],
+      'products': [ 'Autotensiomètres : Produit phare, formation à l'utilisation, interprétation des mesures.', 'Piluliers et dispositifs d'aide à l'observance.', 'Produits liés aux MHD : Substituts de sel (précautions), guides de régime DASH, aides au sevrage tabagique, produits de gestion du poids, compléments de potassium (si hypokaliémie).', 'Autres produits pertinents : Brosses à dents à soies souples/rasoirs électriques pour patients sous anticoagulants, produits d'hydratation.' ],
+      'services': [ 'Services de suivi pharmaceutique : Entretiens pharmaceutiques pour suivi d'observance, tolérance, efficacité.' ],
     },
     'pharmacistRoleValorization': {
       'title': 'C. Valorisation du Rôle du Pharmacien dans la Santé des Patients Hypertendus',
@@ -247,7 +246,7 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
       'interprofessionalCollaboration': 'Travail avec le médecin, communication aux autres professionnels, évaluation des capacités fonctionnelles.',
     }
   },
-- 'conclusion': 'Récapituler l\'importance du rôle multidisciplinaire et l\'apport essentiel du pharmacien d\'officine et du préparateur en pharmacie dans l\'éducation, la surveillance et l\'optimisation du traitement des patients hypertendus pour améliorer la santé publique.',
+- 'conclusion': 'Récapituler l'importance du rôle multidisciplinaire et l'apport essentiel du pharmacien d'officine et du préparateur en pharmacie dans l'éducation, la surveillance et l'optimisation du traitement des patients hypertendus pour améliorer la santé publique.',
 - 'glossary': [],
 - 'media': [],
 - 'quiz': [],
