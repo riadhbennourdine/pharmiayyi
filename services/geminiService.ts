@@ -54,8 +54,8 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       - "keyQuestions": Tableau de chaînes de caractères (string[]) de questions clés à poser au patient.
       - "redFlags": Tableau de chaînes de caractères (string[]) de signaux d'alerte.
       - "recommendations": Objet avec 4 sous-sections:
-        - "mainTreatment": Tableau de 10 chaînes de caractères (string[]) résumant le traitement principal en points clés. Chaque point doit inclure le nom du traitement en gras (ex: **Nom du traitement**), suivi de sa posologie et de sa durée (ex: **Nom du traitement**: Posologie: [valeur], Durée: [valeur]).
-        - "associatedProducts": Tableau de 10 chaînes de caractères (string[]) résumant les produits associés en points clés. Chaque point doit inclure le nom du produit en gras (ex: **Nom du produit**), suivi de sa posologie et de sa durée (ex: **Nom du produit**: Posologie: [valeur], Durée: [valeur]).
+        - "mainTreatment": "Tableau de 10 chaînes de caractères (string[]) résumant le traitement principal en points clés. Chaque point doit être très détaillé et inclure : le nom du traitement en gras (ex: **Nom du traitement**), la posologie précise (ex: **Amoxicilline**: Posologie: 1g 2 à 3 fois par jour), la durée du traitement (ex: Durée: 7 jours), et des conseils de dispensation importants. Si le texte source ne fournit pas de détails précis, génère des exemples de posologies et de durées plausibles et couramment admises pour un cas d'étude pédagogique. Ne te contente pas de dire \"selon notice\".",
+        - "associatedProducts": "Tableau de 10 chaînes de caractères (string[]) résumant les produits associés en points clés. Chaque point doit être très détaillé et inclure : le nom du produit en gras (ex: **Nom du produit**), la posologie précise, la durée d'utilisation, et des conseils pertinents. Ne te contente pas de dire \"selon notice\".",
         - "lifestyleAdvice": Tableau de chaînes de caractères (string[]) de conseils d'hygiène de vie.
         - "dietaryAdvice": Tableau de chaînes de caractères (string[]) de conseils alimentaires.
       - "keyPoints": Tableau de 3 à 4 points clés ultra-concis.
@@ -143,8 +143,8 @@ La réponse doit être au format JSON, en respectant la structure suivante :
     -   "roleOfDiet": (string) L'influence de l'alimentation sur le traitement.
     -   "drugs": (array of objects) Une liste d'exemples de médicaments de cette classe. Chaque objet doit contenir :
         -   "name": (string) Le nom du médicament (DCI).
-        -   "dosages": (string) Les posologies courantes.
-        -   "precautionsForUse": (string) Les principales précautions d'emploi.
+        -   "dosages": (string) Les posologies précises et courantes. Ne pas dire "selon notice".
+        -   "precautionsForUse": (string) Les principales précautions d'emploi, contre-indications et effets indésirables.
 -   "summaryTable": (object) Un tableau récapitulatif. L'objet doit contenir :
     -   "headers": (array of strings) Les en-têtes du tableau.
     -   "rows": (array of arrays of strings) Les lignes du tableau.
