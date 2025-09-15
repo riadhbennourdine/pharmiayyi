@@ -138,3 +138,57 @@ export interface PharmacologyMemoFiche {
   coverImageUrl?: string;
   youtubeUrl?: string;
 }
+
+export interface ExhaustiveMemoFiche {
+  _id: any;
+  title: string;
+  targetAudience: string;
+  objectives: string[];
+  introductionToPathology: {
+    title: string;
+    definitionAndDiagnosis: string;
+    prevalenceAndImportance: string;
+    riskFactorsAndCauses: string;
+    complications: string;
+    treatmentGoals: string;
+    lifestyleMeasures: string;
+  };
+  drugClasses: {
+    title: string;
+    generalPrinciples: string;
+    classes: {
+      name: string;
+      examples: string;
+      mechanismOfAction: string;
+      mainSideEffects: string;
+      patientAdvice: string;
+      contraindications: string;
+      drugInteractions: string;
+    }[];
+  };
+  dispensingAndCounseling: {
+    title: string;
+    essentialDispensingAdvice: {
+      title: string;
+      medicationExplanation: string;
+      lifestyleReminder: string;
+      monitoringAndSelfMeasurement: string;
+      intercurrentEventManagement: string;
+    };
+    additionalSalesAndServices: {
+      title: string;
+      products: string[];
+      services: string[];
+    };
+    pharmacistRoleValorization: {
+      title: string;
+      medicationExpertise: string;
+      patientEducation: string;
+      interprofessionalCollaboration: string;
+    };
+  };
+  conclusion: string;
+  creationDate: string;
+  coverImageUrl?: string;
+  youtubeUrl?: string;
+}

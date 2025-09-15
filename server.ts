@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { IncomingHttpHeaders } from 'http';
 import path from 'path';
-import { generateCaseStudyFromText, getAssistantResponse, generatePharmacologyMemoFiche } from './services/geminiService';
+import { generateCaseStudyFromText, getAssistantResponse, generatePharmacologyMemoFiche, generateExhaustiveMemoFiche } from './services/geminiService';
 import clientPromise from './services/mongo';
 import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
@@ -492,6 +492,8 @@ app.post('/api/generate', async (req, res) => {
         let result;
         if (memoFicheType === 'pharmacologie') {
             result = await generatePharmacologyMemoFiche(sourceText, theme, pathology);
+        } else if (memoFicheType === 'exhaustive') {
+            result = await generateExhaustiveMemoFiche(sourceText);
         } else {
             result = await generateCaseStudyFromText(sourceText, theme || 'Général', system || 'Général');
         }

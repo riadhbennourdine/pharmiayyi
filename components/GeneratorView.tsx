@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { CaseStudy, PharmacologyMemoFiche } from '../types';
+import { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import Spinner from './Spinner';
 import MemoFicheView from './MemoFicheView';
 import { ChevronLeftIcon, SparklesIcon } from './icons';
@@ -8,7 +8,7 @@ import { TOPIC_CATEGORIES } from '../constants';
 
 interface GeneratorViewProps {
   onBack: () => void;
-  onSaveCaseStudy: (caseStudy: CaseStudy | PharmacologyMemoFiche) => void;
+  onSaveCaseStudy: (caseStudy: CaseStudy | PharmacologyMemoFiche | ExhaustiveMemoFiche) => void;
 }
 
 const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }) => {
@@ -18,15 +18,16 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedCase, setGeneratedCase] = useState<CaseStudy | PharmacologyMemoFiche | null>(null);
+  const [generatedCase, setGeneratedCase] = useState<CaseStudy | PharmacologyMemoFiche | ExhaustiveMemoFiche | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [memoFicheType, setMemoFicheType] = useState<'maladie' | 'pharmacologie'>('maladie');
+  const [memoFicheType, setMemoFicheType] = useState<'maladie' | 'pharmacologie' | 'exhaustive'>('maladie');
   const [pharmaTheme, setPharmaTheme] = useState('');
   const [pharmaPathology, setPharmaPathology] = useState('');
 
   const handleGenerate = async () => {
     if (memoFicheType === 'maladie' && (!sourceText.trim() || !selectedTheme || !selectedSystem)) return;
     if (memoFicheType === 'pharmacologie' && (!sourceText.trim() || !pharmaTheme.trim() || !pharmaPathology.trim())) return;
+    if (memoFicheType === 'exhaustive' && !sourceText.trim()) return;
 
     setIsLoading(true);
     setError(null);
@@ -39,6 +40,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
       youtubeUrl: youtubeUrl.trim() || undefined,
       ...(memoFicheType === 'maladie' && { theme: selectedTheme, system: selectedSystem }),
       ...(memoFicheType === 'pharmacologie' && { theme: pharmaTheme, pathology: pharmaPathology }),
+      // No extra params for exhaustive for now
     };
 
     try {
@@ -58,14 +60,20 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
       
       const finalMemoFiche = {
         ...result,
-        theme: memoFicheType === 'maladie' ? selectedTheme : pharmaTheme,
-        ...(memoFicheType === 'maladie' && { system: selectedSystem }),
-        ...(memoFicheType === 'pharmacologie' && { pathology: pharmaPathology }),
+        ...(memoFicheType === 'maladie' && { 
+          theme: selectedTheme, 
+          system: selectedSystem 
+        }),
+        ...(memoFicheType === 'pharmacologie' && { 
+          theme: pharmaTheme, 
+          pathology: pharmaPathology 
+        }),
+        // No extra params for exhaustive for now
         coverImageUrl: coverImageUrl.trim() || undefined,
         youtubeUrl: youtubeUrl.trim() || undefined,
         creationDate: new Date().toISOString(),
       };
-      setGeneratedCase(finalMemoFiche as CaseStudy | PharmacologyMemoFiche);
+      setGeneratedCase(finalMemoFiche as CaseStudy | PharmacologyMemoFiche | ExhaustiveMemoFiche);
     } catch (err) {
       console.error(err);
       setError("La génération de la mémofiche a échoué. Vérifiez les données d'entrée et réessayez.");
@@ -98,7 +106,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
           <MemoFicheView caseStudy={generatedCase as CaseStudy} onStartQuiz={() => {}} onBack={handleReset} isPreview={true} />
         ) : (
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-bold text-slate-800 mb-4">Mémofiche de Pharmacologie Générée</h3>
+            <h3 className="text-xl font-bold text-slate-800 mb-4">Aperçu non disponible</h3>
             <p className="text-slate-600 mb-4">L'aperçu pour ce type de mémofiche n'est pas encore implémenté. Vous pouvez sauvegarder la mémofiche pour la consulter plus tard.</p>
             <pre className="bg-slate-100 p-4 rounded-md overflow-x-auto text-sm">
               {JSON.stringify(generatedCase, null, 2)}
@@ -156,6 +164,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
             >
             <option value="maladie">Maladie courante</option>
             <option value="pharmacologie">Pharmacologie</option>
+            <option value="exhaustive">Synthèse exhaustive</option>
             </select>
         </div>
 
@@ -283,7 +292,6 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
         <button
           onClick={handleGenerate}
           disabled={isLoading || !sourceText.trim() || (memoFicheType === 'maladie' && (!selectedTheme || !selectedSystem)) || (memoFicheType === 'pharmacologie' && (!pharmaTheme.trim() || !pharmaPathology.trim()))}
-          className="text-lg inline-flex items-center bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-teal-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 disabled:bg-slate-400 disabled:shadow-none disabled:transform-none"
         >
           {isLoading ? (
             <>
