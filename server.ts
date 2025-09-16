@@ -91,10 +91,11 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-// Middleware to check for admin role
-const adminOnly = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user?.role?.toUpperCase() !== 'ADMIN') {
-    return res.status(403).json({ message: 'Accès refusé. Rôle administrateur requis.' });
+// Middleware to check for admin or formateur role
+const adminOrFormateurOnly = (req: Request, res: Response, next: NextFunction) => {
+  const userRole = req.user?.role?.toUpperCase();
+  if (userRole !== 'ADMIN' && userRole !== 'FORMATEUR') {
+    return res.status(403).json({ message: 'Accès refusé. Rôle administrateur ou formateur requis.' });
   }
   next();
 };
@@ -556,7 +557,7 @@ app.post('/api/memofiches', async (req, res) => {
   }
 });
 
-app.put('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) => {
+app.put('/api/memofiches/:id', authMiddleware, adminOrFormateurOnly, async (req, res) => {
   try {
     const { id } = req.params;
     const updatedCase = req.body;
@@ -593,7 +594,7 @@ app.put('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
-app.delete('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) => {
+app.delete('/api/memofiches/:id', authMiddleware, adminOrFormateurOnly, async (req, res) => {
   try {
     const { id } = req.params;
     const client = await clientPromise;

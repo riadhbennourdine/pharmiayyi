@@ -48,6 +48,8 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       Identifie un scénario patient plausible à partir du texte.
       Le ton doit être professionnel et didactique.
 
+      **N'utilise PAS de recherche externe ou de connaissances préalables.** Base-toi uniquement sur le texte source fourni.
+
       Inclus les sections suivantes, en t'assurant que les tableaux sont bien des tableaux de chaînes de caractères ou d'objets selon le type:
       - "title": "Titre concis de la mémofiche",
       - "patientSituation": "Scénario patient détaillé",
