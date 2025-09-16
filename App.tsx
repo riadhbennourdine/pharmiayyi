@@ -52,8 +52,9 @@ const LoggedInRoute: React.FC = () => {
 
 const AdminRoute: React.FC = () => {
     const { user } = useAuth();
-    const isAdmin = user?.role?.toUpperCase() === UserRole.ADMIN;
-    return isAdmin ? <Outlet /> : <Navigate to="/dashboard" replace />;
+    const userRole = user?.role?.toUpperCase();
+    const isAuthorized = userRole === UserRole.ADMIN || userRole === UserRole.FORMATEUR;
+    return isAuthorized ? <Outlet /> : <Navigate to="/dashboard" replace />;
 }
 
 // --- PAGE WRAPPERS (to connect legacy components to new context/router) ---

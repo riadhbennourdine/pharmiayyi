@@ -64,10 +64,11 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   }, []); // Empty dependency array ensures this runs only once on mount
 
   const { user } = useAuth();
-  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
-  const canEdit = isAdmin && !isPreview;
+  const userRole = user?.role?.toUpperCase();
+  const isAuthorized = userRole === 'ADMIN' || userRole === 'FORMATEUR';
+  const canEdit = isAuthorized && !isPreview;
   console.log("User:", user);
-  console.log("isAdmin:", isAdmin);
+  console.log("isAuthorized:", isAuthorized);
 
   const caseStudy = useMemo(() => ({
     ...rawCaseStudy,
