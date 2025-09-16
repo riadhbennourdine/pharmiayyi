@@ -256,17 +256,18 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   }, [caseStudy]);
   
   const menuItems: { id: TabName; label: string; icon: React.ReactNode }[] = [
-      { id: 'memo', label: 'Mémo', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/9.png" className="h-7 w-7" alt="Mémo" /> },
-      { id: 'flashcards', label: 'Flashcards', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/10.png" className="h-7 w-7" alt="Flashcards" /> },
+      { id: 'memo', label: 'Mémo', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/9.png" className="h-10 w-10" alt="Mémo" /> },
+      { id: 'flashcards', label: 'Flashcards', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/10.png" className="h-10 w-10" alt="Flashcards" /> },
   ];
 
   if (!isPreview) {
-      menuItems.push({ id: 'quiz', label: 'Quiz', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/11.png" className="h-7 w-7" alt="Quiz" /> });
+      menuItems.push({ id: 'kahoot', label: 'Kahoot', icon: <img src="https://pharmaconseilbmb.com/photos/site/icons8-kahoot-48.png" className="h-10 w-10" alt="Kahoot" /> });
+      menuItems.push({ id: 'quiz', label: 'Quiz', icon: <img src="https://pharmaconseilbmb.com/photos/site/quiz-2.png" className="h-10 w-10" alt="Quiz" /> });
   }
 
   menuItems.push(
-      { id: 'glossary', label: 'Glossaire', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/12.png" className="h-7 w-7" alt="Glossaire" /> },
-      { id: 'media', label: 'Médias', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/13.png" className="h-7 w-7" alt="Médias" /> }
+      { id: 'glossary', label: 'Glossaire', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/12.png" className="h-10 w-10" alt="Glossaire" /> },
+      { id: 'media', label: 'Médias', icon: <img src="https://pharmaconseilbmb.com/photos/site/icone/13.png" className="h-10 w-10" alt="Médias" /> }
   );
 
   const renderContent = () => {
@@ -440,14 +441,14 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                            <button
                              key={item.id}
                              onClick={() => setActiveTab(item.id)}
-                             className={`flex items-center space-x-2 px-3 sm:px-4 py-3 text-sm sm:text-base font-medium rounded-t-md transition-colors duration-300 focus:outline-none ${ 
+                             className={`flex flex-col items-center px-3 sm:px-4 py-3 text-sm sm:text-base font-medium rounded-t-md transition-colors duration-300 focus:outline-none ${ 
                                  activeTab === item.id
                                  ? 'border-b-2 border-teal-600 text-teal-600 bg-teal-50/50'
                                  : 'text-slate-500 hover:text-teal-500 hover:bg-slate-100/50'
                              }`}
                              aria-current={activeTab === item.id ? 'page' : undefined}
                            >
-                               {item.icon} <span>{item.label}</span>
+                               {item.icon} <span className="text-xs mt-1">{item.label}</span>
                            </button>
                        ))}
                     </div>
