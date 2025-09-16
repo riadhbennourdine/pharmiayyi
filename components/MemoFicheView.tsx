@@ -67,6 +67,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   const userRole = user?.role?.toUpperCase();
   const isAuthorized = userRole === 'ADMIN' || userRole === 'FORMATEUR';
   const canEdit = isAuthorized && !isPreview;
+  const canDelete = userRole === 'ADMIN' && !isPreview;
   console.log("User:", user);
   console.log("isAuthorized:", isAuthorized);
 
@@ -462,20 +463,20 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                           {isPreview ? "Générer une autre fiche" : "Retour à l'accueil"}
                         </button>
                         {!isPreview && canEdit && (
-                            <>
-                                <button
-                                    onClick={onEdit}
-                                    className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-                                >
-                                    <PencilIcon className="h-5 w-5 mr-2" /> Modifier
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    className="px-6 py-3 text-base font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center"
-                                >
-                                    <TrashIcon className="h-5 w-5 mr-2" /> Supprimer
-                                </button>
-                            </>
+                            <button
+                                onClick={onEdit}
+                                className="px-6 py-3 text-base font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                            >
+                                <PencilIcon className="h-5 w-5 mr-2" /> Modifier
+                            </button>
+                        )}
+                        {!isPreview && canDelete && (
+                            <button
+                                onClick={handleDelete}
+                                className="px-6 py-3 text-base font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center"
+                            >
+                                <TrashIcon className="h-5 w-5 mr-2" /> Supprimer
+                            </button>
                         )}
                     </div>
                 </div>
