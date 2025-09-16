@@ -70,7 +70,6 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   const canDelete = userRole === 'ADMIN' && !isPreview;
   console.log("User:", user);
   console.log("isAuthorized:", isAuthorized);
-  console.log("Kahoot Link:", caseStudy.kahootLink);
 
   const caseStudy = useMemo(() => ({
     ...rawCaseStudy,
