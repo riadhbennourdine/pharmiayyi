@@ -91,9 +91,25 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
         });
 
         const response = result.response;
-        const jsonText = response.text();
-        console.log("Raw JSON from Gemini:", jsonText); 
-        const generatedCase: CaseStudy = JSON.parse(jsonText);
+        let jsonText = response.text();
+        console.log("Raw JSON from Gemini:", jsonText);
+
+        let generatedCase: CaseStudy;
+        try {
+            generatedCase = JSON.parse(jsonText);
+        } catch (parseError) {
+            console.error("Failed to parse JSON, attempting to fix...", parseError);
+            // Attempt to fix the glossary format issue
+            jsonText = jsonText.replace(/"term": ("[^"]+"), "definition": ("[^"]+")/g, '{"term": $1, "definition": $2}');
+            try {
+                generatedCase = JSON.parse(jsonText);
+                console.log("Successfully parsed JSON after fixing.");
+            } catch (secondParseError) {
+                console.error("Failed to parse JSON even after attempting to fix:", secondParseError);
+                throw new Error("Failed to generate case study from text due to malformed JSON.");
+            }
+        }
+
 
         // Transform glossary if it's an object
         if (generatedCase.glossary && typeof generatedCase.glossary === 'object' && !Array.isArray(generatedCase.glossary)) {
@@ -122,7 +138,7 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
         console.log("Parsed CaseStudy object (after transformation):", generatedCase);
         return generatedCase;
     } catch (error) {
-        console.error("Error generating case study:", error); 
+        console.error("Error generating case study:", error);
         throw new Error("Failed to generate case study from text.");
     }
 };
@@ -182,9 +198,24 @@ Texte source :
         });
 
         const response = result.response;
-        const jsonText = response.text();
+        let jsonText = response.text();
         console.log("Raw JSON from Gemini:", jsonText);
-        const generatedMemoFiche: PharmacologyMemoFiche = JSON.parse(jsonText);
+        
+        let generatedMemoFiche: PharmacologyMemoFiche;
+        try {
+            generatedMemoFiche = JSON.parse(jsonText);
+        } catch (parseError) {
+            console.error("Failed to parse JSON, attempting to fix...", parseError);
+            // Attempt to fix the glossary format issue
+            jsonText = jsonText.replace(/"term": ("[^"]+"), "definition": ("[^"]+")/g, '{"term": $1, "definition": $2}');
+            try {
+                generatedMemoFiche = JSON.parse(jsonText);
+                console.log("Successfully parsed JSON after fixing.");
+            } catch (secondParseError) {
+                console.error("Failed to parse JSON even after attempting to fix:", secondParseError);
+                throw new Error("Failed to generate pharmacology memo fiche from text due to malformed JSON.");
+            }
+        }
 
         return generatedMemoFiche;
     } catch (error) {
@@ -272,9 +303,24 @@ Texte source :
         });
 
         const response = result.response;
-        const jsonText = response.text();
+        let jsonText = response.text();
         console.log("Raw JSON from Gemini:", jsonText);
-        const generatedMemoFiche: ExhaustiveMemoFiche = JSON.parse(jsonText);
+        
+        let generatedMemoFiche: ExhaustiveMemoFiche;
+        try {
+            generatedMemoFiche = JSON.parse(jsonText);
+        } catch (parseError) {
+            console.error("Failed to parse JSON, attempting to fix...", parseError);
+            // Attempt to fix the glossary format issue
+            jsonText = jsonText.replace(/"term": ("[^"]+"), "definition": ("[^"]+")/g, '{"term": $1, "definition": $2}');
+            try {
+                generatedMemoFiche = JSON.parse(jsonText);
+                console.log("Successfully parsed JSON after fixing.");
+            } catch (secondParseError) {
+                console.error("Failed to parse JSON even after attempting to fix:", secondParseError);
+                throw new Error("Failed to generate exhaustive memo fiche from text due to malformed JSON.");
+            }
+        }
 
         return generatedMemoFiche;
     } catch (error) {
