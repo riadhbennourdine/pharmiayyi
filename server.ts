@@ -100,6 +100,14 @@ const adminOrFormateurOnly = (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
+// Middleware to check for admin role
+const adminOnly = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user?.role?.toUpperCase() !== 'ADMIN') {
+    return res.status(403).json({ message: 'Accès refusé. Rôle administrateur requis.' });
+  }
+  next();
+};
+
 // Serve index.html for the root path
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
@@ -594,7 +602,7 @@ app.put('/api/memofiches/:id', authMiddleware, adminOrFormateurOnly, async (req,
   }
 });
 
-app.delete('/api/memofiches/:id', authMiddleware, adminOrFormateurOnly, async (req, res) => {
+app.delete('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { id } = req.params;
     const client = await clientPromise;
