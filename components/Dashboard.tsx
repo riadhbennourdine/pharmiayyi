@@ -221,9 +221,9 @@ const Dashboard: React.FC = () => {
                                 <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
                                 {(study.theme || study.system) && (
                                     <p className="text-xs text-slate-500">
-                                        {study.theme && `"${study.theme}"`}
+                                        {study.theme && study.theme}
                                         {study.theme && study.system && <span className="mx-1">&bull;</span>}
-                                        {study.system && `"${study.system}"`}
+                                        {study.system && study.system}
                                     </p>
                                 )}
                                 <div className="mt-4 w-full">
@@ -267,9 +267,9 @@ const Dashboard: React.FC = () => {
                                                 <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
                                                 {(study.theme || study.system) && (
                                                     <p className="text-xs text-slate-500">
-                                                        {study.theme && `"${study.theme}"`}
+                                                        {study.theme && study.theme}
                                                         {study.theme && study.system && <span className="mx-1">&bull;</span>}
-                                                        {study.system && `"${study.system}"`}
+                                                        {study.system && study.system}
                                                     </p>
                                                 )}
                                                 <div className="mt-4 w-full">
