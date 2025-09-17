@@ -155,3 +155,61 @@ export const updateKnowledgeBase = async (): Promise<{ processed: number; chunks
         throw new Error("Failed to update knowledge base.");
     }
 };
+
+export const indexSingleMemoFiche = async (ficheId: ObjectId): Promise<{ processed: number; chunks: number; }> => {
+    console.log(`Starting indexing for single fiche: ${ficheId}`);
+
+    try {
+        const client = await clientPromise;
+        const db = client.db('pharmia');
+        const fichesCollection = db.collection('memofiches_v2');
+        const chunksCollection = db.collection<MemoFicheChunk>('memofiche_chunks');
+
+        // Step 1: Clear existing chunks for this specific fiche
+        console.log(`Deleting old chunks for fiche ID: ${ficheId}...`);
+        await chunksCollection.deleteMany({ sourceFicheId: ficheId });
+
+        // Step 2: Fetch the specific memo fiche
+        console.log(`Fetching fiche with ID: ${ficheId}...`);
+        const fiche = await fichesCollection.findOne({ _id: ficheId });
+
+        if (!fiche) {
+            console.log(`Fiche with ID ${ficheId} not found. No chunks indexed.`);
+            return { processed: 0, chunks: 0 };
+        }
+
+        let totalChunksCreated = 0;
+
+        // Step 3: Process the fiche
+        const chunksWithoutEmbedding = createChunksFromFiche(fiche);
+
+        if (chunksWithoutEmbedding.length === 0) {
+            console.log(`No chunks created for fiche: ${fiche.title}`);
+            return { processed: 1, chunks: 0 };
+        }
+        
+        // Step 4: Generate embeddings for each chunk
+        const textsToEmbed = chunksWithoutEmbedding.map(c => c.content);
+        console.log(`Generating ${textsToEmbed.length} embeddings for fiche: ${fiche.title}`);
+        
+        const embeddings = await Promise.all(textsToEmbed.map(text => getEmbedding(text)));
+
+        const chunksToInsert: MemoFicheChunk[] = chunksWithoutEmbedding.map((chunk, i) => ({
+            ...chunk,
+            embedding: embeddings[i],
+            createdAt: new Date(),
+        }));
+
+        // Step 5: Insert new chunks into the database
+        await chunksCollection.insertMany(chunksToInsert);
+        totalChunksCreated += chunksToInsert.length;
+        console.log(`Inserted ${chunksToInsert.length} chunks for fiche: ${fiche.title}`);
+
+        console.log(`Single fiche indexing complete. Processed 1 fiche and created ${totalChunksCreated} chunks.`);
+        return { processed: 1, chunks: totalChunksCreated };
+
+    } catch (error) {
+        console.error("Error during single fiche indexing:", error);
+        throw new Error("Failed to index single fiche.");
+    }
+};

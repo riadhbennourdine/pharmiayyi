@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { IncomingHttpHeaders } from 'http';
 import path from 'path';
 import { generateCaseStudyFromText, getAssistantResponse, generatePharmacologyMemoFiche, generateExhaustiveMemoFiche, getEmbedding } from './services/geminiService';
-import { updateKnowledgeBase } from './services/indexingService';
+import { updateKnowledgeBase, indexSingleMemoFiche } from './services/indexingService';
 import clientPromise from './services/mongo';
 import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
@@ -612,6 +612,9 @@ app.post('/api/memofiches', async (req, res) => {
     // Récupérer le document inséré pour le renvoyer avec son _id généré
     const insertedDocument = await db.collection('memofiches_v2').findOne({ _id: result.insertedId });
     
+    // Indexer la nouvelle fiche pour la base de connaissance
+    await indexSingleMemoFiche(result.insertedId);
+
     res.status(201).json(insertedDocument); // Retourne le document inséré avec son _id
   } catch (error) {
     console.error('Error creating memo fiche:', error);
@@ -648,6 +651,9 @@ app.put('/api/memofiches/:id', authMiddleware, adminOrFormateurOnly, async (req,
 
     // Si la mise à jour a réussi, récupérer le document mis à jour pour le renvoyer
     const savedCase = await db.collection('memofiches_v2').findOne({ _id: new ObjectId(id) });
+
+    // Réindexer la fiche mise à jour pour la base de connaissance
+    await indexSingleMemoFiche(new ObjectId(id));
 
     res.status(200).json(savedCase); // Renvoie le document mis à jour
   } catch (error) {
