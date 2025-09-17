@@ -4,7 +4,7 @@ import * as icons from "./icons";
 import { useAuth } from "./contexts/AuthContext";
 import { useData } from "./contexts/DataContext";
 import FlashcardDeck from "./FlashcardDeck";
-import { Spinner } from "./Spinner";
+import Spinner from "./Spinner";
 
 interface ChatAssistantProps {
   onClose: () => void;
