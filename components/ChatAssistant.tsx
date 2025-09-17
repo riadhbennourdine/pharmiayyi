@@ -124,19 +124,27 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({ onClose }) => {
     <div
       className={`fixed bottom-6 right-6 z-50 ${
         isOpen ? "w-96 h-[600px]" : "w-16 h-16"
-      } bg-white rounded-lg shadow-lg flex flex-col transition-all duration-300 ease-in-out`}
+      } bg-white rounded-full shadow-lg flex flex-col transition-all duration-300 ease-in-out`}
     >
-      <div
-        className="w-full h-16 bg-blue-600 text-white flex items-center justify-between p-4 rounded-t-lg cursor-pointer"
-        onClick={toggleChat}
-      >
-        <h3 className="text-lg font-semibold">Assistant IA</h3>
-        <button onClick={onClose} className="text-white">
-          <icons.XMarkIcon className="h-6 w-6" />
-        </button>
-      </div>
+      {!isOpen && (
+        <div
+          className="w-16 h-16 rounded-full overflow-hidden cursor-pointer shadow-lg"
+          onClick={toggleChat}
+        >
+          <img src="https://pharmaconseilbmb.com/photos/site/bot.gif" alt="Chatbot" className="w-full h-full object-cover" />
+        </div>
+      )}
       {isOpen && (
         <>
+          <div
+            className="w-full h-16 bg-blue-600 text-white flex items-center justify-between p-4 rounded-t-lg cursor-pointer"
+            onClick={toggleChat}
+          >
+            <h3 className="text-lg font-semibold">Assistant IA</h3>
+            <button onClick={onClose} className="text-white">
+              <icons.XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
           <div className="flex-1 p-4 overflow-y-auto space-y-4">
             {messages.map((msg, index) => (
               <Message key={index} sender={msg.sender} content={msg.content} type={msg.type} />

@@ -1,11 +1,72 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useData } from './contexts/DataContext'; // Import the hook
+import { useAuth } from './contexts/AuthContext';
+import { UserRole } from '../types';
 import { TOPIC_CATEGORIES } from '../constants';
 import { CapsuleIcon } from './icons';
 import { CaseStudy } from '../types';
 
+const AdminPanel: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const handleUpdate = async () => {
+    setIsLoading(true);
+    setFeedback(null);
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setFeedback({ message: 'Erreur: Token d\'authentification introuvable.', type: 'error' });
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/update-knowledge-base', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Une erreur est survenue lors de la mise à jour.');
+      }
+
+      setFeedback({ message: `Mise à jour terminée ! ${data.processed} fiches traitées, ${data.chunks} morceaux créés.`, type: 'success' });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+      setFeedback({ message: `Erreur: ${errorMessage}`, type: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-lg my-8">
+      <h3 className="font-bold text-lg">Panneau d\'Administration</h3>
+      <p className="text-sm mb-4">Cette section n'est visible que par les administrateurs.</p>
+      <button
+        onClick={handleUpdate}
+        disabled={isLoading}
+        className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded disabled:bg-orange-300 disabled:cursor-not-allowed"
+      >
+        {isLoading ? 'Mise à jour en cours...' : 'Lancer la mise à jour de la base de connaissances'}
+      </button>
+      {feedback && (
+        <p className={`mt-4 text-sm font-semibold ${feedback.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+          {feedback.message}
+        </p>
+      )}
+    </div>
+  );
+};
+
 const Dashboard: React.FC = () => {
   const { selectCase } = useData(); // Use the context
+  const { user } = useAuth();
   const [memofiches, setMemofiches] = useState<CaseStudy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,6 +187,8 @@ const Dashboard: React.FC = () => {
           <h2 className="text-3xl font-bold text-slate-800 mb-2">Bienvenue sur PharmIA</h2>
           <p className="text-lg text-slate-600">Explorez les thèmes disponibles et consultez les mémofiches générées.</p>
         </div>
+
+        {user?.role === UserRole.ADMIN && <AdminPanel />}
 
         <div className="mb-8 flex flex-col sm:flex-row justify-center items-center gap-4">
             <div className="relative w-full sm:w-1/2">
