@@ -9,5 +9,5 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["server.ts", "services/**/*.ts", "types/global.d.ts"]
+  "include": ["*.ts", "services/**/*.ts", "types/global.d.ts", "migration.ts", "drop_collection.ts", "list_memo_sections.ts"]
 }

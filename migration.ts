@@ -35,6 +35,7 @@ interface MemoFiche {
 
 // Fonction générique pour trouver une section par ID ou titre (avec mots-clés)
 const findSection = (memoContent: any[], keywords: string[]): any | undefined => {
+    if (!Array.isArray(memoContent)) return undefined;
     for (const keyword of keywords) {
         const found = memoContent.find(c => 
             (c.id && c.id.toLowerCase().includes(keyword.toLowerCase())) || 
@@ -56,14 +57,14 @@ const getSectionListContent = (memoContent: any[], keywords: string[]): string[]
     const section = findSection(memoContent, keywords);
     if (!section || typeof section.content !== 'string') return [];
     // Diviser par retour à la ligne, nettoyer, et filtrer les lignes vides
-    return section.content.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+    return section.content.split('\n').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
 };
 
 // Fonction pour extraire les références
 const getReferencesContent = (memoContent: any[]): string[] => {
     const section = findSection(memoContent, ['references bibliographiques', 'references']);
     if (!section || typeof section.content !== 'string') return [];
-    return section.content.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+    return section.content.split('\n').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
 };
 
 // Fonction pour extraire les traitements principaux
