@@ -1,5 +1,7 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
 import type { CaseStudy, ChatMessage, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
+import clientPromise from './mongo';
+import { ObjectId } from 'mongodb';
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
@@ -413,3 +415,75 @@ export const getAssistantResponse = async (messages: ChatMessage[], caseContext?
         throw new Error("Failed to get assistant response.");
     }
 };
+
+export async function getCustomChatResponse(
+    userMessage: string,
+    chatHistory: { role: string; parts: string }[] = []
+): Promise<string> {
+    try {
+        // Step 1: Embed the user's message
+        const queryEmbedding = await getEmbedding(userMessage);
+
+        // Step 2: Perform vector search in memofiche_chunks
+        const client = await clientPromise;
+        const db = client.db('pharmia'); // Assuming 'pharmia' is the database name
+        const chunksCollection = db.collection('memofiche_chunks');
+
+        const searchResults = await chunksCollection.aggregate([
+            {
+                $vectorSearch: {
+                    index: 'vector_embedding_index', // This MUST match the index name in MongoDB Atlas
+                    path: 'embedding',
+                    queryVector: queryEmbedding,
+                    numCandidates: 150, // Number of candidates to consider
+                    limit: 5 // Number of top results to return
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    content: 1,
+                    score: { $meta: 'vectorSearchScore' }
+                }
+            }
+        ]).toArray();
+
+        // Step 3: Assemble context from relevant chunks
+        const relevantContext = searchResults
+            .filter(result => result.score > 0.75) // Filter by a confidence score
+            .map(result => result.content)
+            .join('\n\n---\n\n');
+
+        let prompt = `Vous êtes un assistant expert en pharmacie. Répondez à la question de l'utilisateur en vous basant uniquement sur le contexte fourni. Si la réponse ne se trouve pas dans le contexte, indiquez que vous ne pouvez pas répondre à cette question avec les informations disponibles.
+
+Contexte des fiches mémo pertinentes :
+${relevantContext || "Aucun contexte pertinent trouvé."}
+
+Question de l'utilisateur : ${userMessage}`;
+
+        // Step 4: Interact with the LLM
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Use gemini-pro for chat
+        function toContent(message: { role: string; parts: string }): Content {
+            return {
+                role: message.role,
+                parts: [{ text: message.parts }]
+            };
+        }
+        const history: Content[] = chatHistory.map(toContent);
+
+        const chat = model.startChat({
+            history: history, // Include previous chat history if available
+            generationConfig: {
+                maxOutputTokens: 500,
+            },
+        });
+
+        const result = await chat.sendMessage(prompt);
+        const response = result.response;
+        return response.text();
+
+    } catch (error) {
+        console.error('Error in getCustomChatResponse:', error);
+        throw new Error('Failed to get custom chat response.');
+    }
+}

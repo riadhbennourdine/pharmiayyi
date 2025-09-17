@@ -4,6 +4,7 @@ import { IncomingHttpHeaders } from 'http';
 import path from 'path';
 import { generateCaseStudyFromText, getAssistantResponse, generatePharmacologyMemoFiche, generateExhaustiveMemoFiche, getEmbedding } from './services/geminiService';
 import { updateKnowledgeBase, indexSingleMemoFiche } from './services/indexingService';
+import { getCustomChatResponse } from './services/geminiService';
 import clientPromise from './services/mongo';
 import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
@@ -580,6 +581,24 @@ app.post('/api/chat', authMiddleware, async (req, res) => {
             return res.status(500).json({ error: "La recherche vectorielle a échoué. Veuillez demander à l'administrateur de créer ou vérifier l'index de recherche vectorielle dans la base de données." });
         }
         res.status(500).json({ error: 'Failed to get assistant response' });
+    }
+});
+
+// New endpoint for custom chat bot
+app.post('/api/custom-chat', authMiddleware, async (req, res) => {
+    try {
+        const { userMessage, chatHistory } = req.body;
+
+        if (!userMessage) {
+            return res.status(400).json({ error: 'User message is required.' });
+        }
+
+        const response = await getCustomChatResponse(userMessage, chatHistory);
+        res.json({ response });
+
+    } catch (error) {
+        console.error('Error in /api/custom-chat:', error);
+        res.status(500).json({ error: 'Failed to get custom chat response.' });
     }
 });
 
