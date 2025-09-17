@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { CaseStudy, GlossaryTerm } from '../types';
 import { VideoCameraIcon, KeyIcon, CheckCircleIcon, PencilIcon, TrashIcon } from './icons'; // Ajout de TrashIcon
-import ChatAssistant from './ChatAssistant';
 import FlashcardDeck from './FlashcardDeck';
 import { useAuth } from './contexts/AuthContext'; // Ajout de useAuth
 
@@ -507,11 +506,6 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                 </div>
                 
                 <aside className="lg:col-span-1">
-                    {!isPreview && (
-                        <div className="sticky top-24">
-                            <ChatAssistant caseContext={caseStudy} />
-                        </div>
-                    )}
                 </aside>
             </div>
         </div>
