@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import FlashcardDeck from './FlashcardDeck';
 import { VideoCameraIcon } from './icons';
+import CustomChatBot from './CustomChatBot'; // Import the chatbot component
 
 const AccordionSection: React.FC<{ 
     title: string;
@@ -744,6 +745,13 @@ const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ memoFiche
       ) : (
         <ExhaustiveMemoFicheComponent fiche={memoFiche as ExhaustiveMemoFiche} onBack={onBack} onStartQuiz={onStartQuiz} />
       )}
+      <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+        <h3 style={{ marginBottom: '15px', fontSize: '1.5rem', fontWeight: 'bold', color: '#333' }}>Posez une question sur cette fiche !</h3>
+        <CustomChatBot />
+      </div>
+    </div>
+  );
+};
       <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
         <h3 style={{ marginBottom: '15px', fontSize: '1.5rem', fontWeight: 'bold', color: '#333' }}>Posez une question sur cette fiche !</h3>
         <CustomChatBot />
