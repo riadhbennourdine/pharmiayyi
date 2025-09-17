@@ -1,173 +1,177 @@
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import ReactMarkdown from 'react-markdown';
-
-import type { ChatMessage, CaseStudy } from '../types';
-import { CommunicationIcon, ChevronRightIcon, SparklesIcon } from './icons';
-import Spinner from './Spinner';
+import React, { useState, useEffect, useRef } from "react";
+import * as icons from "./icons";
+import { useAuth } from "./contexts/AuthContext";
+import { useData } from "./contexts/DataContext";
+import { FlashcardDeck } from "./FlashcardDeck";
+import { Spinner } from "./Spinner";
 
 interface ChatAssistantProps {
-    caseContext: CaseStudy;
+  onClose: () => void;
 }
 
-const ChatAssistant: React.FC<ChatAssistantProps> = ({ caseContext }) => {
-    const [messages, setMessages] = useState<ChatMessage[]>([
-        { role: 'model', content: "Bonjour ! Je suis PharmIA. Posez-moi des questions sur ce cas pour approfondir votre analyse." }
-    ]);
-    const [input, setInput] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-    const [knowledgeBaseContent, setKnowledgeBaseContent] = useState(''); // New state
+interface Message {
+  sender: "user" | "bot";
+  content: string;
+  type?: "flashcard" | "text" | "json";
+}
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+const isJsonString = (str: string) => {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+};
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+export const ChatAssistant: React.FC<ChatAssistantProps> = ({ onClose }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const { memoFiches } = useData();
 
-    useEffect(() => {
-        if (caseContext) {
-            // Construct the knowledge base string from caseContext
-            const { title, patientSituation, pathologyOverview, keyQuestions, redFlags, recommendations, keyPoints } = caseContext;
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+  };
 
-            const formatTreatments = (treatments: any[] | undefined) => {
-                if (!treatments || treatments.length === 0) return 'Aucun';
-                return treatments.map(t => `- ${t.medicament || t}: Posologie: ${t.posologie}, Durée: ${t.duree}`).join('\n');
-            };
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-            const content = `
-Titre: ${title}
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-Situation du patient:
-${patientSituation}
+  const handleSendMessage = async () => {
+    if (input.trim() === "") return;
 
-Aperçu de la pathologie:
-${Array.isArray(pathologyOverview) ? pathologyOverview.join('\n') : pathologyOverview}
+    const userMessage: Message = { sender: "user", content: input };
+    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    setInput("");
+    setIsLoading(true);
 
-Questions clés à poser:
-${keyQuestions.join('\n')}
-
-Signaux d'alerte:
-${redFlags.join('\n')}
-
-Recommandations:
-  Traitement principal:
-${formatTreatments(recommendations.mainTreatment)}
-  Produits associés:
-${formatTreatments(recommendations.associatedProducts)}
-  Conseils d'hygiène de vie:
-${recommendations.lifestyleAdvice.join('\n')}
-  Conseils alimentaires:
-${recommendations.dietaryAdvice.join('\n')}
-
-Points clés:
-${keyPoints.join('\n')}
-            `;
-            setKnowledgeBaseContent(content);
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/chat/assistant",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user?.token}`,
+          },
+          body: JSON.stringify({
+            message: input,
+            memoFiches: memoFiches.map((mf) => ({
+              title: mf.title,
+              sections: mf.sections.map((s) => ({
+                title: s.title,
+                content: s.content,
+              })),
+            })),
+          }),
         }
-    }, [caseContext]); // Re-fetch when caseContext changes
+      );
 
-    const handleSend = useCallback(async () => {
-        if (input.trim() === '' || isLoading) return;
+      if (!response.ok) {
+        throw new Error("Failed to fetch from assistant API");
+      }
 
-        const newUserMessage: ChatMessage = { role: 'user', content: input };
-        setMessages(prev => [...prev, newUserMessage]);
-        setInput('');
-        setIsLoading(true);
+      const data = await response.json();
+      let botMessage: Message;
 
-        try {
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ messages: [...messages, newUserMessage], caseContext, knowledgeBaseContent }),
-            });
+      if (isJsonString(data.reply)) {
+        botMessage = { sender: "bot", content: data.reply, type: "json" };
+      } else {
+        botMessage = { sender: "bot", content: data.reply };
+      }
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      const errorMessage: Message = {
+        sender: "bot",
+        content: "Désolé, une erreur est survenue. Veuillez réessayer.",
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            if (!response.ok) {
-                throw new Error('Failed to get assistant response');
-            }
-
-            const data = await response.json();
-            const newModelMessage: ChatMessage = { role: 'model', content: data.response };
-            setMessages(prev => [...prev, newModelMessage]);
-        } catch (error) {
-            console.error("Error fetching assistant response:", error);
-            const errorMessage: ChatMessage = { role: 'model', content: "Désolé, une erreur est survenue. Veuillez réessayer." };
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [input, isLoading, messages, caseContext]);
-
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSend();
-        }
-    };
-
-    const renderContent = (content: string) => {
-        try {
-            const parsed = JSON.parse(content);
-            if (parsed && parsed.response) {
-                return <ReactMarkdown>{parsed.response}</ReactMarkdown>;
-            }
-        } catch (e) {
-            // Not a JSON string, render as is
-        }
-        return <ReactMarkdown>{content}</ReactMarkdown>;
-    };
+  const Message = ({ sender, content, type }: Message) => {
+    const isBot = sender === "bot";
+    const messageClass = isBot ? "bg-blue-200 self-start" : "bg-green-200 self-end";
 
     return (
-        <div className="bg-white rounded-lg shadow-lg flex flex-col h-full max-h-[80vh]">
-            <div className="p-4 border-b flex items-center bg-slate-50 rounded-t-lg">
-                <img src="https://pharmaconseilbmb.com/photos/site/bot.gif" alt="Chatbot GIF" className="h-10 w-10 mr-2" />
-                <h3 className="text-lg font-semibold text-slate-800">Assistant PharmIA</h3>
-            </div>
-            <div className="flex-grow p-4 overflow-y-auto bg-slate-100/50">
-                <div className="space-y-4">
-                    {messages.map((msg, index) => (
-                        <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-xs md:max-w-md lg:max-w-xs xl:max-w-sm px-4 py-2 rounded-lg ${msg.role === 'user' ? 'bg-teal-500 text-white' : 'bg-slate-200 text-slate-800'}`}>
-                                {msg.role === 'model' && index === 0 && <SparklesIcon className="h-4 w-4 inline-block mr-1 text-amber-500" />}
-                                {renderContent(msg.content)}
-                            </div>
-                        </div>
-                    ))}
-                    {isLoading && (
-                        <div className="flex justify-start">
-                             <div className="px-4 py-2 rounded-lg bg-slate-200 text-slate-800">
-                                <Spinner />
-                             </div>
-                        </div>
-                    )}
-                    <div ref={messagesEndRef} />
-                </div>
-            </div>
-            <div className="p-4 border-t bg-white rounded-b-lg">
-                <div className="flex items-center">
-                    <input
-                        type="text"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Posez une question..."
-                        className="flex-grow border rounded-l-md p-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        disabled={isLoading}
-                    />
-                    <button
-                        onClick={handleSend}
-                        disabled={isLoading || input.trim() === ''}
-                        className="bg-teal-600 text-white p-3 flex items-center justify-center rounded-r-md hover:bg-teal-700 disabled:bg-slate-400"
-                    >
-                        {isLoading ? <Spinner /> : <ChevronRightIcon className="h-5 w-5" />}
-                    </button>
-                </div>
-            </div>
-        </div>
+      <div className={`p-3 rounded-lg max-w-[70%] ${messageClass} shadow-md`}>
+        {type === "flashcard" ? (
+          <FlashcardDeck flashcards={JSON.parse(content)} />
+        ) : type === "json" ? (
+          <pre className="text-gray-800 whitespace-pre-wrap text-xs">
+            {JSON.stringify(JSON.parse(content), null, 2)}
+          </pre>
+        ) : (
+          <p className="text-gray-800 whitespace-pre-wrap">{content}</p>
+        )}
+      </div>
     );
+  };
+
+  return (
+    <div
+      className={`fixed bottom-6 right-6 z-50 ${
+        isOpen ? "w-96 h-[600px]" : "w-16 h-16"
+      } bg-white rounded-lg shadow-lg flex flex-col transition-all duration-300 ease-in-out`}
+    >
+      <div
+        className="w-full h-16 bg-blue-600 text-white flex items-center justify-between p-4 rounded-t-lg cursor-pointer"
+        onClick={toggleChat}
+      >
+        <h3 className="text-lg font-semibold">Assistant IA</h3>
+        <button onClick={onClose} className="text-white">
+          <icons.XMarkIcon className="h-6 w-6" />
+        </button>
+      </div>
+      {isOpen && (
+        <>
+          <div className="flex-1 p-4 overflow-y-auto space-y-4">
+            {messages.map((msg, index) => (
+              <Message key={index} sender={msg.sender} content={msg.content} type={msg.type} />
+            ))}
+            {isLoading && (
+              <div className="flex justify-center items-center">
+                <Spinner />
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="border-t p-4 flex items-center">
+            <input
+              type="text"
+              className="flex-1 border rounded-lg p-2 mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Tapez votre message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleSendMessage();
+                }
+              }}
+            />
+            <button
+              onClick={handleSendMessage}
+              className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              Envoyer
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default ChatAssistant;
