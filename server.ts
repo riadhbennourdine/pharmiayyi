@@ -1,7 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { IncomingHttpHeaders } from 'http';
 import path from 'path';
-import { generateCaseStudyFromText, getAssistantResponse, generatePharmacologyMemoFiche, generateExhaustiveMemoFiche } from './services/geminiService';
+import { generateCaseStudyFromText, getAssistantResponse, generatePharmacologyMemoFiche, generateExhaustiveMemoFiche, getEmbedding } from './services/geminiService';
+import { updateKnowledgeBase } from './services/indexingService';
 import clientPromise from './services/mongo';
 import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
@@ -518,13 +519,65 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', authMiddleware, async (req, res) => {
     try {
-        const { messages, caseContext, knowledgeBaseContent } = req.body; // Added knowledgeBaseContent
-        const result = await getAssistantResponse(messages, caseContext, knowledgeBaseContent); // Pass knowledgeBaseContent
+        const { messages } = req.body;
+
+        if (!messages || messages.length === 0) {
+            return res.status(400).json({ error: 'Messages are required.' });
+        }
+
+        const userQuery = messages[messages.length - 1].content;
+
+        // Step 1: Vectorize the user's query
+        const queryEmbedding = await getEmbedding(userQuery);
+
+        // Step 2: Perform vector search to find relevant knowledge
+        const client = await clientPromise;
+        const db = client.db('pharmia');
+        const chunksCollection = db.collection('memofiche_chunks');
+
+        const searchResults = await chunksCollection.aggregate([
+            {
+                $vectorSearch: {
+                    index: 'vector_embedding_index', // This MUST match the index name in MongoDB
+                    path: 'embedding',
+                    queryVector: queryEmbedding,
+                    numCandidates: 150, // Number of candidates to consider
+                    limit: 5 // Number of top results to return
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    content: 1,
+                    score: { $meta: 'vectorSearchScore' }
+                }
+            }
+        ]).toArray();
+
+        // Step 3: Filter results and assemble the context
+        const highConfidenceResults = searchResults.filter(result => result.score > 0.75);
+        let knowledgeBaseContent = 'Aucune information pertinente trouvée dans la base de connaissances.';
+
+        if (highConfidenceResults.length > 0) {
+            knowledgeBaseContent = highConfidenceResults
+                .map(result => result.content)
+                .join('\n\n---\n\n');
+        }
+        
+        console.log(`Found ${highConfidenceResults.length} relevant chunks with score > 0.75.`);
+
+        // Step 4: Get the assistant's response using the retrieved context
+        const result = await getAssistantResponse(messages, null, knowledgeBaseContent);
         res.json({ response: result });
+
     } catch (error) {
         console.error('Error in /api/chat:', error);
+        // Check if the error is due to a missing vector index
+        if (error instanceof Error && error.message.includes('index not found')) {
+            return res.status(500).json({ error: "La recherche vectorielle a échoué. Veuillez demander à l'administrateur de créer ou vérifier l'index de recherche vectorielle dans la base de données." });
+        }
         res.status(500).json({ error: 'Failed to get assistant response' });
     }
 });
@@ -617,6 +670,21 @@ app.delete('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) =>
   } catch (error) {
     console.error('Error deleting memo fiche:', error);
     res.status(500).json({ error: 'Failed to delete memo fiche.' });
+  }
+});
+
+// Endpoint for admin to trigger knowledge base update
+app.post('/api/admin/update-knowledge-base', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+  try {
+    console.log(`Knowledge base update initiated by admin: ${req.user?.email}`);
+    const result = await updateKnowledgeBase();
+    res.status(200).json({
+      message: 'Knowledge base update completed successfully.',
+      ...result
+    });
+  } catch (error) {
+    console.error('Error during knowledge base update endpoint:', error);
+    res.status(500).json({ message: 'Failed to update knowledge base.' });
   }
 });
 

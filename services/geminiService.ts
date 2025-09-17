@@ -39,6 +39,22 @@ const safetySettings = [
     },
 ];
 
+const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
+
+export const getEmbedding = async (text: string): Promise<number[]> => {
+    try {
+        const result = await embeddingModel.embedContent(text);
+        const embedding = result.embedding;
+        if (!embedding || !embedding.values) {
+            throw new Error("L'embedding n'a pas pu être généré.");
+        }
+        return embedding.values;
+    } catch (error) {
+        console.error("Erreur lors de la génération de l'embedding:", error);
+        throw new Error("Échec de la génération de l'embedding à partir du texte.");
+    }
+};
+
 export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
     const prompt = `
       À partir du texte suivant, génère une mémofiche de cas de comptoir pour un préparateur en pharmacie.
@@ -331,7 +347,7 @@ Texte source :
     }
 };
 
-export const getAssistantResponse = async (messages: ChatMessage[], caseContext: CaseStudy, knowledgeBaseContent: string): Promise<string> => {
+export const getAssistantResponse = async (messages: ChatMessage[], caseContext?: CaseStudy | null, knowledgeBaseContent?: string): Promise<string> => {
     let knowledgeBaseInstruction = '';
     if (knowledgeBaseContent) {
         knowledgeBaseInstruction = `
