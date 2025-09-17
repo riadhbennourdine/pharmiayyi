@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
-import type { CaseStudy, ChatMessage, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
+import type { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import clientPromise from './mongo';
 import { ObjectId } from 'mongodb';
 
@@ -349,72 +349,7 @@ Texte source :
     }
 };
 
-export const getAssistantResponse = async (messages: ChatMessage[], caseContext?: CaseStudy | null, knowledgeBaseContent?: string): Promise<string> => {
-    let knowledgeBaseInstruction = '';
-    if (knowledgeBaseContent) {
-        knowledgeBaseInstruction = `
-        Voici la mémofiche qui sert de base de connaissances. Base tes réponses exclusivement sur ces informations.
 
-        ---
-        ${knowledgeBaseContent}
-        ---
-        `;
-    }
-
-    const systemInstruction = {
-        role: "system",
-        parts: [{
-            text: `
-        Tu es "PharmIA", un assistant pédagogique expert en pharmacie.
-        Ton rôle est d'aider un étudiant à approfondir sa compréhension d'un cas de comptoir en se basant sur la mémofiche fournie.
-        ${knowledgeBaseInstruction}
-        Réponds aux questions de l'étudiant de manière concise, claire et encourageante.
-        Formate tes réponses en Markdown (utilise des listes à puces, du gras, etc. pour une meilleure lisibilité).
-        Base tes réponses UNIQUEMENT sur les informations fournies dans la mémofiche. Ne spécule pas et n'ajoute pas d'informations extérieures.
-        Si une question sort du cadre de la mémofiche, réponds poliment que tu ne peux répondre qu'aux questions relatives à la mémofiche.
-        Adopte un ton amical et professionnel. Ne te présente pas à nouveau.
-    `}]
-    };
-
-    function toContent(message: ChatMessage): Content {
-    return {
-        role: message.role,
-        parts: [{ text: message.content }]
-    };
-}
-
-// ...
-
-    let chatHistory = messages;
-    if (chatHistory.length > 0 && chatHistory[0].role === 'model') {
-        chatHistory = chatHistory.slice(1);
-    }
-
-    const history: Content[] = chatHistory.map(toContent);
-
-
-    try {
-        if (chatHistory.length > 0) {
-            console.log("Sending message to Gemini:", chatHistory.slice(-1)[0].content); 
-        }
-        console.log("System instruction sent to Gemini:", systemInstruction.parts[0].text); 
-
-        const result = await model.generateContent({
-            contents: history,
-            systemInstruction: systemInstruction.parts[0].text,
-            generationConfig,
-            safetySettings,
-        });
-
-        const response = result.response;
-        console.log("Raw JSON from Gemini:", response.text()); 
-        return response.text();
-
-    } catch (error) {
-        console.error("Error getting assistant response from Gemini:", error); 
-        throw new Error("Failed to get assistant response.");
-    }
-};
 
 export async function getCustomChatResponse(
     userMessage: string,
