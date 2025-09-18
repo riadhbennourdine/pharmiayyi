@@ -96,7 +96,7 @@ const CustomChatBot: React.FC = () => {
   return (
     <div style={styles.chatbotWrapper}> {/* New wrapper div */}
       <button onClick={toggleChat} style={styles.chatToggleButton}>
-        <img src="/assets/icons/chatbot.gif" alt="Chatbot Toggle" style={styles.chatToggleImage} />
+        <img src="https://pharmaconseilbmb.com/photos/site/bot.gif" alt="Chatbot Toggle" style={styles.chatToggleImage} />
       </button>
 
       {isOpen && ( // Conditionally render chat container
