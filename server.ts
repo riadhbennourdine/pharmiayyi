@@ -576,7 +576,8 @@ app.post('/api/memofiches', async (req, res) => {
     res.status(201).json(insertedDocument); // Retourne le document inséré avec son _id
   } catch (error) {
     console.error('Error creating memo fiche:', error);
-    res.status(500).json({ error: 'Failed to create memo fiche.' });
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    res.status(500).json({ error: 'Failed to create memo fiche.', details: errorMessage });
   }
 });
 
