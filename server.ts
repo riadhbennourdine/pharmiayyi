@@ -537,7 +537,8 @@ app.post('/api/custom-chat', authMiddleware, async (req, res) => {
 
     } catch (error) {
         console.error('Error in /api/custom-chat:', error);
-        res.status(500).json({ error: 'Failed to get custom chat response.' });
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        res.status(500).json({ error: 'Failed to get custom chat response.', details: errorMessage });
     }
 });
 

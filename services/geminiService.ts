@@ -438,6 +438,7 @@ Question de l'utilisateur : ${userMessage}`;
 
     } catch (error) {
         console.error('Error in getCustomChatResponse:', error);
-        throw new Error('Failed to get custom chat response.');
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred in chat response generation';
+        throw new Error(`Failed to get custom chat response: ${errorMessage}`);
     }
 }

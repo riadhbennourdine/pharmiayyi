@@ -210,6 +210,7 @@ export const indexSingleMemoFiche = async (ficheId: ObjectId): Promise<{ process
 
     } catch (error) {
         console.error("Error during single fiche indexing:", error);
-        throw new Error("Failed to index single fiche.");
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred during indexing';
+        throw new Error(`Failed to index single fiche: ${errorMessage}`);
     }
 };

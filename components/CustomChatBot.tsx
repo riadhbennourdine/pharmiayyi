@@ -8,9 +8,10 @@ interface ChatMessage {
 const CustomChatBot: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'bot', content: 'Bonjour ! Je suis votre assistant PharmIA. Comment puis-je vous aider aujourd\'hui ?' }
-]);
+  ]);
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false); // New state for chat visibility
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -18,8 +19,10 @@ const CustomChatBot: React.FC = () => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (isOpen) { // Only scroll to bottom if chat is open
+      scrollToBottom();
+    }
+  }, [messages, isOpen]);
 
   const handleSendMessage = async () => {
     if (input.trim() === '') return;
@@ -67,41 +70,79 @@ const CustomChatBot: React.FC = () => {
     }
   };
 
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div style={styles.chatContainer}>
-      <div style={styles.messagesContainer}>
-        {messages.map((msg, index) => (
-          <div key={index} style={msg.role === 'user' ? styles.userMessage : styles.botMessage}>
-            {msg.content}
+    <div style={styles.chatbotWrapper}> {/* New wrapper div */}
+      <button onClick={toggleChat} style={styles.chatToggleButton}>
+        <img src="/assets/icons/chatbot.gif" alt="Chatbot Toggle" style={styles.chatToggleImage} />
+      </button>
+
+      {isOpen && ( // Conditionally render chat container
+        <div style={styles.chatContainer}>
+          <div style={styles.messagesContainer}>
+            {messages.map((msg, index) => (
+              <div key={index} style={msg.role === 'user' ? styles.userMessage : styles.botMessage}>
+                {msg.content}
+              </div>
+            ))}
+            {isLoading && (
+              <div style={styles.loadingIndicator}>
+                <div style={styles.spinner}></div>
+                <span>Réflexion en cours...</span>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
-        ))}
-        {isLoading && (
-          <div style={styles.loadingIndicator}>
-            <div style={styles.spinner}></div>
-            <span>Réflexion en cours...</span>
+          <div style={styles.inputContainer}>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Posez votre question..."
+              style={styles.inputField}
+              disabled={isLoading}
+            />
+            <button onClick={handleSendMessage} style={styles.sendButton} disabled={isLoading}>
+              Envoyer
+            </button>
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-      <div style={styles.inputContainer}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Posez votre question..."
-          style={styles.inputField}
-          disabled={isLoading}
-        />
-        <button onClick={handleSendMessage} style={styles.sendButton} disabled={isLoading}>
-          Envoyer
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
+  chatbotWrapper: { // New style for the wrapper
+    position: 'fixed',
+    bottom: '20px',
+    right: '20px',
+    zIndex: 1000,
+  },
+  chatToggleButton: { // New style for the toggle button
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+    width: '60px', // Adjust size as needed
+    height: '60px', // Adjust size as needed
+    borderRadius: '50%',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff', // Or any background color for the button
+  },
+  chatToggleImage: { // New style for the GIF
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    borderRadius: '50%',
+  },
   chatContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -112,6 +153,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     overflow: 'hidden',
     fontFamily: 'Arial, sans-serif',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    position: 'absolute', // Position the chat window relative to the wrapper
+    bottom: '80px', // Adjust to be above the toggle button
+    right: '0',
   },
   messagesContainer: {
     flexGrow: 1,
