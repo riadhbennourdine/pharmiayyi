@@ -33,7 +33,7 @@ const CustomChatBot: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const chatHistoryForApi = messages.map(msg => ({
+      const chatHistoryForApi = messages.slice(1).map(msg => ({ // Exclude the initial bot welcome message
         role: msg.role === 'user' ? 'user' : 'model', // Gemini API expects 'user' or 'model'
         parts: msg.content,
       }));
