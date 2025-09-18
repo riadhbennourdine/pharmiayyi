@@ -375,33 +375,40 @@ export async function getCustomChatResponse(
     chatHistory: { role: string; parts: string }[] = []
 ): Promise<string> {
     try {
-        // Temporarily remove vectorization to bypass quota issues
-        // const queryEmbedding = await getEmbedding(userMessage);
-        // const client = await clientPromise;
-        // const db = client.db('pharmia');
-        // const chunksCollection = db.collection('memofiche_chunks');
-        // const searchResults = await chunksCollection.aggregate([
-        //     {
-        //         $vectorSearch: {
-        //             index: 'vector_embedding_index',
-        //             path: 'embedding',
-        //             queryVector: queryEmbedding,
-        //             numCandidates: 150,
-        //             limit: 5
-        //         }
-        //     },
-        //     {
-        //         $project: {
-        //             _id: 0,
-        //             content: 1,
-        //             score: { $meta: 'vectorSearchScore' }
-        //         }
-        //     }
-        // ]).toArray();
-        // const relevantContext = searchResults
-        //     .filter(result => result.score > 0.75)
-        //     .map(result => result.content)
-        //     .join('\n\n---\n\n');
+        const queryEmbedding = await getEmbedding(userMessage);
+        const client = await clientPromise;
+        const db = client.db('pharmia');
+        const chunksCollection = db.collection('memofiche_chunks');
+        const searchResults = await chunksCollection.aggregate([
+            {
+                $vectorSearch: {
+                    index: 'vector_embedding_index',
+                    path: 'embedding',
+                    queryVector: queryEmbedding,
+                    numCandidates: 150,
+                    limit: 5
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    content: 1,
+                    score: { $meta: 'vectorSearchScore' }
+                }
+            }
+        ]).toArray();
+        const relevantContext = searchResults
+            .filter(result => result.score > 0.75)
+            .map(result => result.content)
+            .join('\n\n---\n\n');
+
+        const prompt = `Vous êtes un assistant expert en pharmacie. Répondez à la question de l'utilisateur en vous basant sur le contexte suivant, si pertinent. Si le contexte ne contient pas la réponse, utilisez vos connaissances générales.
+
+Contexte:
+${relevantContext}
+
+Question:
+${userMessage}`;
 
         function toContent(message: { role: string; parts: string }): Content {
             return {
@@ -418,7 +425,7 @@ export async function getCustomChatResponse(
             },
         });
 
-        const result = await chat.sendMessage(userMessage); // Pass userMessage directly
+        const result = await chat.sendMessage(prompt);
         const response = result.response;
         return response.text();
 
