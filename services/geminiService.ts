@@ -406,7 +406,7 @@ export async function getCustomChatResponse(
         let prompt = `Vous êtes un assistant expert en pharmacie. Répondez à la question de l'utilisateur.`;
 
         // Step 4: Interact with the LLM
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Use gemini-pro for chat
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Use gemini-1.5-flash for chat
         function toContent(message: { role: string; parts: string }): Content {
             return {
                 role: message.role,
