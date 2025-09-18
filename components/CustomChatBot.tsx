@@ -6,7 +6,9 @@ interface ChatMessage {
 }
 
 const CustomChatBot: React.FC = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'bot', content: 'Bonjour ! Je suis votre assistant PharmIA. Comment puis-je vous aider aujourd\'hui ?' }
+]);
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

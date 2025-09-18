@@ -43,6 +43,16 @@ const safetySettings = [
 
 const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
 
+// Helper function to extract JSON from a string that might contain markdown or other text
+function extractJsonFromString(text: string): string {
+    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+    if (jsonMatch && jsonMatch[1]) {
+        return jsonMatch[1];
+    }
+    // If no markdown block, assume the whole text is potentially JSON or needs fixing
+    return text;
+}
+
 export const getEmbedding = async (text: string): Promise<number[]> => {
     try {
         const result = await embeddingModel.embedContent(text);
@@ -113,6 +123,9 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
         const response = result.response;
         let jsonText = response.text();
         console.log("Raw JSON from Gemini:", jsonText);
+
+        // Extract JSON block from the response
+        jsonText = extractJsonFromString(jsonText);
 
         let generatedCase: CaseStudy;
         try {
@@ -220,6 +233,9 @@ Texte source :
         const response = result.response;
         let jsonText = response.text();
         console.log("Raw JSON from Gemini:", jsonText);
+
+        // Extract JSON block from the response
+        jsonText = extractJsonFromString(jsonText);
         
         let generatedMemoFiche: PharmacologyMemoFiche;
         try {
@@ -325,6 +341,9 @@ Texte source :
         const response = result.response;
         let jsonText = response.text();
         console.log("Raw JSON from Gemini:", jsonText);
+
+        // Extract JSON block from the response
+        jsonText = extractJsonFromString(jsonText);
         
         let generatedMemoFiche: ExhaustiveMemoFiche;
         try {
