@@ -403,18 +403,6 @@ export async function getCustomChatResponse(
         //     .map(result => result.content)
         //     .join('\n\n---\n\n');
 
-        let prompt = `Vous êtes un assistant expert en pharmacie. Répondez à la question de l'utilisateur.`;
-
-        // Step 4: Interact with the LLM
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Use gemini-1.5-flash for chat
-        function toContent(message: { role: string; parts: string }): Content {
-            return {
-                role: message.role,
-                parts: [{ text: message.parts }]
-            };
-        }
-        const history: Content[] = chatHistory.map(toContent);
-
         const chat = model.startChat({
             history: history, // Include previous chat history if available
             generationConfig: {
@@ -422,7 +410,7 @@ export async function getCustomChatResponse(
             },
         });
 
-        const result = await chat.sendMessage(prompt);
+        const result = await chat.sendMessage(userMessage); // Pass userMessage directly
         const response = result.response;
         return response.text();
 
