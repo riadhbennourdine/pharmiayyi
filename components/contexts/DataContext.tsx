@@ -74,7 +74,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify(editedCase),
       });
