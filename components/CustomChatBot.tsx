@@ -44,7 +44,7 @@ const CustomChatBot: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify({ userMessage: input.trim(), chatHistory: chatHistoryForApi }),
+        body: JSON.stringify({ userMessage: input.trim(), chatHistory: chatHistoryForApi, context }),
       });
 
       if (!response.ok) {
@@ -245,6 +245,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     fontSize: '14px',
     transition: 'background-color 0.2s',
+  },
+  sendButtonHover: {
+    backgroundColor: '#0056b3',
+  },
+};
+
+export default CustomChatBot;nd-color 0.2s',
   },
   sendButtonHover: {
     backgroundColor: '#0056b3',

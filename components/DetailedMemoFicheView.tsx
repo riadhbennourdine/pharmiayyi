@@ -379,7 +379,7 @@ const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ memoFiche
       )}
       <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
         <h3 style={{ marginBottom: '15px', fontSize: '1.5rem', fontWeight: 'bold', color: '#333' }}>Posez une question sur cette fiche !</h3>
-        <CustomChatBot />
+        <CustomChatBot context={JSON.stringify(memoFiche)} />
       </div>
     </div>
   );

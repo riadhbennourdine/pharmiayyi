@@ -33,7 +33,7 @@ const AppLayout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
-      <CustomChatBot /> {/* Render CustomChatBot directly */}
+
     </div>
   );
 };

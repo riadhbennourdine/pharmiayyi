@@ -526,13 +526,13 @@ app.post('/api/generate', async (req, res) => {
 // New endpoint for custom chat bot
 app.post('/api/custom-chat', authMiddleware, async (req, res) => {
     try {
-        const { userMessage, chatHistory } = req.body;
+        const { userMessage, chatHistory, context } = req.body;
 
         if (!userMessage) {
             return res.status(400).json({ error: 'User message is required.' });
         }
 
-        const response = await getCustomChatResponse(userMessage, chatHistory);
+        const response = await getCustomChatResponse(userMessage, chatHistory, context);
         res.json({ response });
 
     } catch (error) {
