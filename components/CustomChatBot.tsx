@@ -42,8 +42,7 @@ const CustomChatBot: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add authorization header if your API requires it
-          // 'Authorization': `Bearer YOUR_AUTH_TOKEN`, 
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ userMessage: input.trim(), chatHistory: chatHistoryForApi }),
       });
@@ -165,7 +164,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   chatContainer: {
     display: 'flex',
     flexDirection: 'column',
-    height: '600px',
+    height: '400px',
     width: '400px',
     border: '1px solid #ccc',
     borderRadius: '8px',
