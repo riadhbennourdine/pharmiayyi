@@ -57,7 +57,26 @@ const CustomChatBot: React.FC = () => {
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorMessage: ChatMessage = { role: 'bot', content: 'Désolé, une erreur est survenue. Veuillez réessayer.' };
+      let errorContent = 'Désolé, une erreur est survenue. Veuillez réessayer.';
+
+      // Attempt to parse error response for more details
+      if (error instanceof Response) {
+        try {
+          const errorData = await error.json();
+          if (errorData.details) {
+            errorContent = `Désolé, une erreur est survenue. Détails: ${errorData.details}`;
+          } else if (errorData.error) {
+            errorContent = `Désolé, une erreur est survenue. Détails: ${errorData.error}`;
+          }
+        } catch (jsonError) {
+          console.error('Failed to parse error JSON:', jsonError);
+          // Fallback to generic message
+        }
+      } else if (error instanceof Error) {
+        errorContent = `Désolé, une erreur est survenue. Détails: ${error.message}`;
+      }
+
+      const errorMessage: ChatMessage = { role: 'bot', content: errorContent };
       setMessages((prevMessages) => [...prevMessages, errorMessage]);
     } finally {
       setIsLoading(false);
