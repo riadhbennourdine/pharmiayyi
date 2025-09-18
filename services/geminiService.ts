@@ -403,6 +403,14 @@ export async function getCustomChatResponse(
         //     .map(result => result.content)
         //     .join('\n\n---\n\n');
 
+        function toContent(message: { role: string; parts: string }): Content {
+            return {
+                role: message.role,
+                parts: [{ text: message.parts }]
+            };
+        }
+        const history: Content[] = chatHistory.map(toContent);
+
         const chat = model.startChat({
             history: history, // Include previous chat history if available
             generationConfig: {
