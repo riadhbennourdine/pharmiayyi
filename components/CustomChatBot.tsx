@@ -5,7 +5,11 @@ interface ChatMessage {
   content: string;
 }
 
-const CustomChatBot: React.FC = () => {
+interface CustomChatBotProps {
+  context?: string; // Optional context for the chatbot
+}
+
+const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'bot', content: 'Bonjour ! Je suis votre assistant PharmIA. Comment puis-je vous aider aujourd\'hui ?' }
   ]);
@@ -245,13 +249,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     fontSize: '14px',
     transition: 'background-color 0.2s',
-  },
-  sendButtonHover: {
-    backgroundColor: '#0056b3',
-  },
-};
-
-export default CustomChatBot;nd-color 0.2s',
   },
   sendButtonHover: {
     backgroundColor: '#0056b3',
