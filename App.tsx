@@ -26,14 +26,6 @@ import CustomChatBot from './components/CustomChatBot';
 
 // --- ROUTE GUARDS & LAYOUT ---
 const AppLayout: React.FC = () => {
-  const location = useLocation();
-  const isMemoFicheRoute = location.pathname.startsWith('/memofiche/');
-  const [showChatbot, setShowChatbot] = useState(isMemoFicheRoute); // Default visibility
-
-  useEffect(() => {
-    setShowChatbot(isMemoFicheRoute); // Update visibility when route changes
-  }, [isMemoFicheRoute]);
-
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-800">
       <Header />
@@ -41,44 +33,33 @@ const AppLayout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
-
-      {isMemoFicheRoute && (
-        <div style={chatbotContainerStyles}>
-          <button
-            onClick={() => setShowChatbot(!showChatbot)}
-            style={chatbotToggleStyles}
-          >
-            {showChatbot ? 'Fermer le Chat' : 'Ouvrir le Chat'}
-          </button>
-          {showChatbot && <CustomChatBot />}
-        </div>
-      )}
+      <CustomChatBot /> {/* Render CustomChatBot directly */}
     </div>
   );
 };
 
-// Define some inline styles for the chatbot container and toggle button
-const chatbotContainerStyles: React.CSSProperties = {
-  position: 'fixed',
-  bottom: '20px',
-  right: '20px',
-  zIndex: 1000,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-end',
-};
+// Remove these styles as they are no longer needed
+// const chatbotContainerStyles: React.CSSProperties = {
+//   position: 'fixed',
+//   bottom: '20px',
+//   right: '20px',
+//   zIndex: 1000,
+//   display: 'flex',
+//   flexDirection: 'column',
+//   alignItems: 'flex-end',
+// };
 
-const chatbotToggleStyles: React.CSSProperties = {
-  backgroundColor: '#007bff',
-  color: 'white',
-  border: 'none',
-  borderRadius: '50px',
-  padding: '10px 20px',
-  cursor: 'pointer',
-  fontSize: '16px',
-  boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-  marginBottom: '10px',
-};
+// const chatbotToggleStyles: React.CSSProperties = {
+//   backgroundColor: '#007bff',
+//   color: 'white',
+//   border: 'none',
+//   borderRadius: '50px',
+//   padding: '10px 20px',
+//   cursor: 'pointer',
+//   fontSize: '16px',
+//   boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+//   marginBottom: '10px',
+// };
 
 const LoggedInRoute: React.FC = () => {
   const { isAuthenticated, user } = useAuth(); // Need user to check profileIncomplete
