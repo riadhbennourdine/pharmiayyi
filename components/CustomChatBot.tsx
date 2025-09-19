@@ -113,10 +113,18 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
             </div>
             <div style={styles.messagesContainer}>
               {messages.map((msg, index) => (
-                <div key={index} style={msg.role === 'user' ? styles.userMessage : styles.botMessage}>
-                  {msg.role === 'bot' ? <ReactMarkdown>{msg.content}</ReactMarkdown> : msg.content}
-                </div>
-              ))}
+                              <div key={index}>
+                {msg.role === 'user' ? (
+                  <div style={styles.userMessage}>{msg.content}</div>
+                ) : (
+                  <div style={styles.botMessageContainer}>
+                    <img src="https://pharmaconseilbmb.com/photos/site/23.png" alt="chatbot icon" style={styles.botIcon} />
+                    <div style={styles.botMessage}>
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+              </div>
               {isLoading && (
                 <div style={styles.loadingIndicator}>
                   <div style={styles.spinner}></div>
@@ -232,14 +240,22 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     lineHeight: '1.4',
   },
+  botMessageContainer: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    marginBottom: '8px',
+  },
+  botIcon: {
+    width: '30px',
+    height: '30px',
+    borderRadius: '50%',
+    marginRight: '10px',
+  },
   botMessage: {
     backgroundColor: '#e6fffa',
-    alignSelf: 'flex-start',
     padding: '8px 12px',
     borderRadius: '15px',
-    marginBottom: '8px',
     maxWidth: '80%',
-    marginRight: 'auto',
     wordBreak: 'break-word',
     fontSize: '14px',
     lineHeight: '1.4',
