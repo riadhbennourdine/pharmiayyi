@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import type { CaseStudy, GlossaryTerm } from '../types';
 import { VideoCameraIcon, KeyIcon, CheckCircleIcon, PencilIcon, TrashIcon } from './icons'; // Ajout de TrashIcon
 import FlashcardDeck from './FlashcardDeck';
+import CustomChatBot from './CustomChatBot';
 import { useAuth } from './contexts/AuthContext'; // Ajout de useAuth
 
 interface MemoFicheViewProps {
@@ -89,6 +90,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   }), [rawCaseStudy]);
 
   const [openSection, setOpenSection] = useState<string | null>('patientSituation');
+  const [isChatbotOpen, setChatbotOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabName>('memo');
 
   const handleToggle = (title: string) => {
@@ -506,6 +508,19 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                 </div>
                 
                 <aside className="lg:col-span-1">
+                    <div className="sticky top-24">
+                        <button 
+                            onClick={() => setChatbotOpen(!isChatbotOpen)}
+                            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg mb-4"
+                        >
+                            {isChatbotOpen ? 'Fermer le Chat' : 'Chatter avec la mémofiche'}
+                        </button>
+                        {isChatbotOpen && (
+                            <div className="bg-white rounded-lg shadow-md">
+                                <CustomChatBot context={JSON.stringify(caseStudy)} />
+                            </div>
+                        )}
+                    </div>
                 </aside>
             </div>
         </div>
