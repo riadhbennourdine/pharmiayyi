@@ -759,7 +759,7 @@ app.post('/api/user/track-quiz-completion', authMiddleware, async (req, res) => 
     // Add quiz completion to quizHistory array
     await usersCollection.updateOne(
       { _id: new ObjectId(userId) },
-      { $push: { quizHistory: newQuizEntry } }
+      { $push: { quizHistory: newQuizEntry } as any }
     );
 
 
