@@ -557,6 +557,11 @@ app.get('/api/memofiches', async (req, res) => {
 app.get('/api/memofiches/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'ID de mémofiche invalide.' });
+    }
+
     const client = await clientPromise;
     const db = client.db('pharmia');
     const memoFiche = await db.collection('memofiches_v2').findOne({ _id: new ObjectId(id) });
@@ -566,8 +571,8 @@ app.get('/api/memofiches/:id', async (req, res) => {
     }
 
     res.status(200).json(memoFiche);
-  } catch (error) {
-    console.error('Error fetching single memo fiche:', error);
+  } catch (error: any) {
+    console.error('Error fetching single memo fiche:', error.message, error.stack);
     res.status(500).json({ message: 'Failed to fetch memo fiche.' });
   }
 });
