@@ -255,6 +255,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginRight: 'auto',
     backgroundColor: '#e0e0e0',
     color: '#555',
+    fontSize: '14px',
   },
   spinner: {
     border: '3px solid #f3f3f3',
