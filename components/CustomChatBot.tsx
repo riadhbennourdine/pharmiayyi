@@ -113,7 +113,7 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
             </div>
             <div style={styles.messagesContainer}>
               {messages.map((msg, index) => (
-                              <div key={index}>
+              <div key={index}>
                 {msg.role === 'user' ? (
                   <div style={styles.userMessage}>{msg.content}</div>
                 ) : (
@@ -125,12 +125,13 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
                   </div>
                 )}
               </div>
-              {isLoading && (
-                <div style={styles.loadingIndicator}>
-                  <div style={styles.spinner}></div>
-                  <span>Réflexion en cours...</span>
-                </div>
-              )}
+            ))}
+            {isLoading && (
+              <div style={styles.loadingIndicator}>
+                <div style={styles.spinner}></div>
+                <span>Réflexion en cours...</span>
+              </div>
+            )}
               <div ref={messagesEndRef} />
             </div>
             <div style={styles.inputContainer}>
