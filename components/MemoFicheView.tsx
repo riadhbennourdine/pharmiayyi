@@ -509,12 +509,14 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                 
                 <aside className="lg:col-span-1">
                     <div className="sticky top-24">
-                        <button 
-                            onClick={() => setChatbotOpen(!isChatbotOpen)}
-                            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg mb-4"
-                        >
-                            {isChatbotOpen ? 'Fermer le Chat' : 'Chatter avec la mémofiche'}
-                        </button>
+                        {!isChatbotOpen && (
+                            <img 
+                                src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTViYjNmZWM4Y2YyYjI4YjY5YjQ4YjY5YjY5YjY5YjY5YjY5YjY/s4aazvE1a3i92/giphy.gif" 
+                                alt="Open Chatbot" 
+                                className="cursor-pointer w-full rounded-lg shadow-lg mb-4"
+                                onClick={() => setChatbotOpen(true)}
+                            />
+                        )}
                         {isChatbotOpen && (
                             <div className="bg-white rounded-lg shadow-md">
                                 <CustomChatBot context={JSON.stringify(caseStudy)} />
