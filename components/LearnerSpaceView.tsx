@@ -19,6 +19,7 @@ const LearnerSpaceView: React.FC = () => {
         <p className="text-lg text-slate-600 mb-4">
           Je suis Votre Coach IA pour vous accompagner dans votre parcours d'apprentissage. Voici votre État d'avancement à la date du {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}.
         </p>
+      </div>
     </div>
   );
 };
