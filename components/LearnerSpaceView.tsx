@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { MemoFiche } from '../types'; // Assuming MemoFiche type is available
 
@@ -114,7 +115,11 @@ const LearnerSpaceView: React.FC = () => {
         {readMemofichesDetails.length > 0 ? (
           <ul className="list-disc pl-5 text-slate-700 mb-6">
             {readMemofichesDetails.map(fiche => (
-              <li key={fiche._id}>{fiche.title} ({fiche.theme})</li>
+              <li key={fiche._id}>
+                <Link to={`/memofiche/${fiche._id}`} className="text-teal-600 hover:underline">
+                  {fiche.title} ({fiche.theme})
+                </Link>
+              </li>
             ))}
           </ul>
         ) : (
@@ -125,7 +130,11 @@ const LearnerSpaceView: React.FC = () => {
         {unreadMemofichesDetails.length > 0 ? (
           <ul className="list-disc pl-5 text-slate-700">
             {unreadMemofichesDetails.map(fiche => (
-              <li key={fiche._id}>{fiche.title} ({fiche.theme})</li>
+              <li key={fiche._id}>
+                <Link to={`/memofiche/${fiche._id}`} className="text-teal-600 hover:underline">
+                  {fiche.title} ({fiche.theme})
+                </Link>
+              </li>
             ))}
           </ul>
         ) : (
