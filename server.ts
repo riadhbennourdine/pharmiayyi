@@ -666,8 +666,8 @@ app.get('/api/memofiches/count', async (req, res) => {
     const db = client.db('pharmia');
     const count = await db.collection('memofiches_v2').countDocuments();
     res.status(200).json({ count });
-  } catch (error) {
-    console.error('Error fetching memo fiches count:', error);
+  } catch (error: any) {
+    console.error('Error fetching memo fiches count:', error.message, error.stack);
     res.status(500).json({ message: 'Failed to fetch memo fiches count.' });
   }
 });
