@@ -511,7 +511,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     <div className="sticky top-24">
                         <button 
                             onClick={() => setChatbotOpen(!isChatbotOpen)}
-                            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg mb-4"
+                            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg mb-4"
                         >
                             {isChatbotOpen ? 'Fermer le Chat' : 'Chatter avec la mémofiche'}
                         </button>
