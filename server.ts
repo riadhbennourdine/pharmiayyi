@@ -553,6 +553,19 @@ app.get('/api/memofiches', async (req, res) => {
   }
 });
 
+// Endpoint to get total number of memo fiches
+app.get('/api/memofiches/count', async (req, res) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const count = await db.collection('memofiches_v2').countDocuments();
+    res.status(200).json({ count });
+  } catch (error: any) {
+    console.error('Error fetching memo fiches count:', error.message, error.stack);
+    res.status(500).json({ message: 'Failed to fetch memo fiches count.' });
+  }
+});
+
 // Endpoint to get a single memo fiche by ID
 app.get('/api/memofiches/:id', async (req, res) => {
   try {
@@ -617,7 +630,8 @@ app.put('/api/memofiches/:id', authMiddleware, adminOrFormateurOnly, async (req,
     // Handle knowledgeBaseUrl
     if (updatedCase.knowledgeBaseUrl) {
         updateData.knowledgeBaseUrl = updatedCase.knowledgeBaseUrl;
-    } else {
+    }
+    else {
         // If knowledgeBaseUrl is not provided, ensure it's removed from the document if it existed
         updateData.knowledgeBaseUrl = null; 
     } 
