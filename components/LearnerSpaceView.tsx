@@ -82,64 +82,111 @@ const LearnerSpaceView: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold text-slate-800 mb-4">
-        <span style={{ color: '#0D9488' }}>{username}</span>, bienvenue dans votre espace apprenant !
-      </h1>
-      <p className="text-lg text-slate-600 mb-8">
-        Suivez ici votre parcours d'apprentissage !
-      </p>
-
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-slate-800 mb-4">Votre Coach IA</h2>
-        <p className="text-lg text-slate-600 mb-4">
-          Je suis Votre Coach IA pour vous accompagner dans votre parcours d'apprentissage. Voici votre État d'avancement à la date du {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}.
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
+          Bienvenue, <span className="text-teal-600">{username}</span> !
+        </h1>
+        <p className="text-lg text-gray-600 mb-8">
+          Votre tableau de bord personnalisé pour suivre votre progression.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <div className="bg-teal-50 p-4 rounded-lg shadow-sm">
-            <h3 className="font-bold text-teal-800">Fiches lues</h3>
-            <p className="text-2xl text-teal-600">{readMemoficheIds.length} / {totalMemofiches}</p>
+        {/* AI Coach Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <svg className="w-6 h-6 text-teal-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Votre Coach IA
+          </h2>
+          <p className="text-gray-700 mb-4">
+            Je suis Votre Coach IA, prêt à vous guider. Voici un aperçu de votre parcours au {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}.
+          </p>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Fiches lues */}
+            <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+              <h3 className="text-lg font-semibold mb-2">Fiches lues</h3>
+              <p className="text-4xl font-bold">{readMemoficheIds.length} / {totalMemofiches}</p>
+              <p className="text-sm opacity-80">MémoFiches uniques consultées</p>
+            </div>
+
+            {/* Quiz réalisés */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+              <h3 className="text-lg font-semibold mb-2">Quiz réalisés</h3>
+              <p className="text-4xl font-bold">{totalQuizzesCompleted}</p>
+              <p className="text-sm opacity-80">Tests de connaissances terminés</p>
+            </div>
+
+            {/* Score moyen aux quiz */}
+            <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+              <h3 className="text-lg font-semibold mb-2">Score moyen aux quiz</h3>
+              <p className="text-4xl font-bold">{averageScore}%</p>
+              <p className="text-sm opacity-80">Performance moyenne</p>
+            </div>
+
+            {/* Flashcards visionnées (Placeholder) */}
+            <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+              <h3 className="text-lg font-semibold mb-2">Flashcards visionnées</h3>
+              <p className="text-4xl font-bold">0</p>
+              <p className="text-sm opacity-80">Nécessite un suivi backend</p>
+            </div>
           </div>
-          <div className="bg-teal-50 p-4 rounded-lg shadow-sm">
-            <h3 className="font-bold text-teal-800">Quiz réalisés</h3>
-            <p className="text-2xl text-teal-600">{totalQuizzesCompleted}</p>
+
+          {/* Médias consultés (Placeholder) */}
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+              <svg className="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.555-4.555A1 1 0 0121 6v12a1 1 0 01-1.445.895L15 14m-6 4h6a2 2 0 002-2V6a2 2 0 00-2-2H9a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Médias consultés
+            </h2>
+            <p className="text-4xl font-bold text-gray-900 mb-2">0</p>
+            <p className="text-gray-700">Cette section nécessite une implémentation backend pour le suivi des médias.</p>
           </div>
-          <div className="bg-teal-50 p-4 rounded-lg shadow-sm">
-            <h3 className="font-bold text-teal-800">Score moyen aux quiz</h3>
-            <p className="text-2xl text-teal-600">{averageScore}%</p>
+
+          {/* Fiches Sections */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Vos fiches lues */}
+            <div className="bg-gray-50 rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 text-teal-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                Vos fiches lues
+              </h3>
+              {readMemofichesDetails.length > 0 ? (
+                <ul className="space-y-3">
+                  {readMemofichesDetails.map(fiche => (
+                    <li key={fiche._id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <Link to={`/memofiche/${fiche._id}`} className="text-teal-600 hover:text-teal-800 font-medium">
+                        {fiche.title} <span className="text-gray-500 text-sm">({fiche.theme})</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600 italic">Vous n'avez pas encore lu de mémofiches. Commencez votre apprentissage dès maintenant !</p>
+              )}
+            </div>
+
+            {/* Fiches à découvrir */}
+            <div className="bg-gray-50 rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                Fiches à découvrir
+              </h3>
+              {unreadMemofichesDetails.length > 0 ? (
+                <ul className="space-y-3">
+                  {unreadMemofichesDetails.map(fiche => (
+                    <li key={fiche._id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                      <Link to={`/memofiche/${fiche._id}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                        {fiche.title} <span className="text-gray-500 text-sm">({fiche.theme})</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600 italic">Félicitations ! Vous avez lu toutes les mémofiches disponibles. Continuez à explorer !</p>
+              )}
+            </div>
           </div>
         </div>
-
-        <h3 className="text-xl font-bold text-slate-800 mb-3">Vos fiches lues</h3>
-        {readMemofichesDetails.length > 0 ? (
-          <ul className="list-disc pl-5 text-slate-700 mb-6">
-            {readMemofichesDetails.map(fiche => (
-              <li key={fiche._id}>
-                <Link to={`/memofiche/${fiche._id}`} className="text-teal-600 hover:underline">
-                  {fiche.title} ({fiche.theme})
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-slate-600 mb-6">Vous n'avez pas encore lu de mémofiches.</p>
-        )}
-
-        <h3 className="text-xl font-bold text-slate-800 mb-3">Fiches à découvrir</h3>
-        {unreadMemofichesDetails.length > 0 ? (
-          <ul className="list-disc pl-5 text-slate-700">
-            {unreadMemofichesDetails.map(fiche => (
-              <li key={fiche._id}>
-                <Link to={`/memofiche/${fiche._id}`} className="text-teal-600 hover:underline">
-                  {fiche.title} ({fiche.theme})
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-slate-600">Vous avez lu toutes les mémofiches disponibles ! Bravo !</p>
-        )}
       </div>
     </div>
   );
