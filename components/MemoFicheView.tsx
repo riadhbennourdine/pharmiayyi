@@ -506,7 +506,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     </div>
                 </div>
                 
-                <aside className="lg:col-span-1">
+                <aside className="lg:col-span-1 z-50">
                     <div className="sticky top-24">
                         <CustomChatBot context={JSON.stringify(caseStudy)} />
                     </div>
