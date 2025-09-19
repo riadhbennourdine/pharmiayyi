@@ -765,6 +765,46 @@ app.post('/api/user/track-quiz-completion', authMiddleware, async (req, res) => 
   }
 });
 
+// Endpoint to clean up invalid readFicheIds for the authenticated user
+app.post('/api/admin/cleanup-read-fiches', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection('users');
+    const memofichesCollection = db.collection('memofiches_v2');
+
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const currentReadFicheIds = user.readFicheIds || [];
+    const validReadFicheIds: string[] = [];
+
+    for (const ficheId of currentReadFicheIds) {
+      const exists = await memofichesCollection.countDocuments({ _id: new ObjectId(ficheId) });
+      if (exists > 0) {
+        validReadFicheIds.push(ficheId);
+      }
+    }
+
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { readFicheIds: validReadFicheIds } }
+    );
+
+    res.status(200).json({ message: 'Read fiches cleaned up successfully.', cleanedCount: currentReadFicheIds.length - validReadFicheIds.length });
+  } catch (error) {
+    console.error('Error cleaning up read fiches:', error);
+    res.status(500).json({ message: 'Failed to clean up read fiches.' });
+  }
+});
+
 // Endpoint for admin to trigger knowledge base update
 app.post('/api/admin/update-knowledge-base', authMiddleware, adminOnly, async (req: Request, res: Response) => {
   try {
