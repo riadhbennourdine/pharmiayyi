@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import Spinner from './Spinner';
 import MemoFicheView from './MemoFicheView';
-import DetailedMemoFicheView from './DetailedMemoFicheView';
+import { DetailedMemoFicheView } from './DetailedMemoFicheView';
 import { ChevronLeftIcon, SparklesIcon } from './icons';
 import { TOPIC_CATEGORIES } from '../constants';
 
