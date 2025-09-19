@@ -104,6 +104,9 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
 
       {isOpen && ( // Conditionally render chat container
         <div style={styles.chatContainer}>
+          <div style={styles.chatHeader}>
+            <h3 style={styles.headerTitle}>PharmIA Assistant</h3>
+          </div>
           <div style={styles.messagesContainer}>
             {messages.map((msg, index) => (
               <div key={index} style={msg.role === 'user' ? styles.userMessage : styles.botMessage}>
@@ -150,8 +153,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: 'none',
     cursor: 'pointer',
     padding: 0,
-    width: '60px', // Adjust size as needed
-    height: '60px', // Adjust size as needed
+    width: '80px', // Adjust size as needed
+    height: '80px', // Adjust size as needed
     borderRadius: '50%',
     boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
     display: 'flex',
@@ -168,16 +171,29 @@ const styles: { [key: string]: React.CSSProperties } = {
   chatContainer: {
     display: 'flex',
     flexDirection: 'column',
-    height: '400px',
-    width: '400px',
+    maxHeight: 'calc(100vh - 180px)',
+    height: '500px',
+    width: '380px',
     border: '1px solid #ccc',
     borderRadius: '8px',
     overflow: 'hidden',
     fontFamily: 'Arial, sans-serif',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
     position: 'absolute', // Position the chat window relative to the wrapper
-    bottom: '80px', // Adjust to be above the toggle button
+    bottom: '100px', // Adjust to be above the toggle button
     right: '0',
+  },
+  chatHeader: {
+    backgroundColor: '#0D9488',
+    color: 'white',
+    padding: '10px',
+    borderTopLeftRadius: '8px',
+    borderTopRightRadius: '8px',
+    textAlign: 'center',
+  },
+  headerTitle: {
+    margin: 0,
+    fontSize: '16px',
   },
   messagesContainer: {
     flexGrow: 1,
@@ -186,7 +202,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: '#f9f9f9',
   },
   userMessage: {
-    backgroundColor: '#dcf8c6',
+    backgroundColor: '#f0f0f0',
     alignSelf: 'flex-end',
     padding: '8px 12px',
     borderRadius: '15px',
@@ -194,9 +210,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: '80%',
     marginLeft: 'auto',
     wordBreak: 'break-word',
+    fontSize: '14px',
+    lineHeight: '1.4',
   },
   botMessage: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#e6fffa',
     alignSelf: 'flex-start',
     padding: '8px 12px',
     borderRadius: '15px',
@@ -204,6 +222,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: '80%',
     marginRight: 'auto',
     wordBreak: 'break-word',
+    fontSize: '14px',
+    lineHeight: '1.4',
   },
   loadingIndicator: {
     display: 'flex',
@@ -219,7 +239,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   spinner: {
     border: '3px solid #f3f3f3',
-    borderTop: '3px solid #3498db',
+    borderTop: '3px solid #0D9488',
     borderRadius: '50%',
     width: '16px',
     height: '16px',
@@ -241,7 +261,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
   },
   sendButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#0D9488',
     color: 'white',
     border: 'none',
     borderRadius: '20px',
@@ -251,7 +271,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'background-color 0.2s',
   },
   sendButtonHover: {
-    backgroundColor: '#0056b3',
+    backgroundColor: '#0a6b60',
   },
 };
 
