@@ -28,6 +28,8 @@ export interface User {
   updatedAt?: Date;
   resetPasswordToken?: string; // New field
   resetPasswordExpires?: Date; // New field
+  readFicheIds?: string[]; // Add this
+  quizHistory?: { quizId: string; score: number; completedAt: Date }[]; // Add this
 }
 
 export interface Flashcard {
