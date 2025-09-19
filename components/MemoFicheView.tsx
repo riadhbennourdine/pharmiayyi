@@ -90,7 +90,6 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   }), [rawCaseStudy]);
 
   const [openSection, setOpenSection] = useState<string | null>('patientSituation');
-  const [isChatbotOpen, setChatbotOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabName>('memo');
 
   const handleToggle = (title: string) => {
@@ -509,17 +508,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                 
                 <aside className="lg:col-span-1">
                     <div className="sticky top-24">
-                        <button 
-                            onClick={() => setChatbotOpen(!isChatbotOpen)}
-                            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg mb-4"
-                        >
-                            {isChatbotOpen ? 'Fermer le Chat' : 'Chatter avec la mémofiche'}
-                        </button>
-                        {isChatbotOpen && (
-                            <div className="bg-white rounded-lg shadow-md">
-                                <CustomChatBot context={JSON.stringify(caseStudy)} />
-                            </div>
-                        )}
+                        <CustomChatBot context={JSON.stringify(caseStudy)} />
                     </div>
                 </aside>
             </div>
