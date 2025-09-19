@@ -705,6 +705,66 @@ app.post('/api/memofiches/details', async (req, res) => {
   }
 });
 
+// Endpoint to track read memo fiches
+app.post('/api/user/track-read-fiche', authMiddleware, async (req, res) => {
+  try {
+    const { ficheId } = req.body;
+    const userId = req.user?._id;
+
+    if (!ficheId) {
+      return res.status(400).json({ message: 'Fiche ID is required.' });
+    }
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection('users');
+
+    // Add ficheId to readFicheIds array if it doesn't already exist
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $addToSet: { readFicheIds: ficheId } }
+    );
+
+    res.status(200).json({ message: 'Fiche marked as read.' });
+  } catch (error) {
+    console.error('Error tracking read fiche:', error);
+    res.status(500).json({ message: 'Failed to track read fiche.' });
+  }
+});
+
+// Endpoint to track quiz completion
+app.post('/api/user/track-quiz-completion', authMiddleware, async (req, res) => {
+  try {
+    const { quizId, score } = req.body;
+    const userId = req.user?._id;
+
+    if (!quizId || score === undefined) {
+      return res.status(400).json({ message: 'Quiz ID and score are required.' });
+    }
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection('users');
+
+    // Add quiz completion to quizHistory array
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $push: { quizHistory: { quizId, score, completedAt: new Date() } } }
+    );
+
+    res.status(200).json({ message: 'Quiz completion tracked.' });
+  } catch (error) {
+    console.error('Error tracking quiz completion:', error);
+    res.status(500).json({ message: 'Failed to track quiz completion.' });
+  }
+});
+
 // Endpoint for admin to trigger knowledge base update
 app.post('/api/admin/update-knowledge-base', authMiddleware, adminOnly, async (req: Request, res: Response) => {
   try {

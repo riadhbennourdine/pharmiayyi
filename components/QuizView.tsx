@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import type { QuizQuestion } from '../types';
 import { CheckCircleIcon, XCircleIcon, ChevronLeftIcon } from './icons';
+import { useAuth } from './contexts/AuthContext';
 
 interface QuizViewProps {
   questions: QuizQuestion[];
   caseTitle: string;
   onBack: () => void;
+  quizId: string; // Add quizId prop
 }
 
-const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack }) => {
+const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack, quizId }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(Array(questions.length).fill(null));
   const [showResults, setShowResults] = useState(false);
   const [submittedAnswer, setSubmittedAnswer] = useState<number | null>(null);
+  const { user } = useAuth();
 
   const handleAnswerSelect = (optionIndex: number) => {
     if (submittedAnswer !== null) return;
@@ -23,12 +26,33 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack }) => 
     setSubmittedAnswer(optionIndex);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setSubmittedAnswer(null);
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       setShowResults(true);
+      // Track quiz completion
+      if (user && quizId) {
+        const score = calculateScore();
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch('/api/user/track-quiz-completion', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ quizId, score }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to track quiz completion:', await response.text());
+          }
+        } catch (error) {
+          console.error('Error tracking quiz completion:', error);
+        }
+      }
     }
   };
 

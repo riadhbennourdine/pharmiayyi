@@ -40,11 +40,14 @@ const LearnerSpaceView: React.FC = () => {
         const allMemofiches: MemoFiche[] = await allMemofichesResponse.json();
 
         const readIds = new Set(progressData.readFicheIds || []);
-        const readFiches = allMemofiches.filter(fiche => readIds.has(fiche._id));
+        const existingReadFiches = allMemofiches.filter(fiche => readIds.has(fiche._id));
         const unreadFiches = allMemofiches.filter(fiche => !readIds.has(fiche._id));
 
-        setReadMemofichesDetails(readFiches);
+        setReadMemofichesDetails(existingReadFiches);
         setUnreadMemofichesDetails(unreadFiches);
+
+        // Update readMemoficheIds to only include existing fiches for accurate count
+        setReadMemoficheIds(existingReadFiches.map(fiche => fiche._id));
 
       } catch (err: any) {
         setError(err.message);

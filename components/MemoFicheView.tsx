@@ -64,6 +64,33 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   }, []); // Empty dependency array ensures this runs only once on mount
 
   const { user } = useAuth();
+
+  // Track memo fiche as read
+  useEffect(() => {
+    const trackReadFiche = async () => {
+      if (user && rawCaseStudy._id) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch('/api/user/track-read-fiche', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ ficheId: rawCaseStudy._id }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to track read fiche:', await response.text());
+          }
+        } catch (error) {
+          console.error('Error tracking read fiche:', error);
+        }
+      }
+    };
+    trackReadFiche();
+  }, [user, rawCaseStudy._id]); // Re-run when user or caseStudy changes
+
   const userRole = user?.role?.toUpperCase();
   const isAuthorized = userRole === 'ADMIN' || userRole === 'FORMATEUR';
   const canEdit = isAuthorized && !isPreview;

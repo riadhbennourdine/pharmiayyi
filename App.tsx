@@ -106,7 +106,7 @@ const GeneratorPage = () => {
 const QuizPage = () => {
     const { quizQuestions, currentCase, backToMemoFiche } = useData();
     if (!currentCase) return <Navigate to="/dashboard" replace />;
-    return <QuizView questions={quizQuestions} caseTitle={currentCase.title} onBack={backToMemoFiche} />
+    return <QuizView questions={quizQuestions} caseTitle={currentCase.title} onBack={backToMemoFiche} quizId={currentCase._id} />
 }
 
 const MemoFicheEditorPage = () => {
