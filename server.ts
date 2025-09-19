@@ -640,6 +640,71 @@ app.delete('/api/memofiches/:id', authMiddleware, adminOnly, async (req, res) =>
   }
 });
 
+// Endpoint to get total number of memo fiches
+app.get('/api/memofiches/count', async (req, res) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const count = await db.collection('memofiches_v2').countDocuments();
+    res.status(200).json({ count });
+  } catch (error) {
+    console.error('Error fetching memo fiches count:', error);
+    res.status(500).json({ message: 'Failed to fetch memo fiches count.' });
+  }
+});
+
+// Endpoint to get user progress (read fiches and quiz history)
+app.get('/api/user/progress', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection('users');
+
+    const userProgress = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { readFicheIds: 1, quizHistory: 1 } }
+    );
+
+    if (!userProgress) {
+      return res.status(404).json({ message: 'User progress not found.' });
+    }
+
+    res.status(200).json(userProgress);
+  } catch (error) {
+    console.error('Error fetching user progress:', error);
+    res.status(500).json({ message: 'Failed to fetch user progress.' });
+  }
+});
+
+// Endpoint to get details of specific memo fiches
+app.post('/api/memofiches/details', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'An array of memo fiche IDs is required.' });
+    }
+
+    const objectIds = ids.map((id: string) => new ObjectId(id));
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const memofiches = await db.collection('memofiches_v2').find(
+      { _id: { $in: objectIds } },
+      { projection: { _id: 1, title: 1, theme: 1 } }
+    ).toArray();
+
+    res.status(200).json(memofiches);
+  } catch (error) {
+    console.error('Error fetching memo fiche details:', error);
+    res.status(500).json({ message: 'Failed to fetch memo fiche details.' });
+  }
+});
+
 // Endpoint for admin to trigger knowledge base update
 app.post('/api/admin/update-knowledge-base', authMiddleware, adminOnly, async (req: Request, res: Response) => {
   try {
