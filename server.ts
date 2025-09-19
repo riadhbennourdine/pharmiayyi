@@ -553,6 +553,25 @@ app.get('/api/memofiches', async (req, res) => {
   }
 });
 
+// Endpoint to get a single memo fiche by ID
+app.get('/api/memofiches/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const memoFiche = await db.collection('memofiches_v2').findOne({ _id: new ObjectId(id) });
+
+    if (!memoFiche) {
+      return res.status(404).json({ message: 'Mémofiche non trouvée.' });
+    }
+
+    res.status(200).json(memoFiche);
+  } catch (error) {
+    console.error('Error fetching single memo fiche:', error);
+    res.status(500).json({ message: 'Failed to fetch memo fiche.' });
+  }
+});
+
 app.post('/api/memofiches', async (req, res) => {
   try {
     const newCase = req.body;
