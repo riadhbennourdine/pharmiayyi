@@ -154,7 +154,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'fixed',
     bottom: '20px',
     right: '20px',
-    zIndex: 1000,
+    zIndex: 9999,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-end',
