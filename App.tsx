@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, Outlet, useParams, useLocation } from 'react-router-dom';
-import { UserRole } from './types';
+import { UserRole, MemoFiche } from './types';
 
 // Import Providers
 import { AuthProvider, useAuth } from './components/contexts/AuthContext';
@@ -92,10 +92,41 @@ const DashboardPage = () => {
 }
 
 const MemoFichePage = () => {
-    const { currentCase, startQuiz, goHome, editCase } = useData();
-    // In a real app, you would fetch the case based on useParams('id') if not in context
-    if (!currentCase) return <Navigate to="/dashboard" replace />;
-    return <MemoFicheView caseStudy={currentCase} onStartQuiz={startQuiz} onBack={goHome} onEdit={editCase} />
+    const { id } = useParams<{ id: string }>(); // Récupérer l'ID de l'URL
+    const [memoFiche, setMemoFiche] = useState<MemoFiche | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const { startQuiz, goHome, editCase } = useData(); // Garder les fonctions du DataContext
+
+    useEffect(() => {
+        const fetchMemoFiche = async () => {
+            if (!id) {
+                setError("ID de mémofiche manquant.");
+                setLoading(false);
+                return;
+            }
+            setLoading(true);
+            try {
+                const response = await fetch(`/api/memofiches/${id}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data: MemoFiche = await response.json();
+                setMemoFiche(data);
+            } catch (e: any) {
+                setError(e.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMemoFiche();
+    }, [id]); // Recharger quand l'ID change
+
+    if (loading) return <div>Chargement de la mémofiche...</div>;
+    if (error) return <div>Erreur: {error}</div>;
+    if (!memoFiche) return <Navigate to="/dashboard" replace />; // Rediriger si la mémofiche n'est pas trouvée
+
+    return <MemoFicheView caseStudy={memoFiche} onStartQuiz={startQuiz} onBack={goHome} onEdit={editCase} />;
 }
 
 const GeneratorPage = () => {

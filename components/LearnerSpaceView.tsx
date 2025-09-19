@@ -154,7 +154,7 @@ const LearnerSpaceView: React.FC = () => {
                 <ul className="space-y-3">
                   {readMemofichesDetails.map(fiche => (
                     <li key={fiche._id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                      <Link to={`/memofiche/${fiche._id}`} style={{ color: '#28a745' }} className="hover:text-green-700 font-medium">
+                      <Link to={`/memofiche/${fiche._id}`} style={{ color: '#0D9488' }} className="hover:text-green-700 font-medium">
                         {fiche.title} <span className="text-gray-500 text-sm">({fiche.theme})</span>
                       </Link>
                     </li>
@@ -175,7 +175,7 @@ const LearnerSpaceView: React.FC = () => {
                 <ul className="space-y-3">
                   {unreadMemofichesDetails.map(fiche => (
                     <li key={fiche._id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                      <Link to={`/memofiche/${fiche._id}`} style={{ color: '#28a745' }} className="hover:text-green-700 font-medium">
+                      <Link to={`/memofiche/${fiche._id}`} style={{ color: '#0D9488' }} className="hover:text-green-700 font-medium">
                         {fiche.title} <span className="text-gray-500 text-sm">({fiche.theme})</span>
                       </Link>
                     </li>
