@@ -22,6 +22,7 @@ import ForgotPasswordView from './components/ForgotPasswordView';
 import ResetPasswordView from './components/ResetPasswordView';
 import ActivateAccountView from './components/ActivateAccountView';
 import ProfileCompletionView from './components/ProfileCompletionView';
+import LearnerSpaceView from './components/LearnerSpaceView';
 import CustomChatBot from './components/CustomChatBot';
 
 // --- ROUTE GUARDS & LAYOUT ---
@@ -133,7 +134,7 @@ const App: React.FC = () => (
                     <Route path="/memofiche/:id" element={<MemoFichePage />} />
                     <Route path="/quiz/:id" element={<QuizPage />} />
                     <Route path="/coach-accueil" element={<div className="container mx-auto p-8">Coach IA Page - Coming Soon</div>} />
-                    <Route path="/learner-space" element={<div className="container mx-auto p-8">Learner Space Page - Coming Soon</div>} />
+                    <Route path="/learner-space" element={<LearnerSpaceView />} />
                     <Route path="/fiches" element={<div className="container mx-auto p-8">Mémofiches Page - Coming Soon</div>} />
 
                     <Route element={<AdminRoute />}>
