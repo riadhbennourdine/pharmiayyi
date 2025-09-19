@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface ChatMessage {
   role: 'user' | 'bot';
@@ -110,7 +111,7 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
           <div style={styles.messagesContainer}>
             {messages.map((msg, index) => (
               <div key={index} style={msg.role === 'user' ? styles.userMessage : styles.botMessage}>
-                {msg.content}
+                {msg.role === 'bot' ? <ReactMarkdown>{msg.content}</ReactMarkdown> : msg.content}
               </div>
             ))}
             {isLoading && (
