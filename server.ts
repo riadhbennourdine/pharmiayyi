@@ -486,7 +486,6 @@ app.get('/api/users/pharmacists', async (req, res) => {
       { projection: { _id: 1, email: 1, firstName: 1, lastName: 1 } } // Include firstName and lastName
     ).toArray();
 
-    console.log('Fetched pharmacists:', pharmacists); // Add this line for debugging
     res.status(200).json(pharmacists);
   } catch (error) {
     console.error('Error fetching pharmacists:', error);
