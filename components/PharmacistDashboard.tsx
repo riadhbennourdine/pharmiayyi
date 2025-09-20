@@ -76,13 +76,6 @@ const PharmacistDashboard: React.FC<PharmacistDashboardProps> = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-          Bienvenue, Pharmacien <span className="text-teal-600">{user?.firstName} {user?.lastName}</span> !
-        </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Gérez et suivez la progression de vos préparateurs.
-        </p>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {preparateurs.length === 0 ? (
             <p className="text-gray-600 italic">Aucun préparateur attribué pour le moment.</p>
@@ -102,7 +95,11 @@ const PharmacistDashboard: React.FC<PharmacistDashboardProps> = () => {
         </div>
       </div>
       {showPopup && selectedPreparerId && (
-        <PreparerLearningJourneyPopup preparerId={selectedPreparerId} onClose={handleClosePopup} />
+        <PreparerLearningJourneyPopup 
+          preparerId={selectedPreparerId} 
+          preparerName={`${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.firstName} ${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.lastName}`}
+          onClose={handleClosePopup} 
+        />
       )}
     </div>
   );

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 
 interface PreparerLearningJourneyPopupProps {
   preparerId: string;
+  preparerName: string; // Add this prop
   onClose: () => void;
 }
 
@@ -14,7 +15,7 @@ interface LearningJourneyData {
   viewedMediaIds: string[];
 }
 
-const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> = ({ preparerId, onClose }) => {
+const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> = ({ preparerId, preparerName, onClose }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +98,7 @@ const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Parcours d'apprentissage</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Parcours d'apprentissage de <span className="text-teal-600">{preparerName}</span></h2>
 
         <div className="space-y-6">
           {/* Fiches Lues */}

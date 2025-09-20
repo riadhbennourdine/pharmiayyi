@@ -104,8 +104,13 @@ const LearnerSpaceView: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-          Bienvenue, <span className="text-teal-600">{username}</span> !
+          Bienvenue, <span className="text-teal-600">{user?.firstName || username}</span> !
         </h1>
+        {user?.role === UserRole.PHARMACIEN && (
+          <p className="text-lg text-gray-600 mb-2">
+            Gérez et suivez la progression de vos préparateurs.
+          </p>
+        )}
         <p className="text-lg text-gray-600 mb-2">
           Votre tableau de bord personnalisé pour suivre votre progression.
         </p>
