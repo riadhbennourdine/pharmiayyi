@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { User, UserRole } from '../types';
 import { Link } from 'react-router-dom';
+import PreparerLearningJourneyPopup from './PreparerLearningJourneyPopup'; // Import the popup component
 
 interface PharmacistDashboardProps {
   // Add any props if needed
@@ -12,6 +13,8 @@ const PharmacistDashboard: React.FC<PharmacistDashboardProps> = () => {
   const [preparateurs, setPreparateurs] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [selectedPreparerId, setSelectedPreparerId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPreparateurs = async () => {
@@ -43,6 +46,16 @@ const PharmacistDashboard: React.FC<PharmacistDashboardProps> = () => {
 
     fetchPreparateurs();
   }, [user]);
+
+  const handleViewPreparateurJourney = (preparerId: string) => {
+    setSelectedPreparerId(preparerId);
+    setShowPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+    setSelectedPreparerId(null);
+  };
 
   if (loading) {
     return (
@@ -78,7 +91,7 @@ const PharmacistDashboard: React.FC<PharmacistDashboardProps> = () => {
               <div
                 key={prep._id?.toString()}
                 className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200"
-                // onClick={() => handleViewPreparateurJourney(prep._id?.toString())} // To be implemented
+                onClick={() => handleViewPreparateurJourney(prep._id?.toString() || '')}
               >
                 <h3 className="text-xl font-bold text-gray-800 mb-2">{prep.firstName} {prep.lastName}</h3>
                 <p className="text-gray-600">{prep.email}</p>
@@ -88,6 +101,9 @@ const PharmacistDashboard: React.FC<PharmacistDashboardProps> = () => {
           )}
         </div>
       </div>
+      {showPopup && selectedPreparerId && (
+        <PreparerLearningJourneyPopup preparerId={selectedPreparerId} onClose={handleClosePopup} />
+      )}
     </div>
   );
 };
