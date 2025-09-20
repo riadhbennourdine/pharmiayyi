@@ -562,6 +562,35 @@ app.put('/api/users/:id/assign-pharmacist', authMiddleware, adminOnly, async (re
   }
 });
 
+// Get user by ID (public profile details)
+app.get('/api/users/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'ID utilisateur invalide.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(id) },
+      { projection: { passwordHash: 0, resetPasswordToken: 0, resetPasswordExpires: 0 } } // Exclude sensitive fields
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    res.status(500).json({ message: 'Failed to fetch user.' });
+  }
+});
+
 app.post('/api/generate', async (req, res) => {
     try {
         const { memoFicheType, sourceText, theme, system, pathology } = req.body;
