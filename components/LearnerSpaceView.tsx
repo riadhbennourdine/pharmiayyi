@@ -3,9 +3,16 @@ import { Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { MemoFiche, UserRole } from '../types'; // Assuming MemoFiche type is available
 import AdminPanel from './AdminPanel'; // Import AdminPanel
+import PharmacistDashboard from './PharmacistDashboard'; // Import PharmacistDashboard
 
 const LearnerSpaceView: React.FC = () => {
   const { user } = useAuth();
+
+  // If user is a Pharmacien, render PharmacistDashboard instead
+  if (user?.role === UserRole.PHARMACIEN) {
+    return <PharmacistDashboard />;
+  }
+
   const username = user?.username || 'cher apprenant';
 
   const [totalMemofiches, setTotalMemofiches] = useState<number>(0);

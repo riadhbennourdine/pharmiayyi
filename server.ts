@@ -591,6 +591,36 @@ app.get('/api/users/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// Get list of preparateurs by pharmacist ID
+app.get('/api/users/preparateurs-by-pharmacist/:pharmacistId', authMiddleware, async (req, res) => {
+  try {
+    const { pharmacistId } = req.params;
+
+    if (!ObjectId.isValid(pharmacistId)) {
+      return res.status(400).json({ message: 'ID pharmacien invalide.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    // Ensure the requesting user is the pharmacist themselves or an admin/formateur
+    if (req.user?.role !== UserRole.ADMIN && req.user?.role !== UserRole.FORMATEUR && req.user?._id?.toString() !== pharmacistId) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+
+    const preparateurs = await usersCollection.find(
+      { role: UserRole.PREPARATEUR, pharmacistId: new ObjectId(pharmacistId) },
+      { projection: { passwordHash: 0, resetPasswordToken: 0, resetPasswordExpires: 0 } } // Exclude sensitive fields
+    ).toArray();
+
+    res.status(200).json(preparateurs);
+  } catch (error) {
+    console.error('Error fetching preparateurs by pharmacist ID:', error);
+    res.status(500).json({ message: 'Failed to fetch preparateurs by pharmacist ID.' });
+  }
+});
+
 app.post('/api/generate', async (req, res) => {
     try {
         const { memoFicheType, sourceText, theme, system, pathology } = req.body;
