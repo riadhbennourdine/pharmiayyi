@@ -410,16 +410,15 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                     {caseStudy.kahootUrl ? (
                         <div className="bg-white p-4 rounded-lg shadow-md">
                             <h4 className="font-bold text-slate-800 mb-4">Jeu Kahoot!</h4>
-                            <div className="aspect-w-16 aspect-h-9">
-                                <iframe 
-                                    src={caseStudy.kahootUrl} 
-                                    title="Kahoot! Game" 
-                                    frameBorder="0" 
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowFullScreen
-                                    className="w-full h-full rounded-md"
-                                ></iframe>
-                            </div>
+                            <iframe 
+                                src={caseStudy.kahootUrl} 
+                                title="Kahoot! Game" 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                                className="w-full rounded-md" 
+                                style={{ height: '80vh' }}
+                            ></iframe>
                         </div>
                     ) : (
                         <div className="bg-white p-4 rounded-lg shadow-md text-center text-slate-600">
