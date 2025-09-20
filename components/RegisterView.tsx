@@ -21,6 +21,7 @@ const RegisterView: React.FC = () => {
     useEffect(() => {
         if (role === UserRole.PREPARATEUR) {
           const fetchPharmacists = async () => {
+            console.log('Fetching pharmacists...'); // Add this line
             try {
               const response = await fetch('/api/users/pharmacists');
               if (!response.ok) {
