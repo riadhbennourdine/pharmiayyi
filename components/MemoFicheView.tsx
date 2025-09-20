@@ -351,14 +351,15 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                       {youtubeEmbedUrl ? (
                         <div className="bg-white p-4 rounded-lg shadow-md">
                             <h4 className="font-bold text-slate-800 mb-4">Vidéo associée</h4>
-                            <div className="aspect-w-16 aspect-h-9">
+                            <div className="w-full">
                                 <iframe 
                                     src={youtubeEmbedUrl} 
                                     title="YouTube video player" 
                                     frameBorder="0" 
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                     allowFullScreen
-                                    className="w-full h-full rounded-md"
+                                    className="w-full rounded-md" 
+                                    style={{ height: '80vh' }}
                                 ></iframe>
                             </div>
                         </div>
