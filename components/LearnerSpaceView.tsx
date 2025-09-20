@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { MemoFiche } from '../types'; // Assuming MemoFiche type is available
+import { MemoFiche, UserRole } from '../types'; // Assuming MemoFiche type is available
+import AdminPanel from './AdminPanel'; // Import AdminPanel
 
 const LearnerSpaceView: React.FC = () => {
   const { user } = useAuth();
@@ -92,6 +93,9 @@ const LearnerSpaceView: React.FC = () => {
         <p className="text-lg text-gray-600 mb-8">
           Votre tableau de bord personnalisé pour suivre votre progression.
         </p>
+
+        {/* Admin Panel Section (visible only for ADMIN) */}
+        {user?.role === UserRole.ADMIN && <AdminPanel />}
 
         {/* AI Coach Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
