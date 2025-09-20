@@ -16,9 +16,10 @@ const LearnerSpaceView: React.FC = () => {
   const [unreadMemofichesDetails, setUnreadMemofichesDetails] = useState<MemoFiche[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [referentPharmacistName, setReferentPharmacistName] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchStatsAndPharmacist = async () => {
       try {
         const token = localStorage.getItem('token');
 
@@ -53,6 +54,20 @@ const LearnerSpaceView: React.FC = () => {
         // Update readMemoficheIds to only include existing fiches for accurate count
         setReadMemoficheIds(existingReadFiches.map(fiche => fiche._id));
 
+        // Fetch referent pharmacist details if user is PREPARATEUR and has a pharmacistId
+        if (user?.role === UserRole.PREPARATEUR && user.pharmacistId) {
+          const pharmacistResponse = await fetch(`/api/users/${user.pharmacistId}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (pharmacistResponse.ok) {
+            const pharmacistData = await pharmacistResponse.json();
+            setReferentPharmacistName(`${pharmacistData.firstName} ${pharmacistData.lastName}`);
+          } else {
+            console.error('Failed to fetch referent pharmacist details');
+            setReferentPharmacistName(null); // Clear if fetch fails
+          }
+        }
+
       } catch (err: any) {
         setError(err.message);
         console.error('Error fetching learner stats:', err);
@@ -61,7 +76,7 @@ const LearnerSpaceView: React.FC = () => {
       }
     };
 
-    fetchStats();
+    fetchStatsAndPharmacist();
   }, [user]);
 
   const totalQuizzesCompleted = quizHistory.length;
@@ -90,9 +105,14 @@ const LearnerSpaceView: React.FC = () => {
         <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
           Bienvenue, <span className="text-teal-600">{username}</span> !
         </h1>
-        <p className="text-lg text-gray-600 mb-8">
+        <p className="text-lg text-gray-600 mb-2">
           Votre tableau de bord personnalisé pour suivre votre progression.
         </p>
+        {user?.role === UserRole.PREPARATEUR && referentPharmacistName && (
+          <p className="text-xl font-semibold text-gray-700 mb-8">
+            Pharmacie {referentPharmacistName}
+          </p>
+        )}
 
         {/* Admin Panel Section (visible only for ADMIN) */}
         {user?.role === UserRole.ADMIN && <AdminPanel />}
