@@ -326,6 +326,7 @@ const Dashboard: React.FC = () => {
           <p className="text-lg text-slate-600">Explorez les thèmes disponibles et consultez les mémofiches générées.</p>
         </div>
 
+        {console.log('User in Dashboard:', user, 'Role:', user?.role, 'Is Admin:', user?.role === UserRole.ADMIN)}
         {user?.role === UserRole.ADMIN && <AdminPanel />}
 
         <div className="mb-8 flex flex-col sm:flex-row justify-center items-center gap-4">
