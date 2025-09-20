@@ -348,7 +348,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
           case 'media':
               return (
                   <div className="space-y-4">
-                      {youtubeEmbedUrl && (
+                      {youtubeEmbedUrl ? (
                         <div className="bg-white p-4 rounded-lg shadow-md">
                             <h4 className="font-bold text-slate-800 mb-4">Vidéo associée</h4>
                             <div className="aspect-w-16 aspect-h-9">
@@ -362,18 +362,11 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                                 ></iframe>
                             </div>
                         </div>
+                      ) : (
+                        <div className="text-center text-slate-500">
+                          Aucun média disponible pour cette mémofiche.
+                        </div>
                       )}
-                      {caseStudy.media.map((item, i) => (
-                          <div key={i} className="bg-white p-6 rounded-lg shadow-md flex items-start">
-                              <div className="bg-teal-100 p-3 rounded-full mr-4">
-                                  <VideoCameraIcon className="h-6 w-6 text-teal-600" />
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-slate-800">{item.title} ({item.type})</h4>
-                                <p className="text-slate-600">{item.description}</p>
-                              </div>
-                          </div>
-                      ))}
                   </div>
               );
         case 'quiz':
