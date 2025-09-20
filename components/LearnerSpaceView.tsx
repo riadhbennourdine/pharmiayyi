@@ -1,192 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
-import { MemoFiche } from '../types'; // Assuming MemoFiche type is available
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from './contexts/AuthContext';
+import { DataContext } from './contexts/DataContext';
 
 const LearnerSpaceView: React.FC = () => {
-  const { user } = useAuth();
-  const username = user?.username || 'cher apprenant';
-
-  const [totalMemofiches, setTotalMemofiches] = useState<number>(0);
-  const [readMemoficheIds, setReadMemoficheIds] = useState<string[]>([]);
-  const [quizHistory, setQuizHistory] = useState<any[]>([]);
-  const [readMemofichesDetails, setReadMemofichesDetails] = useState<MemoFiche[]>([]);
-  const [unreadMemofichesDetails, setUnreadMemofichesDetails] = useState<MemoFiche[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // const { user } = useContext(AuthContext); // Assuming AuthContext provides user info
+  // const { learnerStats, fetchLearnerStats } = useContext(DataContext); // Assuming DataContext provides learner stats
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem('token');
+    // Simulate fetching data
+    const timer = setTimeout(() => {
+      setLoading(false);
+      // setError("Failed to load data."); // Uncomment to test error state
+    }, 1500);
 
-        // Fetch total memo fiches count
-        const countResponse = await fetch('/api/memofiches/count');
-        if (!countResponse.ok) throw new Error('Failed to fetch memo fiches count');
-        const { count } = await countResponse.json();
-        setTotalMemofiches(count);
+    // In a real application, you would fetch data here:
+    // if (user && fetchLearnerStats) {
+    //   fetchLearnerStats(user.id)
+    //     .catch((err: Error) => setError(err.message));
+    // }
 
-        // Fetch user progress
-        const progressResponse = await fetch('/api/user/progress', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        if (!progressResponse.ok) throw new Error('Failed to fetch user progress');
-        const progressData = await progressResponse.json();
-        setReadMemoficheIds(progressData.readFicheIds || []);
-        setQuizHistory(progressData.quizHistory || []);
-
-        // Fetch all memo fiches details to determine read/unread
-        const allMemofichesResponse = await fetch('/api/memofiches'); // Assuming this endpoint returns all memofiches
-        if (!allMemofichesResponse.ok) throw new Error('Failed to fetch all memo fiches');
-        const allMemofiches: MemoFiche[] = await allMemofichesResponse.json();
-
-        const readIds = new Set(progressData.readFicheIds || []);
-        const existingReadFiches = allMemofiches.filter(fiche => readIds.has(fiche._id));
-        const unreadFiches = allMemofiches.filter(fiche => !readIds.has(fiche._id));
-
-        setReadMemofichesDetails(existingReadFiches);
-        setUnreadMemofichesDetails(unreadFiches);
-
-        // Update readMemoficheIds to only include existing fiches for accurate count
-        setReadMemoficheIds(existingReadFiches.map(fiche => fiche._id));
-
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Error fetching learner stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, [user]);
-
-  const totalQuizzesCompleted = quizHistory.length;
-  const totalScore = quizHistory.reduce((sum, quiz) => sum + quiz.score, 0);
-  const averageScore = totalQuizzesCompleted > 0 ? (totalScore / totalQuizzesCompleted).toFixed(2) : 'N/A';
+    return () => clearTimeout(timer);
+  }, []); // Add user.id to dependency array if fetching based on user
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-8 text-center text-slate-600">
-        Chargement de votre espace apprenant...
-      </div>
-    );
+    return <div className="text-center py-8">Chargement de votre espace...</div>;
   }
 
   if (error) {
-    return (
-      <div className="container mx-auto p-8 text-center text-red-600">
-        Erreur lors du chargement de votre espace apprenant : {error}
-      </div>
-    );
+    return <div className="text-center py-8 text-red-500">Erreur: {error}</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-          Bienvenue, <span className="text-teal-600">{username}</span> !
-        </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Votre tableau de bord personnalisé pour suivre votre progression.
-        </p>
+    <div className="flex h-full">
+      {/* Left Column - Darker Green */}
+      <div className="w-1/4 bg-[#0A7C72] text-white p-6 shadow-lg">
+        <h1 className="text-3xl font-bold mb-6">Mon Espace Apprenant</h1>
+        <p className="text-lg mb-8">Bienvenue dans votre espace personnel. Suivez vos progrès ici.</p>
 
-        {/* AI Coach Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-            <svg className="w-6 h-6 text-teal-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Votre Coach IA
-          </h2>
-          <p className="text-gray-700 mb-4">
-            Je suis Votre Coach IA, prêt à vous guider. Voici un aperçu de votre parcours au {new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })}.
-          </p>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {/* Fiches lues */}
-            <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
-              <h3 className="text-lg font-semibold mb-2">Fiches lues</h3>
-              <p className="text-4xl font-bold">{readMemoficheIds.length} / {totalMemofiches}</p>
-              <p className="text-sm opacity-80">MémoFiches uniques consultées</p>
-            </div>
-
-            {/* Quiz réalisés */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
-              <h3 className="text-lg font-semibold mb-2">Quiz réalisés</h3>
-              <p className="text-4xl font-bold">{totalQuizzesCompleted}</p>
-              <p className="text-sm opacity-80">Tests de connaissances terminés</p>
-            </div>
-
-            {/* Score moyen aux quiz */}
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
-              <h3 className="text-lg font-semibold mb-2">Score moyen aux quiz</h3>
-              <p className="text-4xl font-bold">{averageScore}%</p>
-              <p className="text-sm opacity-80">Performance moyenne</p>
-            </div>
-
-            {/* Flashcards visionnées (Placeholder) */}
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
-              <h3 className="text-lg font-semibold mb-2">Flashcards visionnées</h3>
-              <p className="text-4xl font-bold">0</p>
-              <p className="text-sm opacity-80">Nécessite un suivi backend</p>
-            </div>
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm opacity-80">Fiches lues</p>
+            <p className="text-2xl font-semibold">5 / 16</p>
           </div>
-
-          {/* Médias consultés (Placeholder) */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              <svg className="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.555-4.555A1 1 0 0121 6v12a1 1 0 01-1.445.895L15 14m-6 4h6a2 2 0 002-2V6a2 2 0 00-2-2H9a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              Médias consultés
-            </h2>
-            <p className="text-4xl font-bold text-gray-900 mb-2">0</p>
-            <p className="text-gray-700">Cette section nécessite une implémentation backend pour le suivi des médias.</p>
+          <div>
+            <p className="text-sm opacity-80">MémoFiches uniques consultées</p>
+            <p className="text-2xl font-semibold">--</p>
           </div>
-
-          {/* Fiches Sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Vos fiches lues */}
-            <div className="bg-gray-50 rounded-xl shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 text-teal-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                Vos fiches lues
-              </h3>
-              {readMemofichesDetails.length > 0 ? (
-                <ul className="space-y-3">
-                  {readMemofichesDetails.map(fiche => (
-                    <li key={fiche._id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                      <Link to={`/memofiche/${fiche._id}`} style={{ color: '#0D9488' }} className="hover:text-green-700 font-medium">
-                        {fiche.title} <span className="text-gray-500 text-sm">({fiche.theme})</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-600 italic">Vous n'avez pas encore lu de mémofiches. Commencez votre apprentissage dès maintenant !</p>
-              )}
-            </div>
-
-            {/* Fiches à découvrir */}
-            <div className="bg-gray-50 rounded-xl shadow-md p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                Fiches à découvrir
-              </h3>
-              {unreadMemofichesDetails.length > 0 ? (
-                <ul className="space-y-3">
-                  {unreadMemofichesDetails.map(fiche => (
-                    <li key={fiche._id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                      <Link to={`/memofiche/${fiche._id}`} style={{ color: '#0D9488' }} className="hover:text-green-700 font-medium">
-                        {fiche.title} <span className="text-gray-500 text-sm">({fiche.theme})</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-600 italic">Félicitations ! Vous avez lu toutes les mémofiches disponibles. Continuez à explorer !</p>
-              )}
-            </div>
+          <div>
+            <p className="text-sm opacity-80">Quiz réalisés</p>
+            <p className="text-2xl font-semibold">2</p>
+          </div>
+          <div>
+            <p className="text-sm opacity-80">Tests de connaissances terminés</p>
+            <p className="text-2xl font-semibold">--</p>
+          </div>
+          <div>
+            <p className="text-sm opacity-80">Score moyen aux quiz</p>
+            <p className="text-2xl font-semibold">53.00%</p>
+          </div>
+          <div>
+            <p className="text-sm opacity-80">Performance moyenne</p>
+            <p className="text-2xl font-semibold">--</p>
+          </div>
+          <div>
+            <p className="text-sm opacity-80">Flashcards visionnées</p>
+            <p className="text-2xl font-semibold">0</p>
+          </div>
+          <div>
+            <p className="text-sm opacity-80">Médias consultés</p>
+            <p className="text-2xl font-semibold">0</p>
           </div>
         </div>
+      </div>
+
+      {/* Right Column - Lighter Green/Main Content */}
+      <div className="w-3/4 bg-[#1AD9CC] p-6">
+        <h2 className="text-2xl font-bold text-[#0D9488] mb-4">Tableau de Bord</h2>
+        <p className="text-[#0D9488]">Contenu principal de l'espace apprenant (graphiques, activités récentes, etc.) viendra ici.</p>
+        {/* Future content goes here */}
       </div>
     </div>
   );
