@@ -205,3 +205,5 @@ export interface ExhaustiveMemoFiche {
   coverImageUrl?: string;
   youtubeUrl?: string;
 }
+
+export type MemoFiche = CaseStudy | PharmacologyMemoFiche | ExhaustiveMemoFiche;

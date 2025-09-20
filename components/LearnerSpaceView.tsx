@@ -1,95 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
-import { MemoFiche } from '../types'; // Assuming MemoFiche type is available
+import React, { useState, useEffect, useContext } from 'react';
+import { AuthContext } from './contexts/AuthContext';
+import { DataContext } from './contexts/DataContext';
 
 const LearnerSpaceView: React.FC = () => {
-  const { user } = useAuth();
-  const username = user?.username || 'cher apprenant';
-
-  const [totalMemofiches, setTotalMemofiches] = useState<number>(0);
-  const [readMemoficheIds, setReadMemoficheIds] = useState<string[]>([]);
-  const [quizHistory, setQuizHistory] = useState<any[]>([]);
-  const [readMemofichesDetails, setReadMemofichesDetails] = useState<MemoFiche[]>([]);
-  const [unreadMemofichesDetails, setUnreadMemofichesDetails] = useState<MemoFiche[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // const { user } = useContext(AuthContext); // Assuming AuthContext provides user info
+  // const { learnerStats, fetchLearnerStats } = useContext(DataContext); // Assuming DataContext provides learner stats
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem('token');
+    // Simulate fetching data
+    const timer = setTimeout(() => {
+      setLoading(false);
+      // setError("Failed to load data."); // Uncomment to test error state
+    }, 1500);
 
-        // Fetch total memo fiches count
-        const countResponse = await fetch('/api/memofiches/count');
-        if (!countResponse.ok) throw new Error('Failed to fetch memo fiches count');
-        const { count } = await countResponse.json();
-        setTotalMemofiches(count);
+    // In a real application, you would fetch data here:
+    // if (user && fetchLearnerStats) {
+    //   fetchLearnerStats(user.id)
+    //     .catch((err: Error) => setError(err.message));
+    // }
 
-        // Fetch user progress
-        const progressResponse = await fetch('/api/user/progress', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        if (!progressResponse.ok) throw new Error('Failed to fetch user progress');
-        const progressData = await progressResponse.json();
-        setReadMemoficheIds(progressData.readFicheIds || []);
-        setQuizHistory(progressData.quizHistory || []);
-
-        // Fetch all memo fiches details to determine read/unread
-        const allMemofichesResponse = await fetch('/api/memofiches'); // Assuming this endpoint returns all memofiches
-        if (!allMemofichesResponse.ok) throw new Error('Failed to fetch all memo fiches');
-        const allMemofiches: MemoFiche[] = await allMemofichesResponse.json();
-
-        const readIds = new Set(progressData.readFicheIds || []);
-        const existingReadFiches = allMemofiches.filter(fiche => readIds.has(fiche._id));
-        const unreadFiches = allMemofiches.filter(fiche => !readIds.has(fiche._id));
-
-        setReadMemofichesDetails(existingReadFiches);
-        setUnreadMemofichesDetails(unreadFiches);
-
-        // Update readMemoficheIds to only include existing fiches for accurate count
-        setReadMemoficheIds(existingReadFiches.map(fiche => fiche._id));
-
-      } catch (err: any) {
-        setError(err.message);
-        console.error('Error fetching learner stats:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, [user]);
-
-  const totalQuizzesCompleted = quizHistory.length;
-  const totalScore = quizHistory.reduce((sum, quiz) => sum + quiz.score, 0);
-  const averageScore = totalQuizzesCompleted > 0 ? (totalScore / totalQuizzesCompleted).toFixed(2) : 'N/A';
+    return () => clearTimeout(timer);
+  }, []); // Add user.id to dependency array if fetching based on user
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-8 text-center text-slate-600">
-        Chargement de votre espace apprenant...
-      </div>
-    );
+    return <div className="text-center py-8">Chargement de votre espace...</div>;
   }
 
   if (error) {
-    return (
-      <div className="container mx-auto p-8 text-center text-red-600">
-        Erreur lors du chargement de votre espace apprenant : {error}
-      </div>
-    );
+    return <div className="text-center py-8 text-red-500">Erreur: {error}</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-          Bienvenue, <span className="text-teal-600">{username}</span> !
-        </h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Votre tableau de bord personnalisé pour suivre votre progression.
-        </p>
+    <div className="flex h-full">
+      {/* Left Column - Darker Green */}
+      <div className="w-1/4 bg-[#0A7C72] text-white p-6 shadow-lg">
+        <h1 className="text-3xl font-bold mb-6">Mon Espace Apprenant</h1>
+        <p className="text-lg mb-8">Bienvenue dans votre espace personnel. Suivez vos progrès ici.</p>
 
         {/* AI Coach Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -106,21 +54,21 @@ const LearnerSpaceView: React.FC = () => {
             {/* Fiches lues */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
               <h3 className="text-lg font-semibold mb-2">Fiches lues</h3>
-              <p className="text-4xl font-bold">{readMemoficheIds.length} / {totalMemofiches}</p>
+              <p className="text-4xl font-bold">5 / 16</p>
               <p className="text-sm opacity-80">MémoFiches uniques consultées</p>
             </div>
 
             {/* Quiz réalisés */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
               <h3 className="text-lg font-semibold mb-2">Quiz réalisés</h3>
-              <p className="text-4xl font-bold">{totalQuizzesCompleted}</p>
+              <p className="text-4xl font-bold">2</p>
               <p className="text-sm opacity-80">Tests de connaissances terminés</p>
             </div>
 
             {/* Score moyen aux quiz */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
               <h3 className="text-lg font-semibold mb-2">Score moyen aux quiz</h3>
-              <p className="text-4xl font-bold">{averageScore}%</p>
+              <p className="text-4xl font-bold">53.00%</p>
               <p className="text-sm opacity-80">Performance moyenne</p>
             </div>
 
@@ -138,6 +86,7 @@ const LearnerSpaceView: React.FC = () => {
               <svg className="w-6 h-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.555-4.555A1 1 0 0121 6v12a1 1 0 01-1.445.895L15 14m-6 4h6a2 2 0 002-2V6a2 2 0 00-2-2H9a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               Médias consultés
             </h2>
+<<<<<<< HEAD
             <p className="text-4xl font-bold text-white mb-2">0</p>
             <p className="text-sm opacity-80">Cette section nécessite une implémentation backend pour le suivi des médias.</p>
           </div>
@@ -185,8 +134,19 @@ const LearnerSpaceView: React.FC = () => {
                 <p className="text-gray-600 italic">Félicitations ! Vous avez lu toutes les mémofiches disponibles. Continuez à explorer !</p>
               )}
             </div>
+=======
+            <p className="text-4xl font-bold mb-2">0</p>
+            <p className="text-sm opacity-80">Nécessite un suivi backend</p>
+>>>>>>> 724f53735433d57a3ae61c1767530f131fe46465
           </div>
         </div>
+      </div>
+
+      {/* Right Column - Lighter Green/Main Content */}
+      <div className="w-3/4 bg-[#1AD9CC] p-6">
+        <h2 className="text-2xl font-bold text-[#0D9488] mb-4">Tableau de Bord</h2>
+        <p className="text-[#0D9488]">Contenu principal de l'espace apprenant (graphiques, activités récentes, etc.) viendra ici.</p>
+        {/* Future content goes here */}
       </div>
     </div>
   );

@@ -553,6 +553,43 @@ app.get('/api/memofiches', async (req, res) => {
   }
 });
 
+// Endpoint to get total number of memo fiches
+app.get('/api/memofiches/count', async (req, res) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const count = await db.collection('memofiches_v2').countDocuments();
+    res.status(200).json({ count });
+  } catch (error: any) {
+    console.error('Error fetching memo fiches count:', error.message, error.stack);
+    res.status(500).json({ message: 'Failed to fetch memo fiches count.' });
+  }
+});
+
+// Endpoint to get a single memo fiche by ID
+app.get('/api/memofiches/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'ID de mémofiche invalide.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const memoFiche = await db.collection('memofiches_v2').findOne({ _id: new ObjectId(id) });
+
+    if (!memoFiche) {
+      return res.status(404).json({ message: 'Mémofiche non trouvée.' });
+    }
+
+    res.status(200).json(memoFiche);
+  } catch (error: any) {
+    console.error('Error fetching single memo fiche:', error.message, error.stack);
+    res.status(500).json({ message: 'Failed to fetch memo fiche.' });
+  }
+});
+
 app.post('/api/memofiches', async (req, res) => {
   try {
     const newCase = req.body;
@@ -593,7 +630,8 @@ app.put('/api/memofiches/:id', authMiddleware, adminOrFormateurOnly, async (req,
     // Handle knowledgeBaseUrl
     if (updatedCase.knowledgeBaseUrl) {
         updateData.knowledgeBaseUrl = updatedCase.knowledgeBaseUrl;
-    } else {
+    }
+    else {
         // If knowledgeBaseUrl is not provided, ensure it's removed from the document if it existed
         updateData.knowledgeBaseUrl = null; 
     } 
@@ -647,8 +685,8 @@ app.get('/api/memofiches/count', async (req, res) => {
     const db = client.db('pharmia');
     const count = await db.collection('memofiches_v2').countDocuments();
     res.status(200).json({ count });
-  } catch (error) {
-    console.error('Error fetching memo fiches count:', error);
+  } catch (error: any) {
+    console.error('Error fetching memo fiches count:', error.message, error.stack);
     res.status(500).json({ message: 'Failed to fetch memo fiches count.' });
   }
 });
@@ -738,25 +776,30 @@ app.post('/api/user/track-read-fiche', authMiddleware, async (req, res) => {
 // Endpoint to track quiz completion
 app.post('/api/user/track-quiz-completion', authMiddleware, async (req, res) => {
   try {
-    const { quizId, score } = req.body;
     const userId = req.user?._id;
-
-    if (!quizId || score === undefined) {
-      return res.status(400).json({ message: 'Quiz ID and score are required.' });
-    }
     if (!userId) {
       return res.status(401).json({ message: 'User not authenticated.' });
     }
+
+    const { quizId, score } = req.body;
 
     const client = await clientPromise;
     const db = client.db('pharmia');
     const usersCollection = db.collection('users');
 
+    // Ensure quizId is a string and score is a number
+    const newQuizEntry: { quizId: string; score: number; completedAt: Date } = {
+      quizId: String(quizId),
+      score: Number(score),
+      completedAt: new Date(),
+    };
+
     // Add quiz completion to quizHistory array
     await usersCollection.updateOne(
       { _id: new ObjectId(userId) },
-      { $push: { quizHistory: { quizId, score, completedAt: new Date() } } }
+      { $push: { quizHistory: newQuizEntry } as any }
     );
+
 
     res.status(200).json({ message: 'Quiz completion tracked.' });
   } catch (error) {
