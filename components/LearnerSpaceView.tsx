@@ -130,16 +130,13 @@ const LearnerSpaceView: React.FC = () => {
               <p className="text-4xl font-bold">0</p>
               <p className="text-sm opacity-80">Nécessite un suivi backend</p>
             </div>
-          </div>
 
-          {/* Médias consultés (Placeholder) */}
-          <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-xl shadow-lg p-6 mb-8 text-white">
-            <h2 className="text-2xl font-bold mb-4 flex items-center">
-              <svg className="w-6 h-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.555-4.555A1 1 0 0121 6v12a1 1 0 01-1.445.895L15 14m-6 4h6a2 2 0 002-2V6a2 2 0 00-2-2H9a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              Médias consultés
-            </h2>
-            <p className="text-4xl font-bold text-white mb-2">0</p>
-            <p className="text-sm opacity-80">Cette section nécessite une implémentation backend pour le suivi des médias.</p>
+            {/* Médias consultés (Placeholder) */}
+            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+              <h3 className="text-lg font-semibold mb-2">Médias consultés</h3>
+              <p className="text-4xl font-bold">0</p>
+              <p className="text-sm opacity-80">Nécessite un suivi backend</p>
+            </div>
           </div>
 
           {/* Fiches Sections */}
