@@ -104,28 +104,28 @@ const LearnerSpaceView: React.FC = () => {
           {/* Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {/* Fiches lues */}
-            <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
               <h3 className="text-lg font-semibold mb-2">Fiches lues</h3>
               <p className="text-4xl font-bold">{readMemoficheIds.length} / {totalMemofiches}</p>
               <p className="text-sm opacity-80">MémoFiches uniques consultées</p>
             </div>
 
             {/* Quiz réalisés */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
               <h3 className="text-lg font-semibold mb-2">Quiz réalisés</h3>
               <p className="text-4xl font-bold">{totalQuizzesCompleted}</p>
               <p className="text-sm opacity-80">Tests de connaissances terminés</p>
             </div>
 
             {/* Score moyen aux quiz */}
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
               <h3 className="text-lg font-semibold mb-2">Score moyen aux quiz</h3>
               <p className="text-4xl font-bold">{averageScore}%</p>
               <p className="text-sm opacity-80">Performance moyenne</p>
             </div>
 
             {/* Flashcards visionnées (Placeholder) */}
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
+            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between">
               <h3 className="text-lg font-semibold mb-2">Flashcards visionnées</h3>
               <p className="text-4xl font-bold">0</p>
               <p className="text-sm opacity-80">Nécessite un suivi backend</p>
@@ -133,13 +133,13 @@ const LearnerSpaceView: React.FC = () => {
           </div>
 
           {/* Médias consultés (Placeholder) */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-              <svg className="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.555-4.555A1 1 0 0121 6v12a1 1 0 01-1.445.895L15 14m-6 4h6a2 2 0 002-2V6a2 2 0 00-2-2H9a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-xl shadow-lg p-6 mb-8 text-white">
+            <h2 className="text-2xl font-bold mb-4 flex items-center">
+              <svg className="w-6 h-6 text-white mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.555-4.555A1 1 0 0121 6v12a1 1 0 01-1.445.895L15 14m-6 4h6a2 2 0 002-2V6a2 2 0 00-2-2H9a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               Médias consultés
             </h2>
-            <p className="text-4xl font-bold text-gray-900 mb-2">0</p>
-            <p className="text-gray-700">Cette section nécessite une implémentation backend pour le suivi des médias.</p>
+            <p className="text-4xl font-bold mb-2">0</p>
+            <p className="text-sm opacity-80">Nécessite un suivi backend</p>
           </div>
 
           {/* Fiches Sections */}
