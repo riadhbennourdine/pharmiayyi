@@ -9,6 +9,7 @@ const LearnerSpaceView: React.FC = () => {
 
   const [totalMemofiches, setTotalMemofiches] = useState<number>(0);
   const [readMemoficheIds, setReadMemoficheIds] = useState<string[]>([]);
+  const [viewedMediaIds, setViewedMediaIds] = useState<string[]>([]);
   const [quizHistory, setQuizHistory] = useState<any[]>([]);
   const [readMemofichesDetails, setReadMemofichesDetails] = useState<MemoFiche[]>([]);
   const [unreadMemofichesDetails, setUnreadMemofichesDetails] = useState<MemoFiche[]>([]);
@@ -33,6 +34,7 @@ const LearnerSpaceView: React.FC = () => {
         if (!progressResponse.ok) throw new Error('Failed to fetch user progress');
         const progressData = await progressResponse.json();
         setReadMemoficheIds(progressData.readFicheIds || []);
+        setViewedMediaIds(progressData.viewedMediaIds || []);
         setQuizHistory(progressData.quizHistory || []);
 
         // Fetch all memo fiches details to determine read/unread
@@ -121,8 +123,8 @@ const LearnerSpaceView: React.FC = () => {
             {/* Médias consultés (Placeholder) */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
               <h3 className="text-lg font-semibold mb-2">Médias consultés</h3>
-              <p className="text-4xl font-bold">0</p>
-              <p className="text-sm opacity-80">Nécessite un suivi backend</p>
+              <p className="text-4xl font-bold">{viewedMediaIds.length}</p>
+              <p className="text-sm opacity-80">Vidéos et autres médias consultés</p>
             </div>
 
             {/* Flashcards visionnées (Placeholder) */}

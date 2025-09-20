@@ -705,7 +705,7 @@ app.get('/api/user/progress', authMiddleware, async (req, res) => {
 
     const userProgress = await usersCollection.findOne(
       { _id: new ObjectId(userId) },
-      { projection: { readFicheIds: 1, quizHistory: 1 } }
+      { projection: { readFicheIds: 1, quizHistory: 1, viewedMediaIds: 1 } }
     );
 
     if (!userProgress) {
@@ -716,6 +716,36 @@ app.get('/api/user/progress', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Error fetching user progress:', error);
     res.status(500).json({ message: 'Failed to fetch user progress.' });
+  }
+});
+
+// Endpoint to track viewed media
+app.post('/api/user/track-media-view', authMiddleware, async (req, res) => {
+  try {
+    const { mediaId } = req.body;
+    const userId = req.user?._id;
+
+    if (!mediaId) {
+      return res.status(400).json({ message: 'Media ID is required.' });
+    }
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection('users');
+
+    // Add mediaId to viewedMediaIds array if it doesn't already exist
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $addToSet: { viewedMediaIds: mediaId } }
+    );
+
+    res.status(200).json({ message: 'Media marked as viewed.' });
+  } catch (error) {
+    console.error('Error tracking media view:', error);
+    res.status(500).json({ message: 'Failed to track media view.' });
   }
 });
 

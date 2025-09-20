@@ -118,9 +118,29 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
 
   const [openSection, setOpenSection] = useState<string | null>('patientSituation');
   const [activeTab, setActiveTab] = useState<TabName>('memo');
+  const [isYoutubeModalOpen, setYoutubeModalOpen] = useState(false);
 
   const handleToggle = (title: string) => {
     setOpenSection(openSection === title ? null : title);
+  };
+
+  const handleMediaView = async () => {
+    setYoutubeModalOpen(true);
+    if (user && caseStudy.youtubeUrl) {
+      try {
+        const token = localStorage.getItem('token');
+        await fetch('/api/user/track-media-view', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ mediaId: caseStudy.youtubeUrl }),
+        });
+      } catch (error) {
+        console.error('Error tracking media view:', error);
+      }
+    }
   };
 
   const handleDelete = async () => {
@@ -467,8 +487,41 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                 </div>
             ) : (
                  <div className="text-center mb-8">
-                    <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">{caseStudy.title}</h2>
+                    <div className="flex items-center justify-center">
+                        <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">{caseStudy.title}</h2>
+                        {youtubeEmbedUrl && (
+                            <button
+                                onClick={handleMediaView}
+                                className="ml-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center"
+                            >
+                                <VideoCameraIcon className="h-5 w-5 mr-2" />
+                                Voir la vidéo
+                            </button>
+                        )}
+                    </div>
                  </div>
+            )}
+
+            {isYoutubeModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center" onClick={() => setYoutubeModalOpen(false)}>
+                    <div className="bg-white p-4 rounded-lg shadow-lg relative w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setYoutubeModalOpen(false)} className="absolute -top-2 -right-2 bg-white rounded-full p-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div className="aspect-w-16 aspect-h-9">
+                            <iframe
+                                src={youtubeEmbedUrl}
+                                title="YouTube video player"
+                                frameBorder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                className="w-full h-full rounded-md"
+                            ></iframe>
+                        </div>
+                    </div>
+                </div>
             )}
             
             {caseStudy.keyPoints && caseStudy.keyPoints.length > 0 && (
