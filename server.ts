@@ -621,6 +621,51 @@ app.get('/api/users/preparateurs-by-pharmacist/:pharmacistId', authMiddleware, a
   }
 });
 
+// Get user learning journey details by ID
+app.get('/api/users/:id/learning-journey', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?._id; // Current authenticated user
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'ID utilisateur invalide.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const targetUser = await usersCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!targetUser) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+
+    // Authorization check: Only the user themselves, their pharmacist, or an admin/formateur can view
+    const isAuthorized = (
+      userId?.toString() === id || // User viewing their own journey
+      (req.user?.role === UserRole.PHARMACIEN && targetUser.pharmacistId?.toString() === userId?.toString()) || // Pharmacist viewing their preparateur
+      req.user?.role === UserRole.ADMIN ||
+      req.user?.role === UserRole.FORMATEUR
+    );
+
+    if (!isAuthorized) {
+      return res.status(403).json({ message: 'Accès refusé. Vous n\'êtes pas autorisé à voir ce parcours.' });
+    }
+
+    // Project only the learning journey related fields
+    const learningJourney = await usersCollection.findOne(
+      { _id: new ObjectId(id) },
+      { projection: { readFicheIds: 1, quizHistory: 1, viewedMediaIds: 1 } }
+    );
+
+    res.status(200).json(learningJourney);
+  } catch (error) {
+    console.error('Error fetching user learning journey:', error);
+    res.status(500).json({ message: 'Failed to fetch user learning journey.' });
+  }
+});
+
 app.post('/api/generate', async (req, res) => {
     try {
         const { memoFicheType, sourceText, theme, system, pathology } = req.body;

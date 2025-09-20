@@ -7,12 +7,6 @@ import PharmacistDashboard from './PharmacistDashboard'; // Import PharmacistDas
 
 const LearnerSpaceView: React.FC = () => {
   const { user } = useAuth();
-
-  // If user is a Pharmacien, render PharmacistDashboard instead
-  if (user?.role === UserRole.PHARMACIEN) {
-    return <PharmacistDashboard />;
-  }
-
   const username = user?.username || 'cher apprenant';
 
   const [totalMemofiches, setTotalMemofiches] = useState<number>(0);
@@ -209,6 +203,10 @@ const LearnerSpaceView: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* Pharmacist Dashboard Section (visible only for PHARMACIEN) */}
+          {user?.role === UserRole.PHARMACIEN && <PharmacistDashboard />}
+
         </div>
       </div>
     </div>
