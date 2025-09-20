@@ -105,34 +105,29 @@ const LearnerSpaceView: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {/* Fiches lues */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
+              <h3 className="text-lg font-semibold mb-2">Fiches lues</h3>
               <p className="text-4xl font-bold">{readMemoficheIds.length} / {totalMemofiches}</p>
               <p className="text-sm opacity-80">MémoFiches uniques consultées</p>
             </div>
 
-            {/* Quiz réalisés */}
+            {/* Quiz et Scores */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
-              <h3 className="text-lg font-semibold mb-2">Quiz réalisés</h3>
-              <p className="text-4xl font-bold">{totalQuizzesCompleted}</p>
-              <p className="text-sm opacity-80">Tests de connaissances terminés</p>
-            </div>
-
-            {/* Score moyen aux quiz */}
-            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
-              <h3 className="text-lg font-semibold mb-2">Score moyen aux quiz</h3>
-              <p className="text-4xl font-bold">{averageScore}%</p>
-              <p className="text-sm opacity-80">Performance moyenne</p>
-            </div>
-
-            {/* Flashcards visionnées (Placeholder) */}
-            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
-              <h3 className="text-lg font-semibold mb-2">Flashcards visionnées</h3>
-              <p className="text-4xl font-bold">0</p>
-              <p className="text-sm opacity-80">Nécessite un suivi backend</p>
+              <h3 className="text-lg font-semibold mb-2">Quiz et Scores</h3>
+              <p className="text-2xl font-bold">Réalisés: {totalQuizzesCompleted}</p>
+              <p className="text-2xl font-bold">Moyen: {averageScore}%</p>
+              <p className="text-sm opacity-80">Tests de connaissances & Performance moyenne</p>
             </div>
 
             {/* Médias consultés (Placeholder) */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
               <h3 className="text-lg font-semibold mb-2">Médias consultés</h3>
+              <p className="text-4xl font-bold">0</p>
+              <p className="text-sm opacity-80">Nécessite un suivi backend</p>
+            </div>
+
+            {/* Flashcards visionnées (Placeholder) */}
+            <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
+              <h3 className="text-lg font-semibold mb-2">Flashcards visionnées</h3>
               <p className="text-4xl font-bold">0</p>
               <p className="text-sm opacity-80">Nécessite un suivi backend</p>
             </div>
