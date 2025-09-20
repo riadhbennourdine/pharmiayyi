@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
-import { MemoFiche, UserRole } from '../types'; // Assuming MemoFiche type is available
+import { MemoFiche, UserRole, User } from '../types'; // Assuming MemoFiche type is available
 import AdminPanel from './AdminPanel'; // Import AdminPanel
-import PharmacistDashboard from './PharmacistDashboard'; // Import PharmacistDashboard
+import PreparerLearningJourneyPopup from './PreparerLearningJourneyPopup'; // Import the popup component
 
 const LearnerSpaceView: React.FC = () => {
   const { user } = useAuth();
-  const username = user?.username || 'cher apprenant';
+  const username = user?.firstName || user?.username || 'cher apprenant';
 
   const [totalMemofiches, setTotalMemofiches] = useState<number>(0);
   const [readMemoficheIds, setReadMemoficheIds] = useState<string[]>([]);
@@ -18,6 +18,13 @@ const LearnerSpaceView: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [referentPharmacistName, setReferentPharmacistName] = useState<string | null>(null);
+
+  // State for Pharmacist Dashboard functionality
+  const [preparateurs, setPreparateurs] = useState<User[]>([]);
+  const [pharmacistDashboardLoading, setPharmacistDashboardLoading] = useState<boolean>(true);
+  const [pharmacistDashboardError, setPharmacistDashboardError] = useState<string | null>(null);
+  const [showPreparerPopup, setShowPreparerPopup] = useState<boolean>(false);
+  const [selectedPreparerId, setSelectedPreparerId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStatsAndPharmacist = async () => {
@@ -52,9 +59,6 @@ const LearnerSpaceView: React.FC = () => {
         setReadMemofichesDetails(existingReadFiches);
         setUnreadMemofichesDetails(unreadFiches);
 
-        // Update readMemoficheIds to only include existing fiches for accurate count
-        setReadMemoficheIds(existingReadFiches.map(fiche => fiche._id));
-
         // Fetch referent pharmacist details if user is PREPARATEUR and has a pharmacistId
         if (user?.role === UserRole.PREPARATEUR && user.pharmacistId) {
           const pharmacistResponse = await fetch(`/api/users/${user.pharmacistId}`, {
@@ -77,8 +81,48 @@ const LearnerSpaceView: React.FC = () => {
       }
     };
 
+    const fetchPreparateursForPharmacist = async () => {
+      if (user?.role !== UserRole.PHARMACIEN || !user?._id) {
+        setPharmacistDashboardError('Accès non autorisé ou ID pharmacien manquant.');
+        setPharmacistDashboardLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/users/preparateurs-by-pharmacist/${user._id}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch preparateurs.');
+        }
+
+        const data: User[] = await response.json();
+        setPreparateurs(data);
+      } catch (err: any) {
+        setPharmacistDashboardError(err.message);
+        console.error('Error fetching preparateurs for pharmacist:', err);
+      } finally {
+        setPharmacistDashboardLoading(false);
+      }
+    };
+
     fetchStatsAndPharmacist();
+    if (user?.role === UserRole.PHARMACIEN) {
+      fetchPreparateursForPharmacist();
+    }
   }, [user]);
+
+  const handleViewPreparateurJourney = (preparerId: string) => {
+    setSelectedPreparerId(preparerId);
+    setShowPreparerPopup(true);
+  };
+
+  const handleClosePreparerPopup = () => {
+    setShowPreparerPopup(false);
+    setSelectedPreparerId(null);
+  };
 
   const totalQuizzesCompleted = quizHistory.length;
   const totalScore = quizHistory.reduce((sum, quiz) => sum + quiz.score, 0);
@@ -114,10 +158,32 @@ const LearnerSpaceView: React.FC = () => {
         <p className="text-lg text-gray-600 mb-2">
           Votre tableau de bord personnalisé pour suivre votre progression.
         </p>
-        {user?.role === UserRole.PREPARATEUR && referentPharmacistName && (
-          <p className="text-xl font-semibold text-gray-700 mb-8">
-            Pharmacie {referentPharmacistName}
-          </p>
+
+        {/* Pharmacist Dashboard Section (visible only for PHARMACIEN) */}
+        {user?.role === UserRole.PHARMACIEN && (
+          <div className="mt-8">
+            {pharmacistDashboardLoading ? (
+              <div className="text-center text-slate-600">Chargement des préparateurs...</div>
+            ) : pharmacistDashboardError ? (
+              <div className="text-center text-red-600">Erreur: {pharmacistDashboardError}</div>
+            ) : preparateurs.length === 0 ? (
+              <p className="text-gray-600 italic">Aucun préparateur attribué pour le moment.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {preparateurs.map(prep => (
+                  <div
+                    key={prep._id?.toString()}
+                    className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200"
+                    onClick={() => handleViewPreparateurJourney(prep._id?.toString() || '')}
+                  >
+                    <h3 className="text-xl font-bold text-teal-600 mb-2">{prep.firstName} {prep.lastName}</h3>
+                    <p className="text-gray-600">{prep.email}</p>
+                    <p className="text-sm text-gray-500 mt-2">Cliquez pour voir le parcours d'apprentissage</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Admin Panel Section (visible only for ADMIN) */}
@@ -208,12 +274,15 @@ const LearnerSpaceView: React.FC = () => {
               )}
             </div>
           </div>
-
-          {/* Pharmacist Dashboard Section (visible only for PHARMACIEN) */}
-          {user?.role === UserRole.PHARMACIEN && <PharmacistDashboard />}
-
         </div>
       </div>
+      {showPreparerPopup && selectedPreparerId && (
+        <PreparerLearningJourneyPopup 
+          preparerId={selectedPreparerId} 
+          preparerName={`${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.firstName} ${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.lastName}`}
+          onClose={handleClosePreparerPopup} 
+        />
+      )}
     </div>
   );
 };
