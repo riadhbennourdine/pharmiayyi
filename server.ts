@@ -493,6 +493,75 @@ app.get('/api/users/pharmacists', async (req, res) => {
   }
 });
 
+// Get list of preparateurs
+app.get('/api/users/preparateurs', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const preparateurs = await usersCollection.find(
+      { role: UserRole.PREPARATEUR },
+      { projection: { _id: 1, email: 1, username: 1, firstName: 1, lastName: 1, pharmacistId: 1 } }
+    ).toArray();
+
+    res.status(200).json(preparateurs);
+  } catch (error) {
+    console.error('Error fetching preparateurs:', error);
+    res.status(500).json({ message: 'Failed to fetch preparateurs.' });
+  }
+});
+
+// Assign Pharmacist to Preparateur endpoint (Admin only)
+app.put('/api/users/:id/assign-pharmacist', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pharmacistId } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'ID utilisateur invalide.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    // Verify the preparateur exists and has the PREPARATEUR role
+    const preparateur = await usersCollection.findOne({ _id: new ObjectId(id), role: UserRole.PREPARATEUR });
+    if (!preparateur) {
+      return res.status(404).json({ message: 'Préparateur non trouvé ou rôle incorrect.' });
+    }
+
+    // If pharmacistId is provided, verify it corresponds to an existing PHARMACIEN user
+    let newPharmacistObjectId = null;
+    if (pharmacistId) {
+      if (!ObjectId.isValid(pharmacistId)) {
+        return res.status(400).json({ message: 'ID pharmacien invalide.' });
+      }
+      const pharmacist = await usersCollection.findOne({ _id: new ObjectId(pharmacistId), role: UserRole.PHARMACIEN });
+      if (!pharmacist) {
+        return res.status(400).json({ message: 'Pharmacien référent invalide.' });
+      }
+      newPharmacistObjectId = new ObjectId(pharmacistId);
+    }
+
+    const updateResult = await usersCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { pharmacistId: newPharmacistObjectId, updatedAt: new Date() } }
+    );
+
+    if (updateResult.matchedCount === 0) {
+      return res.status(404).json({ message: 'Préparateur non trouvé.' });
+    }
+
+    res.status(200).json({ message: 'Pharmacien référent attribué avec succès.' });
+
+  } catch (error) {
+    console.error('Error assigning pharmacist to preparateur:', error);
+    res.status(500).json({ message: 'Internal server error during assignment.' });
+  }
+});
+
 app.post('/api/generate', async (req, res) => {
     try {
         const { memoFicheType, sourceText, theme, system, pathology } = req.body;
