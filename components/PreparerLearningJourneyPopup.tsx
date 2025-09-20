@@ -102,8 +102,8 @@ const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> 
         <div className="space-y-6">
           {/* Fiches Lues */}
           <div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-3">Fiches Lues ({readFichesDetails.length})</h3>
-            {readFichesDetails.length > 0 ? (
+            <h3 className="text-xl font-semibold text-gray-700 mb-3">Fiches Lues ({readFichesDetails?.length ?? 0})</h3>
+            {readFichesDetails && readFichesDetails.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
                 {readFichesDetails.map(fiche => (
                   <li key={fiche._id} className="text-gray-600">
@@ -120,8 +120,8 @@ const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> 
 
           {/* Historique des Quiz */}
           <div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-3">Historique des Quiz ({learningJourney.quizHistory.length})</h3>
-            {learningJourney.quizHistory.length > 0 ? (
+            <h3 className="text-xl font-semibold text-gray-700 mb-3">Historique des Quiz ({learningJourney?.quizHistory?.length ?? 0})</h3>
+            {learningJourney?.quizHistory && learningJourney.quizHistory.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
                 {learningJourney.quizHistory.map((quiz, index) => (
                   <li key={index} className="text-gray-600">
@@ -136,8 +136,8 @@ const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> 
 
           {/* Médias Consultés */}
           <div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-3">Médias Consultés ({learningJourney.viewedMediaIds.length})</h3>
-            {learningJourney.viewedMediaIds.length > 0 ? (
+            <h3 className="text-xl font-semibold text-gray-700 mb-3">Médias Consultés ({learningJourney?.viewedMediaIds?.length ?? 0})</h3>
+            {learningJourney?.viewedMediaIds && learningJourney.viewedMediaIds.length > 0 ? (
               <ul className="list-disc pl-5 space-y-1">
                 {learningJourney.viewedMediaIds.map((mediaId, index) => (
                   <li key={index} className="text-gray-600">{mediaId}</li> // Displaying ID for now, could fetch details if needed

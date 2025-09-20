@@ -93,7 +93,7 @@ const PharmacistDashboard: React.FC<PharmacistDashboardProps> = () => {
                 className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200"
                 onClick={() => handleViewPreparateurJourney(prep._id?.toString() || '')}
               >
-                <h3 className="text-xl font-bold text-gray-800 mb-2">{prep.firstName} {prep.lastName}</h3>
+                <h3 className="text-xl font-bold text-teal-600 mb-2">{prep.firstName} {prep.lastName}</h3>
                 <p className="text-gray-600">{prep.email}</p>
                 <p className="text-sm text-gray-500 mt-2">Cliquez pour voir le parcours d'apprentissage</p>
               </div>
