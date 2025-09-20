@@ -115,8 +115,8 @@ const LearnerSpaceView: React.FC = () => {
             {/* Quiz et Scores */}
             <div className="bg-gradient-to-r from-[#0D9488] to-[#0A7C72] rounded-lg shadow-md p-5 text-white flex flex-col justify-between min-h-[120px]">
               <h3 className="text-lg font-semibold mb-2">Quiz et Scores</h3>
-              <p className="text-2xl font-bold">Réalisés: {totalQuizzesCompleted}</p>
-              <p className="text-2xl font-bold">Moyen: {averageScore}%</p>
+              <p className="text-2xl font-bold">Quiz Réalisés: {totalQuizzesCompleted}</p>
+              <p className="text-2xl font-bold">Score Moyen: {averageScore}%</p>
               <p className="text-sm opacity-80">Tests de connaissances & Performance moyenne</p>
             </div>
 
