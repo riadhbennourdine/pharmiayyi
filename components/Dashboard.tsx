@@ -9,6 +9,46 @@ import { CaseStudy } from '../types';
 const AdminPanel: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [preparateurs, setPreparateurs] = useState<User[]>([]);
+  const [pharmacists, setPharmacists] = useState<User[]>([]);
+  const [assignmentLoading, setAssignmentLoading] = useState(false);
+  const [assignmentFeedback, setAssignmentFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const { user } = useAuth();
+
+  const fetchUsers = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      // Fetch Preparateurs
+      const preparateursResponse = await fetch('/api/users/preparateurs', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (preparateursResponse.ok) {
+        const data = await preparateursResponse.json();
+        setPreparateurs(data);
+      } else {
+        console.error('Failed to fetch preparateurs');
+      }
+
+      // Fetch Pharmacists
+      const pharmacistsResponse = await fetch('/api/users/pharmacists', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (pharmacistsResponse.ok) {
+        const data = await pharmacistsResponse.json();
+        setPharmacists(data);
+      } else {
+        console.error('Failed to fetch pharmacists');
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleUpdate = async () => {
     setIsLoading(true);
@@ -44,6 +84,43 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  const handleAssignPharmacist = async (preparateurId: string, newPharmacistId: string) => {
+    setAssignmentLoading(true);
+    setAssignmentFeedback(null);
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setAssignmentFeedback({ message: 'Erreur: Token d\'authentification introuvable.', type: 'error' });
+      setAssignmentLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/users/${preparateurId}/assign-pharmacist`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ pharmacistId: newPharmacistId || null }), // Send null if unassigning
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Une erreur est survenue lors de l\'attribution.');
+      }
+
+      setAssignmentFeedback({ message: 'Attribution mise à jour avec succès.', type: 'success' });
+      fetchUsers(); // Re-fetch users to update the list
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+      setAssignmentFeedback({ message: `Erreur: ${errorMessage}`, type: 'error' });
+    } finally {
+      setAssignmentLoading(false);
+    }
+  };
+
   return (
     <div className="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-lg my-8">
       <h3 className="font-bold text-lg">Panneau d\'Administration</h3>
@@ -60,6 +137,67 @@ const AdminPanel: React.FC = () => {
           {feedback.message}
         </p>
       )}
+
+      <div className="mt-8 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg">
+        <h3 className="font-bold text-lg mb-4">Gestion des Attributions Préparateur-Pharmacien</h3>
+        {assignmentFeedback && (
+          <p className={`mb-4 text-sm font-semibold ${assignmentFeedback.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+            {assignmentFeedback.message}
+          </p>
+        )}
+        {preparateurs.length === 0 ? (
+          <p>Aucun préparateur trouvé.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white rounded-lg shadow overflow-hidden">
+              <thead className="bg-blue-500 text-white">
+                <tr>
+                  <th className="py-2 px-4 text-left">Préparateur</th>
+                  <th className="py-2 px-4 text-left">Pharmacien Référent Actuel</th>
+                  <th className="py-2 px-4 text-left">Attribuer un Pharmacien</th>
+                  <th className="py-2 px-4 text-left">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {preparateurs.map((prep) => (
+                  <tr key={prep._id?.toString()} className="border-b border-blue-200 last:border-b-0">
+                    <td className="py-2 px-4">{prep.firstName} {prep.lastName} ({prep.email})</td>
+                    <td className="py-2 px-4">
+                      {pharmacists.find(p => p._id?.toString() === prep.pharmacistId?.toString())?.firstName || 'Non attribué'}
+                      {' '}
+                      {pharmacists.find(p => p._id?.toString() === prep.pharmacistId?.toString())?.lastName || ''}
+                    </td>
+                    <td className="py-2 px-4">
+                      <select
+                        value={prep.pharmacistId?.toString() || ''}
+                        onChange={(e) => handleAssignPharmacist(prep._id?.toString() || '', e.target.value)}
+                        className="p-2 border border-blue-300 rounded-md w-full"
+                        disabled={assignmentLoading}
+                      >
+                        <option value="">-- Sélectionner --</option>
+                        {pharmacists.map((ph) => (
+                          <option key={ph._id?.toString()} value={ph._id?.toString()}>
+                            {ph.firstName} {ph.lastName} ({ph.email})
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="py-2 px-4">
+                      <button
+                        onClick={() => handleAssignPharmacist(prep._id?.toString() || '', prep.pharmacistId?.toString() || '')}
+                        disabled={assignmentLoading}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded disabled:bg-blue-300 disabled:cursor-not-allowed"
+                      >
+                        {assignmentLoading ? 'Enregistrement...' : 'Enregistrer'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
