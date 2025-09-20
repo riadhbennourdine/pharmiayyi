@@ -201,6 +201,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
   };
 
   const youtubeEmbedUrl = getYoutubeEmbedUrl(caseStudy.youtubeUrl);
+  console.log('youtubeEmbedUrl:', youtubeEmbedUrl);
   
   const formattedDate = caseStudy.creationDate 
     ? new Date(caseStudy.creationDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
