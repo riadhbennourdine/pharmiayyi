@@ -483,7 +483,7 @@ app.get('/api/users/pharmacists', async (req, res) => {
 
     const pharmacists = await usersCollection.find(
       { role: UserRole.PHARMACIEN },
-      { projection: { _id: 1, email: 1 } } // Only return _id and email
+      { projection: { _id: 1, email: 1, firstName: 1, lastName: 1 } } // Include firstName and lastName
     ).toArray();
 
     res.status(200).json(pharmacists);
