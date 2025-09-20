@@ -126,11 +126,12 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
 
   const handleMediaView = async () => {
     setYoutubeModalOpen(true);
-    alert('Tracking media view for youtubeUrl: ' + caseStudy.youtubeUrl);
+    console.log('--- MEDIA VIEW TRACKING --- Clicking 'Voir la vidéo' button. Youtube URL:', caseStudy.youtubeUrl);
     if (user && caseStudy.youtubeUrl) {
       try {
         const token = localStorage.getItem('token');
-        await fetch('/api/user/track-media-view', {
+        console.log('--- MEDIA VIEW TRACKING --- Sending request to /api/user/track-media-view');
+        const response = await fetch('/api/user/track-media-view', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -138,8 +139,13 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
           },
           body: JSON.stringify({ mediaId: caseStudy.youtubeUrl }),
         });
+        if(response.ok) {
+          console.log('--- MEDIA VIEW TRACKING --- Request successful');
+        } else {
+          console.error('--- MEDIA VIEW TRACKING --- Request failed:', await response.text());
+        }
       } catch (error) {
-        console.error('Error tracking media view:', error);
+        console.error('--- MEDIA VIEW TRACKING --- Error tracking media view:', error);
       }
     }
   };

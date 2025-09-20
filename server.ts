@@ -725,8 +725,6 @@ app.post('/api/user/track-media-view', authMiddleware, async (req, res) => {
     const { mediaId } = req.body;
     const userId = req.user?._id;
 
-    console.log(`Tracking media view for user ${userId} and mediaId ${mediaId}`);
-
     if (!mediaId) {
       return res.status(400).json({ message: 'Media ID is required.' });
     }
