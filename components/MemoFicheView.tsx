@@ -124,13 +124,11 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
     setOpenSection(openSection === title ? null : title);
   };
 
-  const handleMediaView = async () => {
-    setYoutubeModalOpen(true);
-    alert('Button clicked!');
+  const handleMarkAsSeen = async () => {
     if (user && caseStudy.youtubeUrl) {
       try {
         const token = localStorage.getItem('token');
-        await fetch('/api/user/track-media-view', {
+        const response = await fetch('/api/user/track-media-view', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -138,10 +136,20 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
           },
           body: JSON.stringify({ mediaId: caseStudy.youtubeUrl }),
         });
+        if (response.ok) {
+          alert('Média marqué comme vu !');
+        } else {
+          alert('Erreur lors du marquage comme vu.');
+        }
       } catch (error) {
         console.error('Error tracking media view:', error);
+        alert('Erreur lors du marquage comme vu.');
       }
     }
+  };
+
+  const handleMediaView = async () => {
+    setYoutubeModalOpen(true);
   };
 
   const handleDelete = async () => {
@@ -362,6 +370,14 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
                                     className="w-full rounded-md" 
                                     style={{ height: '80vh' }}
                                 ></iframe>
+                            </div>
+                            <div className="mt-4 flex justify-end">
+                                <button
+                                    onClick={handleMarkAsSeen}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center"
+                                >
+                                    Marquer comme vu
+                                </button>
                             </div>
                         </div>
                       ) : (
