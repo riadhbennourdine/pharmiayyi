@@ -20,6 +20,8 @@ export interface User {
   _id?: ObjectId; // Change to ObjectId
   email: string;
   username?: string; // New field
+  firstName?: string;
+  lastName?: string;
   password?: string; // Only for registration/login, not stored
   passwordHash?: string; // Stored in DB
   role: UserRole;

@@ -9,6 +9,9 @@ const RegisterView: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [city, setCity] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [role, setRole] = useState<UserRole>(UserRole.PREPARATEUR);
@@ -46,7 +49,7 @@ const RegisterView: React.FC = () => {
         setIsLoading(true);
         try {
             // Pass username to the register function
-            const success = await register(email, username, password, role, pharmacistId);
+            const success = await register(email, username, password, role, pharmacistId, firstName, lastName, city);
             if (success) {
                 navigate('/login');
             } else {
@@ -124,6 +127,52 @@ const RegisterView: React.FC = () => {
                                 onChange={(e) => setUsername(e.target.value)}
                             />
                         </div>
+                        {role === UserRole.PHARMACIEN && (
+                            <>
+                                <div>
+                                    <label htmlFor="first-name-register" className="sr-only">Prénom</label>
+                                    <input
+                                        id="first-name-register"
+                                        name="firstName"
+                                        type="text"
+                                        autoComplete="given-name"
+                                        required
+                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                        placeholder="Prénom"
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="last-name-register" className="sr-only">Nom</label>
+                                    <input
+                                        id="last-name-register"
+                                        name="lastName"
+                                        type="text"
+                                        autoComplete="family-name"
+                                        required
+                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                        placeholder="Nom"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="city-register" className="sr-only">Ville</label>
+                                    <input
+                                        id="city-register"
+                                        name="city"
+                                        type="text"
+                                        autoComplete="address-level2"
+                                        required
+                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                        placeholder="Ville"
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                    />
+                                </div>
+                            </>
+                        )}
                         {role === UserRole.PREPARATEUR && (
                             <div>
                                 <label htmlFor="pharmacist-select" className="sr-only">Pharmacien Référent</label>
@@ -138,7 +187,7 @@ const RegisterView: React.FC = () => {
                                 >
                                     <option value="">Sélectionnez un pharmacien référent</option>
                                     {pharmacists.map(p => (
-                                        <option key={p._id?.toString()} value={p._id?.toString()}>{p.email}</option>
+                                        <option key={p._id?.toString()} value={p._id?.toString()}>{p.firstName} {p.lastName}</option>
                                     ))}
                                 </select>
                             </div>

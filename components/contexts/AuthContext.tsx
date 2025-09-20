@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   login: (identifier: string, password: string) => Promise<boolean>;
   logout: () => void;
-  register: (email: string, username: string, password: string, role: UserRole, pharmacistId?: string) => Promise<boolean>;
+  register: (email: string, username: string, password: string, role: UserRole, pharmacistId?: string, firstName?: string, lastName?: string, city?: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -75,13 +75,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   }, []);
 
-  const register = useCallback(async (email: string, username: string, password: string, role: UserRole, pharmacistId?: string): Promise<boolean> => {
+  const register = useCallback(async (email: string, username: string, password: string, role: UserRole, pharmacistId?: string, firstName?: string, lastName?: string, city?: string): Promise<boolean> => {
     const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, username, password, role, pharmacistId }),
+        body: JSON.stringify({ email, username, password, role, pharmacistId, firstName, lastName, city }),
     });
 
     const data = await response.json();
