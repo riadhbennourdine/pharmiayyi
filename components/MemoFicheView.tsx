@@ -126,6 +126,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ caseStudy: rawCaseStudy, 
 
   const handleMediaView = async () => {
     setYoutubeModalOpen(true);
+    alert('Tracking media view for youtubeUrl: ' + caseStudy.youtubeUrl);
     if (user && caseStudy.youtubeUrl) {
       try {
         const token = localStorage.getItem('token');
