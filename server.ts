@@ -11,17 +11,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
 import crypto from 'crypto';
-import * as SibApiV3Sdk from '@getbrevo/brevo';
+import * as Brevo from '@getbrevo/brevo';
 
 // --- EMAIL SENDING SETUP (Brevo API) ---
 const brevoApiKey = process.env.EMAIL_API_KEY;
-
-// Configure the Brevo API client
-const apiClient = SibApiV3Sdk.ApiClient.instance;
-const apiKey = apiClient.authentications['api-key'];
-if (brevoApiKey) {
-    apiKey.apiKey = brevoApiKey;
-}
 
 interface EmailOptions {
     to: string;
@@ -44,8 +37,11 @@ const sendEmail = async (options: EmailOptions) => {
         return; // Skip sending email if not configured
     }
 
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    const apiInstance = new Brevo.TransactionalEmailsApi();
+    const apiKey = apiInstance.authentications['apiKey'];
+    apiKey.apiKey = brevoApiKey;
+
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
 
     sendSmtpEmail.subject = options.subject;
     sendSmtpEmail.htmlContent = options.html;
