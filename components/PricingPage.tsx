@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext'; // Import useAuth
 
 const PricingPage: React.FC = () => {
   const [showAnnual, setShowAnnual] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { user, isAuthenticated } = useAuth(); // Get user and isAuthenticated from AuthContext
 
   const pricing = {
     solo: {
@@ -43,6 +47,40 @@ const PricingPage: React.FC = () => {
     }
   };
 
+  const handleChoosePlan = async (planName: string, amount: number, isAnnual: boolean) => {
+    if (!isAuthenticated) {
+      setError('Veuillez vous connecter pour choisir un plan.');
+      return;
+    }
+
+    setLoadingPlan(planName);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/payment/initiate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored in localStorage
+        },
+        body: JSON.stringify({ planName, amount, isAnnual }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        window.location.href = data.payUrl; // Redirect to Konnect payment page
+      } else {
+        setError(data.message || 'Échec de l\'initialisation du paiement.');
+      }
+    } catch (err) {
+      console.error('Network error during payment initiation:', err);
+      setError('Une erreur réseau est survenue lors de l\'initialisation du paiement.');
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 md:p-8">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Nos Formules d'Abonnement</h1>
@@ -63,6 +101,12 @@ const PricingPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative mb-4" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {Object.values(pricing).map((plan) => (
@@ -89,12 +133,15 @@ const PricingPage: React.FC = () => {
                 </li>
               ))}
             </ul>
-            <Link
-              to="/contact" // Assuming a contact page for subscription
-              className={`mt-8 block text-center py-3 rounded-lg font-semibold transition-colors duration-300 ${plan.popular ? 'bg-teal-600 text-white hover:bg-green-700' : 'bg-gray-100 text-teal-600 hover:bg-gray-200'}`}
+            <button
+              onClick={() => handleChoosePlan(plan.name, showAnnual ? plan.annual : plan.monthly, showAnnual)}
+              className={`mt-8 block text-center py-3 rounded-lg font-semibold transition-colors duration-300 ${plan.popular ? 'bg-teal-600 text-white hover:bg-green-700' : 'bg-gray-100 text-teal-600 hover:bg-gray-200'} ${
+                loadingPlan === plan.name ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={loadingPlan === plan.name}
             >
-              Choisir {plan.name}
-            </Link>
+              {loadingPlan === plan.name ? 'Chargement...' : `Choisir ${plan.name}`}
+            </button>
           </div>
         ))}
       </div>

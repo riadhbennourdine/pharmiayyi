@@ -12,9 +12,30 @@ import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
 import crypto from 'crypto';
 import * as Brevo from '@getbrevo/brevo';
+import axios from 'axios';
+
+// --- PAYMENT INTERFACE ---
+interface Payment {
+  _id?: ObjectId;
+  userId: ObjectId;
+  planName: string;
+  amount: number;
+  isAnnual: boolean;
+  paymentRef?: string;
+  status: 'pending' | 'completed' | 'failed';
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 // --- EMAIL SENDING SETUP (Brevo API) ---
 const brevoApiKey = process.env.EMAIL_API_KEY;
+
+// Configure the Brevo API client
+const apiClient = Brevo.ApiClient.instance;
+const apiKey = apiClient.authentications['api-key'];
+if (brevoApiKey) {
+    apiKey.apiKey = brevoApiKey;
+}
 
 interface EmailOptions {
     to: string;
@@ -114,6 +135,156 @@ const adminOnly = (req: Request, res: Response, next: NextFunction) => {
   }
   next();
 };
+
+// --- KONNECT PAYMENT ENDPOINTS ---
+app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { planName, amount, isAnnual } = req.body;
+    const userId = req.user?._id;
+
+    if (!userId || !planName || !amount) {
+      return res.status(400).json({ message: 'Missing required payment details.' });
+    }
+
+    const konnectApiKey = process.env.KONNECT_API_KEY;
+    const konnectWalletId = process.env.KONNECT_WALLET_ID;
+
+    if (!konnectApiKey || !konnectWalletId) {
+      console.error('Konnect API keys not configured.');
+      return res.status(500).json({ message: 'Payment service not configured.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const paymentsCollection = db.collection<Payment>('payments');
+
+    // Create a pending payment record in our DB
+    const newPayment: Payment = {
+      userId: new ObjectId(userId),
+      planName,
+      amount,
+      isAnnual,
+      status: 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const result = await paymentsCollection.insertOne(newPayment);
+    const paymentId = result.insertedId; // Use this as orderId for Konnect
+
+    const konnectPayload = {
+      receiverWalletId: konnectWalletId,
+      token: 'TND', // Assuming TND for now
+      amount: amount * 1000, // Convert to millimes
+      type: 'immediate',
+      description: `Subscription for ${planName} plan`,
+      acceptedPaymentMethods: ['wallet', 'bank_card', 'e-DINAR'],
+      lifespan: 60, // 60 minutes
+      checkoutForm: true,
+      addPaymentFeesToAmount: false,
+      firstName: req.user?.firstName || '',
+      lastName: req.user?.lastName || '',
+      phoneNumber: req.user?.phoneNumber || '',
+      email: req.user?.email || '',
+      orderId: paymentId.toHexString(), // Use our internal payment ID
+      webhook: `${req.protocol}://${req.get('host')}/api/payment/webhook`, // Dynamic webhook URL
+      theme: 'light',
+    };
+
+    const konnectResponse = await axios.post('https://api.konnect.network/api/v2/init-payment', konnectPayload, {
+      headers: {
+        'x-api-key': konnectApiKey,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const { payUrl, paymentRef } = konnectResponse.data;
+
+    // Update our payment record with Konnect's paymentRef
+    await paymentsCollection.updateOne(
+      { _id: paymentId },
+      { $set: { paymentRef, updatedAt: new Date() } }
+    );
+
+    res.status(200).json({ payUrl });
+
+  } catch (error: any) {
+    console.error('Error initiating Konnect payment:', error.response?.data || error.message);
+    res.status(500).json({ message: 'Failed to initiate payment.' });
+  }
+});
+
+app.get('/api/payment/webhook', async (req: Request, res: Response) => {
+  try {
+    const paymentRef = req.query.payment_ref as string;
+
+    if (!paymentRef) {
+      return res.status(400).json({ message: 'Missing payment_ref in webhook.' });
+    }
+
+    const konnectApiKey = process.env.KONNECT_API_KEY;
+    if (!konnectApiKey) {
+      console.error('Konnect API key not configured for webhook.');
+      return res.status(500).json({ message: 'Payment service not configured.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const paymentsCollection = db.collection<Payment>('payments');
+    const usersCollection = db.collection<User>('users');
+
+    // Get payment details from Konnect
+    const konnectResponse = await axios.get(`https://api.konnect.network/api/v2/payments/${paymentRef}`, {
+      headers: {
+        'x-api-key': konnectApiKey,
+      },
+    });
+
+    const konnectPayment = konnectResponse.data.payment;
+
+    if (!konnectPayment) {
+      return res.status(404).json({ message: 'Payment not found in Konnect.' });
+    }
+
+    // Find our internal payment record using orderId (which is our _id)
+    const internalPayment = await paymentsCollection.findOne({ _id: new ObjectId(konnectPayment.orderId) });
+
+    if (!internalPayment) {
+      console.error(`Internal payment record not found for orderId: ${konnectPayment.orderId}`);
+      return res.status(404).json({ message: 'Internal payment record not found.' });
+    }
+
+    // Update payment status in our DB
+    let newStatus: Payment['status'] = 'pending';
+    if (konnectPayment.status === 'completed') {
+      newStatus = 'completed';
+      // Update user's subscription based on the plan
+      const user = await usersCollection.findOne({ _id: internalPayment.userId });
+      if (user) {
+        // TODO: Implement actual subscription logic (e.g., update user.role, user.subscriptionEndDate)
+        console.log(`User ${user.email} successfully subscribed to ${internalPayment.planName}.`);
+        // Example: Update user role to 'SUBSCRIBER' or similar
+        await usersCollection.updateOne(
+          { _id: internalPayment.userId },
+          { $set: { role: UserRole.PHARMACIEN, updatedAt: new Date() } } // Example: Set role to PHARMACIEN
+        );
+      }
+    } else if (konnectPayment.status === 'failed') {
+      newStatus = 'failed';
+    }
+
+    await paymentsCollection.updateOne(
+      { _id: internalPayment._id },
+      { $set: { status: newStatus, updatedAt: new Date() } }
+    );
+
+    res.status(200).json({ message: 'Webhook received and processed.' });
+
+  } catch (error: any) {
+    console.error('Error processing Konnect webhook:', error.response?.data || error.message);
+    res.status(500).json({ message: 'Failed to process webhook.' });
+  }
+});
 
 // Serve index.html for the root path
 app.get('/', (req, res) => {
