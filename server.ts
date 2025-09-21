@@ -184,15 +184,15 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
       theme: 'light',
     };
 
-    console.log('Konnect API Request Payload:', JSON.stringify(konnectPayload, null, 2));
-    console.log('Konnect API Request Headers:', konnectResponse.config.headers);
-
     const konnectResponse = await axios.post('https://api.konnect.network/payments/init-payment', konnectPayload, {
       headers: {
         'x-api-key': konnectApiKey,
         'Content-Type': 'application/json',
       },
     });
+
+    console.log('Konnect API Request Payload:', JSON.stringify(konnectPayload, null, 2));
+    console.log('Konnect API Request Headers:', konnectResponse.config.headers);
 
     console.log('Konnect API Response Status:', konnectResponse.status);
     console.log('Konnect API Response Data:', JSON.stringify(konnectResponse.data, null, 2));
