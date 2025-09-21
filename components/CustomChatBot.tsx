@@ -69,23 +69,32 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
         if (context) {
           try {
             const parsedContext = JSON.parse(context);
+
+            const suggestionMap: { [key: string]: string } = {
+              "Évaluer la sévérité du coup de soleil": "Évaluation de la sévérité",
+              "Soulager la douleur et favoriser la cicatrisation": "Traitement à l'officine",
+              "Prévenir la déshydratation et l'infection": "Prévention",
+              // Add more mappings as needed
+            };
+
             if (parsedContext.keyPoints && parsedContext.keyPoints.length > 0) {
-              generatedSuggestions = parsedContext.keyPoints.slice(0, 3).map((kp: string) => `Expliquez le point clé: ${kp}`);
+              generatedSuggestions = parsedContext.keyPoints.map((kp: string) => suggestionMap[kp] || kp);
             } else if (parsedContext.sections) {
-              // Assuming sections is an object with keys like 'patientSituation', 'keyQuestions', etc.
               const sectionTitles = Object.values(parsedContext.sections).map((section: any) => section.title);
-              generatedSuggestions = sectionTitles.slice(0, 3).map((title: string) => `Parlez-moi de la section: ${title}`);
+              generatedSuggestions = sectionTitles.map((title: string) => suggestionMap[title] || title);
             }
           } catch (e) {
             console.error("Error parsing context for suggested questions:", e);
           }
         }
 
+        // Filter out empty or duplicate suggestions and limit to 2
+        generatedSuggestions = Array.from(new Set(generatedSuggestions.filter(s => s.trim() !== ''))).slice(0, 2);
+
         if (generatedSuggestions.length === 0) {
           generatedSuggestions = [
             'Comment puis-je améliorer ma compréhension des mémofiches ?',
             'Quels sont les sujets les plus importants à réviser ?',
-            'Pouvez-vous me donner un exemple de cas pratique ?',
           ];
         }
         setSuggestedQuestions(generatedSuggestions);
