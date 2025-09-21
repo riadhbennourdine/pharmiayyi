@@ -22,6 +22,7 @@ export interface User {
   username?: string; // New field
   firstName?: string;
   lastName?: string;
+  phoneNumber?: string;
   password?: string; // Only for registration/login, not stored
   passwordHash?: string; // Stored in DB
   role: UserRole;
