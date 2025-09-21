@@ -11,7 +11,7 @@ const ResetPasswordView: React.FC = () => {
     const location = useLocation();
 
     // Extract token from URL query parameters
-    const queryParams = new URLSearchParams(location.hash.split('?')[1]);
+    const queryParams = new URLSearchParams(location.search);
     const token = queryParams.get('token');
 
     const handleSubmit = async (e: React.FormEvent) => {
