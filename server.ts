@@ -38,8 +38,7 @@ const sendEmail = async (options: EmailOptions) => {
     }
 
     const apiInstance = new Brevo.TransactionalEmailsApi();
-    const apiKey = apiInstance.authentications['apiKey'];
-    apiKey.apiKey = brevoApiKey;
+    apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
 
     const sendSmtpEmail = new Brevo.SendSmtpEmail();
 
