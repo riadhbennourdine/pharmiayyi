@@ -31,7 +31,7 @@ interface Payment {
 const brevoApiKey = process.env.EMAIL_API_KEY;
 
 // Configure the Brevo API client
-const apiClient = new ApiClient();
+const apiClient = Brevo.ApiClient.instance;
 const apiKey = apiClient.authentications['api-key'];
 if (brevoApiKey) {
     apiKey.apiKey = brevoApiKey;
