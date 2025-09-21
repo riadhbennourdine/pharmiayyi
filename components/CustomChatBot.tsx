@@ -65,11 +65,30 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
       // Generate suggested questions after the first user message
       if (isFirstQuestion) {
         setIsFirstQuestion(false);
-        setSuggestedQuestions([
-          'Comment puis-je améliorer ma compréhension des mémofiches ?',
-          'Quels sont les sujets les plus importants à réviser ?',
-          'Pouvez-vous me donner un exemple de cas pratique ?',
-        ]);
+        let generatedSuggestions: string[] = [];
+        if (context) {
+          try {
+            const parsedContext = JSON.parse(context);
+            if (parsedContext.keyPoints && parsedContext.keyPoints.length > 0) {
+              generatedSuggestions = parsedContext.keyPoints.slice(0, 3).map((kp: string) => `Expliquez le point clé: ${kp}`);
+            } else if (parsedContext.sections) {
+              // Assuming sections is an object with keys like 'patientSituation', 'keyQuestions', etc.
+              const sectionTitles = Object.values(parsedContext.sections).map((section: any) => section.title);
+              generatedSuggestions = sectionTitles.slice(0, 3).map((title: string) => `Parlez-moi de la section: ${title}`);
+            }
+          } catch (e) {
+            console.error("Error parsing context for suggested questions:", e);
+          }
+        }
+
+        if (generatedSuggestions.length === 0) {
+          generatedSuggestions = [
+            'Comment puis-je améliorer ma compréhension des mémofiches ?',
+            'Quels sont les sujets les plus importants à réviser ?',
+            'Pouvez-vous me donner un exemple de cas pratique ?',
+          ];
+        }
+        setSuggestedQuestions(generatedSuggestions);
       }
 
     } catch (error) {
@@ -98,6 +117,12 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSuggestedQuestionClick = (question: string) => {
+    setInput(question);
+    // Trigger send message immediately
+    handleSendMessage();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -153,11 +178,7 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
                   <button
                     key={index}
                     style={styles.suggestedQuestionButton}
-                    onClick={() => {
-                      setInput(question);
-                      // Optionally, send message immediately
-                      // handleSendMessage();
-                    }}
+                    onClick={() => handleSuggestedQuestionClick(question)}
                   >
                     {question}
                   </button>
@@ -350,17 +371,19 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: 'center',
   },
   suggestedQuestionButton: {
-    backgroundColor: '#e6fffa',
+    backgroundColor: 'transparent',
     color: '#0D9488',
-    border: '1px solid #0D9488',
-    borderRadius: '20px',
-    padding: '8px 12px',
+    border: 'none',
+    borderRadius: '0',
+    padding: '5px 0',
     cursor: 'pointer',
-    fontSize: '12px',
-    transition: 'background-color 0.2s, color 0.2s',
+    fontSize: '14px',
+    textAlign: 'left',
+    width: '100%',
+    transition: 'color 0.2s',
     '&:hover': {
-      backgroundColor: '#0D9488',
-      color: 'white',
+      color: '#0A7C72',
+      textDecoration: 'underline',
     },
   },
 };
