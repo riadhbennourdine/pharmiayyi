@@ -399,6 +399,29 @@ app.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
+// Contact form submission endpoint
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ message: 'Tous les champs sont requis.' });
+    }
+
+    await sendEmail({
+      to: 'contact@pharmaconseilbmb.com',
+      subject: `Nouveau message de contact: ${subject}`,
+      text: `De: ${name} (${email})\n\nSujet: ${subject}\n\nMessage:\n${message}`,
+      html: `<p>De: <strong>${name}</strong> (${email})</p><p>Sujet: <strong>${subject}</strong></p><p>Message:</p><p>${message}</p>`,
+    });
+
+    res.status(200).json({ message: 'Votre message a été envoyé avec succès.' });
+  } catch (error) {
+    console.error('Error sending contact form email:', error);
+    res.status(500).json({ message: 'Une erreur est survenue lors de l\'envoi de votre message.' });
+  }
+});
+
 // Profile update endpoint
 app.put('/api/user/profile', authMiddleware, async (req, res) => {
   try {
