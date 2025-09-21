@@ -48,6 +48,7 @@ const sendEmail = async (options: EmailOptions) => {
     }
 
     try {
+        console.log(`Attempting to send email via ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT} with user ${process.env.EMAIL_USER}`);
         const info = await transporter.sendMail({
             from: `"PharmIA" <${process.env.EMAIL_FROM || 'noreply@pharmia.app'}>`,
             ...options,
