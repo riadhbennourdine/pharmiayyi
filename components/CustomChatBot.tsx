@@ -18,8 +18,56 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false); // New state for chat visibility
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
-  const [isFirstQuestion, setIsFirstQuestion] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const generateSuggestions = (currentContext?: string) => {
+    let allPossibleSuggestions: string[] = [];
+    if (currentContext) {
+      try {
+        const parsedContext = JSON.parse(currentContext);
+
+        const questionMap: { [key: string]: string } = {
+          "Évaluer la sévérité du coup de soleil": "Comment évaluer la sévérité du coup de soleil ?",
+          "Soulager la douleur et favoriser la cicatrisation": "Quel est le traitement recommandé ?",
+          "Prévenir le coup de soleil": "Comment prévenir les coups de soleil ?",
+          "Prévenir la déshydratation et l'infection": "Comment prévenir la déshydratation et l'infection ?",
+          // Add more mappings as needed
+        };
+
+        if (parsedContext.keyPoints && parsedContext.keyPoints.length > 0) {
+          allPossibleSuggestions = allPossibleSuggestions.concat(
+            parsedContext.keyPoints.map((kp: string) => questionMap[kp] || `Parlez-moi de: ${kp}`)
+          );
+        }
+        if (parsedContext.sections) {
+          const sectionTitles = Object.values(parsedContext.sections).map((section: any) => section.title);
+          allPossibleSuggestions = allPossibleSuggestions.concat(
+            sectionTitles.map((title: string) => questionMap[title] || `Que contient la section: ${title} ?`)
+          );
+        }
+      } catch (e) {
+        console.error("Error parsing context for suggested questions:", e);
+      }
+    }
+
+    // Fallback generic questions if no context-specific ones are generated
+    if (allPossibleSuggestions.length === 0) {
+      allPossibleSuggestions = [
+        'Comment puis-je améliorer ma compréhension des mémofiches ?',
+        'Quels sont les sujets les plus importants à réviser ?',
+        'Pouvez-vous me donner un exemple de cas pratique ?',
+      ];
+    }
+
+    // Select 2 random unique suggestions
+    const uniqueSuggestions = Array.from(new Set(allPossibleSuggestions.filter(s => s.trim() !== '')));
+    const randomSuggestions: string[] = [];
+    while (randomSuggestions.length < 2 && uniqueSuggestions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * uniqueSuggestions.length);
+      randomSuggestions.push(uniqueSuggestions.splice(randomIndex, 1)[0]);
+    }
+    setSuggestedQuestions(randomSuggestions);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,43 +110,8 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
       const botMessage: ChatMessage = { role: 'bot', content: data.response };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
 
-      // Generate suggested questions after the first user message
-      if (isFirstQuestion) {
-        setIsFirstQuestion(false);
-        let generatedSuggestions: string[] = [];
-        if (context) {
-          try {
-            const parsedContext = JSON.parse(context);
-
-            const suggestionMap: { [key: string]: string } = {
-              "Évaluer la sévérité du coup de soleil": "Évaluation de la sévérité",
-              "Soulager la douleur et favoriser la cicatrisation": "Traitement",
-              "Prévenir le coup de soleil": "Prévention des coups de soleil",
-              // Add more mappings as needed
-            };
-
-            if (parsedContext.keyPoints && parsedContext.keyPoints.length > 0) {
-              generatedSuggestions = parsedContext.keyPoints.map((kp: string) => suggestionMap[kp] || kp);
-            } else if (parsedContext.sections) {
-              const sectionTitles = Object.values(parsedContext.sections).map((section: any) => section.title);
-              generatedSuggestions = sectionTitles.map((title: string) => suggestionMap[title] || title);
-            }
-          } catch (e) {
-            console.error("Error parsing context for suggested questions:", e);
-          }
-        }
-
-        // Filter out empty or duplicate suggestions and limit to 2
-        generatedSuggestions = Array.from(new Set(generatedSuggestions.filter(s => s.trim() !== ''))).slice(0, 2);
-
-        if (generatedSuggestions.length === 0) {
-          generatedSuggestions = [
-            'Comment puis-je améliorer ma compréhension des mémofiches ?',
-            'Quels sont les sujets les plus importants à réviser ?',
-          ];
-        }
-        setSuggestedQuestions(generatedSuggestions);
-      }
+      // Generate new suggestions after bot responds
+      generateSuggestions(context);
 
     } catch (error) {
       console.error('Error sending message:', error);
