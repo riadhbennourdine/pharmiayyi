@@ -11,20 +11,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
+import * as SibApiV3Sdk from '@getbrevo/brevo';
 
-// --- EMAIL SENDING SETUP ---
-// Create a transporter object using SMTP transport.
-// You must configure these environment variables.
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST, // e.g., 'smtp.sendgrid.net'
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: false, // Use STARTTLS on port 587
-    auth: {
-        user: process.env.EMAIL_USER, // e.g., 'apikey' for SendGrid
-        pass: process.env.EMAIL_PASS, // Your SendGrid API Key or SMTP password
-    },
-});
+// --- EMAIL SENDING SETUP (Brevo API) ---
+const brevoApiKey = process.env.EMAIL_API_KEY;
 
 interface EmailOptions {
     to: string;
@@ -34,10 +24,10 @@ interface EmailOptions {
 }
 
 const sendEmail = async (options: EmailOptions) => {
-    if (!process.env.EMAIL_HOST) {
+    if (!brevoApiKey) {
         console.log('****************************************************************');
         console.log('*** WARNING: Email sending is not configured.             ***');
-        console.log('*** Set EMAIL_HOST in your environment variables.         ***');
+        console.log('*** Set EMAIL_API_KEY in your environment variables.      ***');
         console.log('*** Email content that would have been sent:             ***');
         console.log('****************************************************************');
         console.log(`To: ${options.to}`);
@@ -47,15 +37,30 @@ const sendEmail = async (options: EmailOptions) => {
         return; // Skip sending email if not configured
     }
 
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    const apiKey = apiInstance.authentications['apiKey'];
+    apiKey.apiKey = brevoApiKey;
+
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+    sendSmtpEmail.subject = options.subject;
+    sendSmtpEmail.htmlContent = options.html;
+    sendSmtpEmail.textContent = options.text;
+    sendSmtpEmail.sender = {
+        name: 'PharmIA',
+        // This email MUST be a validated sender in your Brevo account.
+        email: process.env.EMAIL_FROM || 'noreply@pharmia.app',
+    };
+    sendSmtpEmail.to = [{ email: options.to }];
+
     try {
-        const info = await transporter.sendMail({
-            from: `"PharmIA" <${process.env.EMAIL_FROM || 'noreply@pharmia.app'}>`,
-            ...options,
-        });
-        console.log('Message sent: %s', info.messageId);
+        const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log('Email sent successfully via Brevo. Response:', data);
     } catch (error) {
-        console.error('Error sending email:', error);
-        // In a real app, you might want to throw this error or handle it differently
+        console.error('Error sending email via Brevo:', error);
+        if (error.response && error.response.body) {
+            console.error('Brevo Error Details:', error.response.body);
+        }
     }
 };
 
