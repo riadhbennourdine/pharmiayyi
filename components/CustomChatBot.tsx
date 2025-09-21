@@ -17,78 +17,7 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false); // New state for chat visibility
-  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const generateSuggestions = (currentContext?: string) => {
-    let allPossibleSuggestions: string[] = [];
-    if (currentContext) {
-      try {
-        const parsedContext = JSON.parse(currentContext);
-
-        const prioritizedSectionIds = [
-          "keyQuestions",
-          "pathologyOverview",
-          "redFlags",
-          "mainTreatment",
-          "associatedProducts",
-          "lifestyleAdvice",
-          "dietaryAdvice",
-        ];
-
-        const sectionQuestionMap: { [key: string]: string } = {
-          "keyQuestions": "Quelles sont les questions clés à poser ?",
-          "pathologyOverview": "Quel est l'aperçu de la pathologie ?",
-          "redFlags": "Quels sont les signaux d'alerte ?",
-          "mainTreatment": "Quel est le traitement principal ?",
-          "associatedProducts": "Quels sont les produits associés ?",
-          "lifestyleAdvice": "Quels sont les conseils d'hygiène de vie ?",
-          "dietaryAdvice": "Quels sont les conseils alimentaires ?",
-        };
-
-        // Generate suggestions from prioritized sections
-        if (parsedContext.sections) {
-          prioritizedSectionIds.forEach(sectionId => {
-            const section = parsedContext.sections[sectionId];
-            if (section) {
-              const question = sectionQuestionMap[sectionId] || `Parlez-moi de la section: ${section.title} ?`;
-              allPossibleSuggestions.push(question);
-            }
-          });
-        }
-
-        // Also consider keyPoints if they exist and are relevant
-        if (parsedContext.keyPoints && parsedContext.keyPoints.length > 0) {
-          const keyPointQuestionMap: { [key: string]: string } = {
-            "Évaluer la sévérité du coup de soleil": "Comment évaluer la sévérité ?",
-            "Soulager la douleur et favoriser la cicatrisation": "Quel est le traitement ?",
-            "Prévenir le coup de soleil": "Comment prévenir les coups de soleil ?",
-            // Add more specific key point mappings here
-          };
-          parsedContext.keyPoints.forEach((kp: string) => {
-            const question = keyPointQuestionMap[kp] || `Parlez-moi de: ${kp} ?`;
-            allPossibleSuggestions.push(question);
-          });
-        }
-
-      } catch (e) {
-        console.error("Error parsing context for suggested questions:", e);
-      }
-    }
-
-    // Filter out empty or duplicate suggestions and limit to 2
-    const uniqueSuggestions = Array.from(new Set(allPossibleSuggestions.filter(s => s.trim() !== ''))).slice(0, 2);
-
-    // Fallback generic questions if no context-specific ones are generated
-    if (uniqueSuggestions.length === 0) {
-      setSuggestedQuestions([
-        'Comment puis-je améliorer ma compréhension des mémofiches ?',
-        'Quels sont les sujets les plus importants à réviser ?',
-      ]);
-    } else {
-      setSuggestedQuestions(uniqueSuggestions);
-    }
-  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,10 +59,6 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
       const data = await response.json();
       const botMessage: ChatMessage = { role: 'bot', content: data.response };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
-
-      // Generate new suggestions after bot responds
-      generateSuggestions(context);
-
     } catch (error) {
       console.error('Error sending message:', error);
       let errorContent = 'Désolé, une erreur est survenue. Veuillez réessayer.';
@@ -160,12 +85,6 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSuggestedQuestionClick = (question: string) => {
-    setInput(question);
-    // Trigger send message immediately
-    handleSendMessage();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -215,19 +134,6 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
             )}
               <div ref={messagesEndRef} />
             </div>
-            {suggestedQuestions.length > 0 && (
-              <div style={styles.suggestedQuestionsContainer}>
-                {suggestedQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    style={styles.suggestedQuestionButton}
-                    onClick={() => handleSuggestedQuestionClick(question)}
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            )}
             <div style={styles.inputContainer}>
               <input
                 type="text"
@@ -403,31 +309,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   sendButtonHover: {
     backgroundColor: '#0a6b60',
-  },
-  suggestedQuestionsContainer: {
-    padding: '10px',
-    borderTop: '1px solid #eee',
-    backgroundColor: '#f9f9f9',
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-    justifyContent: 'center',
-  },
-  suggestedQuestionButton: {
-    backgroundColor: 'transparent',
-    color: '#0D9488',
-    border: 'none',
-    borderRadius: '0',
-    padding: '5px 0',
-    cursor: 'pointer',
-    fontSize: '14px',
-    textAlign: 'left',
-    width: '100%',
-    transition: 'color 0.2s',
-    '&:hover': {
-      color: '#0A7C72',
-      textDecoration: 'underline',
-    },
   },
 };
 
