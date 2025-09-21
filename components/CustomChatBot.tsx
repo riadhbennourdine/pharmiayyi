@@ -17,6 +17,8 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
   const [input, setInput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false); // New state for chat visibility
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [isFirstQuestion, setIsFirstQuestion] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -59,6 +61,17 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
       const data = await response.json();
       const botMessage: ChatMessage = { role: 'bot', content: data.response };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
+
+      // Generate suggested questions after the first user message
+      if (isFirstQuestion) {
+        setIsFirstQuestion(false);
+        setSuggestedQuestions([
+          'Comment puis-je améliorer ma compréhension des mémofiches ?',
+          'Quels sont les sujets les plus importants à réviser ?',
+          'Pouvez-vous me donner un exemple de cas pratique ?',
+        ]);
+      }
+
     } catch (error) {
       console.error('Error sending message:', error);
       let errorContent = 'Désolé, une erreur est survenue. Veuillez réessayer.';
@@ -134,6 +147,23 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
             )}
               <div ref={messagesEndRef} />
             </div>
+            {suggestedQuestions.length > 0 && (
+              <div style={styles.suggestedQuestionsContainer}>
+                {suggestedQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    style={styles.suggestedQuestionButton}
+                    onClick={() => {
+                      setInput(question);
+                      // Optionally, send message immediately
+                      // handleSendMessage();
+                    }}
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            )}
             <div style={styles.inputContainer}>
               <input
                 type="text"
@@ -309,6 +339,29 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   sendButtonHover: {
     backgroundColor: '#0a6b60',
+  },
+  suggestedQuestionsContainer: {
+    padding: '10px',
+    borderTop: '1px solid #eee',
+    backgroundColor: '#f9f9f9',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    justifyContent: 'center',
+  },
+  suggestedQuestionButton: {
+    backgroundColor: '#e6fffa',
+    color: '#0D9488',
+    border: '1px solid #0D9488',
+    borderRadius: '20px',
+    padding: '8px 12px',
+    cursor: 'pointer',
+    fontSize: '12px',
+    transition: 'background-color 0.2s, color 0.2s',
+    '&:hover': {
+      backgroundColor: '#0D9488',
+      color: 'white',
+    },
   },
 };
 
