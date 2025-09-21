@@ -188,6 +188,11 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
     return res.status(200).json({ message: 'Payload logged for debugging. Check server logs.' });
 
     const konnectResponse = await axios.post('https://api.konnect.network/payments/init-payment', konnectPayload, {
+      headers: {
+        'x-api-key': konnectApiKey,
+        'Content-Type': 'application/json',
+      },
+    });
 
     console.log('Konnect API Response Status:', konnectResponse.status);
     console.log('Konnect API Response Data:', JSON.stringify(konnectResponse.data, null, 2));
