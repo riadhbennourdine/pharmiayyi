@@ -57,6 +57,9 @@ const Header: React.FC = () => {
         <NavLink to="/dashboard" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Mémofiches
         </NavLink>
+        <NavLink to="/learner-space" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
+            Mon espace
+        </NavLink>
         <NavLink to="/tarifs" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Tarifs
         </NavLink>
@@ -68,9 +71,6 @@ const Header: React.FC = () => {
             Générateur
             </NavLink>
         )}
-        <NavLink to="/learner-space" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
-            Mon espace
-        </NavLink>
         <button onClick={() => { handleLogout(); isMobile && setIsMenuOpen(false); }} className="text-sm font-medium px-3 py-2 rounded-md transition-colors text-gray-500 hover:text-teal-600">
             Déconnexion
         </button>
