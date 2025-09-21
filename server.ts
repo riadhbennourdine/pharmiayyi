@@ -11,7 +11,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
 import crypto from 'crypto';
-import { Configuration, TransactionalEmailsApi, SendSmtpEmail, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
+import * as Brevo from '@getbrevo/brevo';
 import axios from 'axios';
 
 // --- PAYMENT INTERFACE ---
@@ -29,11 +29,6 @@ interface Payment {
 
 // --- EMAIL SENDING SETUP (Brevo API) ---
 const brevoApiKey = process.env.EMAIL_API_KEY;
-
-// Configure the Brevo API client
-const configuration = new Configuration({
-    apiKey: brevoApiKey,
-});
 
 interface EmailOptions {
     to: string;
@@ -56,10 +51,10 @@ const sendEmail = async (options: EmailOptions) => {
         return; // Skip sending email if not configured
     }
 
-    const apiInstance = new TransactionalEmailsApi(configuration);
-    apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
+    const apiInstance = new Brevo.TransactionalEmailsApi();
+    apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, brevoApiKey);
 
-    const sendSmtpEmail = new SendSmtpEmail();
+    const sendSmtpEmail = new Brevo.SendSmtpEmail();
 
     sendSmtpEmail.subject = options.subject;
     sendSmtpEmail.htmlContent = options.html;
