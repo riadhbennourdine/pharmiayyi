@@ -26,47 +26,68 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
       try {
         const parsedContext = JSON.parse(currentContext);
 
-        const questionMap: { [key: string]: string } = {
-          "Évaluer la sévérité du coup de soleil": "Comment évaluer la sévérité du coup de soleil ?",
-          "Soulager la douleur et favoriser la cicatrisation": "Quel est le traitement recommandé ?",
-          "Prévenir le coup de soleil": "Comment prévenir les coups de soleil ?",
-          "Prévenir la déshydratation et l'infection": "Comment prévenir la déshydratation et l'infection ?",
-          // Add more mappings as needed
+        const prioritizedSectionIds = [
+          "keyQuestions",
+          "pathologyOverview",
+          "redFlags",
+          "mainTreatment",
+          "associatedProducts",
+          "lifestyleAdvice",
+          "dietaryAdvice",
+        ];
+
+        const sectionQuestionMap: { [key: string]: string } = {
+          "keyQuestions": "Quelles sont les questions clés à poser ?",
+          "pathologyOverview": "Quel est l'aperçu de la pathologie ?",
+          "redFlags": "Quels sont les signaux d'alerte ?",
+          "mainTreatment": "Quel est le traitement principal ?",
+          "associatedProducts": "Quels sont les produits associés ?",
+          "lifestyleAdvice": "Quels sont les conseils d'hygiène de vie ?",
+          "dietaryAdvice": "Quels sont les conseils alimentaires ?",
         };
 
-        if (parsedContext.keyPoints && parsedContext.keyPoints.length > 0) {
-          allPossibleSuggestions = allPossibleSuggestions.concat(
-            parsedContext.keyPoints.map((kp: string) => questionMap[kp] || `Parlez-moi de: ${kp}`)
-          );
-        }
+        // Generate suggestions from prioritized sections
         if (parsedContext.sections) {
-          const sectionTitles = Object.values(parsedContext.sections).map((section: any) => section.title);
-          allPossibleSuggestions = allPossibleSuggestions.concat(
-            sectionTitles.map((title: string) => questionMap[title] || `Que contient la section: ${title} ?`)
-          );
+          prioritizedSectionIds.forEach(sectionId => {
+            const section = parsedContext.sections[sectionId];
+            if (section) {
+              const question = sectionQuestionMap[sectionId] || `Parlez-moi de la section: ${section.title} ?`;
+              allPossibleSuggestions.push(question);
+            }
+          });
         }
+
+        // Also consider keyPoints if they exist and are relevant
+        if (parsedContext.keyPoints && parsedContext.keyPoints.length > 0) {
+          const keyPointQuestionMap: { [key: string]: string } = {
+            "Évaluer la sévérité du coup de soleil": "Comment évaluer la sévérité ?",
+            "Soulager la douleur et favoriser la cicatrisation": "Quel est le traitement ?",
+            "Prévenir le coup de soleil": "Comment prévenir les coups de soleil ?",
+            // Add more specific key point mappings here
+          };
+          parsedContext.keyPoints.forEach((kp: string) => {
+            const question = keyPointQuestionMap[kp] || `Parlez-moi de: ${kp} ?`;
+            allPossibleSuggestions.push(question);
+          });
+        }
+
       } catch (e) {
         console.error("Error parsing context for suggested questions:", e);
       }
     }
 
+    // Filter out empty or duplicate suggestions and limit to 2
+    const uniqueSuggestions = Array.from(new Set(allPossibleSuggestions.filter(s => s.trim() !== ''))).slice(0, 2);
+
     // Fallback generic questions if no context-specific ones are generated
-    if (allPossibleSuggestions.length === 0) {
-      allPossibleSuggestions = [
+    if (uniqueSuggestions.length === 0) {
+      setSuggestedQuestions([
         'Comment puis-je améliorer ma compréhension des mémofiches ?',
         'Quels sont les sujets les plus importants à réviser ?',
-        'Pouvez-vous me donner un exemple de cas pratique ?',
-      ];
+      ]);
+    } else {
+      setSuggestedQuestions(uniqueSuggestions);
     }
-
-    // Select 2 random unique suggestions
-    const uniqueSuggestions = Array.from(new Set(allPossibleSuggestions.filter(s => s.trim() !== '')));
-    const randomSuggestions: string[] = [];
-    while (randomSuggestions.length < 2 && uniqueSuggestions.length > 0) {
-      const randomIndex = Math.floor(Math.random() * uniqueSuggestions.length);
-      randomSuggestions.push(uniqueSuggestions.splice(randomIndex, 1)[0]);
-    }
-    setSuggestedQuestions(randomSuggestions);
   };
 
   const scrollToBottom = () => {
