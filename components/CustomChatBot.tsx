@@ -72,8 +72,8 @@ const CustomChatBot: React.FC<CustomChatBotProps> = ({ context }) => {
 
             const suggestionMap: { [key: string]: string } = {
               "Évaluer la sévérité du coup de soleil": "Évaluation de la sévérité",
-              "Soulager la douleur et favoriser la cicatrisation": "Traitement à l'officine",
-              "Prévenir la déshydratation et l'infection": "Prévention",
+              "Soulager la douleur et favoriser la cicatrisation": "Traitement",
+              "Prévenir le coup de soleil": "Prévention des coups de soleil",
               // Add more mappings as needed
             };
 

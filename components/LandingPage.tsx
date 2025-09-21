@@ -69,7 +69,7 @@ const LandingPage: React.FC = () => {
                             onClick={handleStartLearning}
                             className="inline-block bg-teal-600 text-white font-bold px-8 py-4 rounded-lg hover:bg-teal-700 transition-transform duration-300 hover:scale-105 text-lg shadow-lg"
                         >
-                            Commencez votre essai gratuit de 14 jours
+                            Commencez votre essai gratuit de 07 jours
                         </button>
                         <p className="text-sm text-slate-500">Sans engagement. Sans paiement préalable</p>
                     </div>
@@ -205,7 +205,7 @@ const LandingPage: React.FC = () => {
                         onClick={handleStartLearning}
                         className="inline-block bg-teal-600 text-white font-bold px-8 py-4 rounded-lg hover:bg-teal-700 transition-transform duration-300 hover:scale-105 text-lg shadow-lg"
                     >
-                        Démarrer mon essai de 14 jours
+                        Démarrer mon essai de 07 jours
                     </button>
                      <p className="mt-4 text-sm text-slate-500">Sans engagement. Sans paiement préalable</p>
                 </div>
