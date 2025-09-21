@@ -11,7 +11,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole } from './types'; // Import User and UserRole
 import crypto from 'crypto';
-import { ApiClient, TransactionalEmailsApi, SendSmtpEmail, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
+import { TransactionalEmailsApi, SendSmtpEmail, TransactionalEmailsApiApiKeys } from '@getbrevo/brevo';
+import { ApiClient } from '@getbrevo/brevo/dist/api/accountApi'; // Attempt to import ApiClient directly
 import axios from 'axios';
 
 // --- PAYMENT INTERFACE ---
@@ -31,7 +32,7 @@ interface Payment {
 const brevoApiKey = process.env.EMAIL_API_KEY;
 
 // Configure the Brevo API client
-const apiClient = Brevo.ApiClient.instance;
+const apiClient = new ApiClient();
 const apiKey = apiClient.authentications['api-key'];
 if (brevoApiKey) {
     apiKey.apiKey = brevoApiKey;
