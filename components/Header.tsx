@@ -43,7 +43,10 @@ const Header: React.FC = () => {
         <NavLink to="/tarifs" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Tarifs
         </NavLink>
-        <NavLink to="/connexion" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
+        <NavLink to="/contact" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
+            Contact
+        </NavLink>
+        <NavLink to="/login" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Connexion
         </NavLink>
     </>
@@ -56,6 +59,9 @@ const Header: React.FC = () => {
         </NavLink>
         <NavLink to="/tarifs" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Tarifs
+        </NavLink>
+        <NavLink to="/contact" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
+            Contact
         </NavLink>
         {isAdmin && (
             <NavLink to="/generateur" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
