@@ -16,6 +16,13 @@ import * as SibApiV3Sdk from '@getbrevo/brevo';
 // --- EMAIL SENDING SETUP (Brevo API) ---
 const brevoApiKey = process.env.EMAIL_API_KEY;
 
+// Configure the Brevo API client
+const apiClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = apiClient.authentications['api-key'];
+if (brevoApiKey) {
+    apiKey.apiKey = brevoApiKey;
+}
+
 interface EmailOptions {
     to: string;
     subject: string;
@@ -38,9 +45,6 @@ const sendEmail = async (options: EmailOptions) => {
     }
 
     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    const apiKey = apiInstance.authentications['apiKey'];
-    apiKey.apiKey = brevoApiKey;
-
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
     sendSmtpEmail.subject = options.subject;
@@ -55,8 +59,8 @@ const sendEmail = async (options: EmailOptions) => {
 
     try {
         const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
-        console.log('Email sent successfully via Brevo. Response:', data);
-    } catch (error) {
+        console.log('Email sent successfully via Brevo. Response:', JSON.stringify(data, null, 2));
+    } catch (error: any) {
         console.error('Error sending email via Brevo:', error);
         if (error.response && error.response.body) {
             console.error('Brevo Error Details:', error.response.body);
