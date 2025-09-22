@@ -279,7 +279,7 @@ const ManagerDashboard = ({ loading, error, preparateurs, onViewJourney }) => (
               className="bg-gray-50 rounded-xl shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow duration-300"
               onClick={() => onViewJourney(prep._id?.toString() || '')}
             >
-              <h3 className="text-xl font-bold text-teal-700 mb-2">{prep.firstName} {prep.lastName}</h3>
+              <h3 className="text-2xl font-bold text-teal-600 mb-2">{prep.firstName} {prep.lastName}</h3>
               <p className="text-gray-600">{prep.email}</p>
               <p className="text-sm text-gray-500 mt-3 italic">Voir le parcours d'apprentissage</p>
             </div>
