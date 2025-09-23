@@ -22,7 +22,13 @@ const Dashboard: React.FC = () => {
     const fetchMemofiches = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/memofiches', { cache: 'no-store' });
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/memofiches', { 
+          cache: 'no-store',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch memofiches');
         }
