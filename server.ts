@@ -102,6 +102,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 
   const token = authHeader.split(' ')[1];
+  console.log(`[DEBUG] AuthMiddleware received token: ${token ? token.substring(0, 10) + '...' : 'No token'}`);
   const jwtSecret = process.env.JWT_SECRET || 'supersecretjwtkey'; // TODO: Use a strong, environment-variable-based secret
 
   try {
