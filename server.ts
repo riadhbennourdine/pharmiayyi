@@ -107,7 +107,6 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as { _id: string; email: string; role: UserRole };
-    console.log(`[DEBUG] AuthMiddleware decoded _id: ${decoded._id}`);
     req.user = { _id: new ObjectId(decoded._id), email: decoded.email, role: decoded.role }; // Attach user info to request
     next();
   } catch (error) {
@@ -990,7 +989,6 @@ app.get('/api/memofiches', authMiddleware, async (req, res) => {
     const db = client.db('pharmia'); // Specify the database name
 
     const usersCollection = db.collection<User>('users');
-    console.log(`[DEBUG] /api/memofiches handler req.user._id: ${req.user!._id}`);
     const user = await usersCollection.findOne({ _id: new ObjectId(req.user!._id) });
 
     const hasActiveSub = user?.hasActiveSubscription === true && user?.subscriptionEndDate && user.subscriptionEndDate > new Date();

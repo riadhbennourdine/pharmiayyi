@@ -108,7 +108,12 @@ const MemoFichePage = () => {
             }
             setLoading(true);
             try {
-                const response = await fetch(`/api/memofiches/${id}`);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/memofiches/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
