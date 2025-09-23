@@ -102,11 +102,12 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 
   const token = authHeader.split(' ')[1];
-  console.log(`[DEBUG] AuthMiddleware received token: ${token ? token.substring(0, 10) + '...' : 'No token'}`);
-  const jwtSecret = process.env.JWT_SECRET || 'supersecretjwtkey'; // TODO: Use a strong, environment-variable-based secret
+  // console.log(`[DEBUG] AuthMiddleware received token: ${token ? token.substring(0, 10) + '...' : 'No token'}`); // Removed
+  const jwtSecret = process.env.JWT_SECRET || 'supersecretjwtkey';
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as { _id: string; email: string; role: UserRole };
+    console.log(`[DEBUG] AuthMiddleware decoded _id: ${decoded._id}`);
     req.user = { _id: new ObjectId(decoded._id), email: decoded.email, role: decoded.role }; // Attach user info to request
     next();
   } catch (error) {
@@ -989,6 +990,7 @@ app.get('/api/memofiches', authMiddleware, async (req, res) => {
     const db = client.db('pharmia'); // Specify the database name
 
     const usersCollection = db.collection<User>('users');
+    console.log(`[DEBUG] /api/memofiches handler req.user._id: ${req.user!._id}`);
     const user = await usersCollection.findOne({ _id: new ObjectId(req.user!._id) });
 
     const hasActiveSub = user?.hasActiveSubscription === true && user?.subscriptionEndDate && user.subscriptionEndDate > new Date();
