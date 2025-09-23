@@ -83,7 +83,6 @@ declare global {
   namespace Express {
     interface Request {
       user?: User;
-      rawBody?: Buffer;
     }
   }
 }
@@ -91,13 +90,7 @@ declare global {
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(express.json({
-  verify: (req: Request & { rawBody: Buffer }, res, buf, encoding) => {
-    if (buf && buf.length) {
-      req.rawBody = buf;
-    }
-  },
-}));
+app.use(express.json());
 
 // Middleware to protect routes
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -217,36 +210,9 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
   }
 });
 
-app.post('/api/payment/webhook/konnect', async (req: Request, res: Response) => {
+app.get('/api/payment/webhook/konnect', async (req: Request, res: Response) => {
   try {
-    const signature = req.headers['konnect-signature'] as string;
-    const webhookSecret = process.env.KONNECT_WEBHOOK_SECRET;
-
-    if (!webhookSecret) {
-      console.error('Konnect webhook secret not configured.');
-      return res.status(500).json({ message: 'Webhook service not configured.' });
-    }
-
-    if (!signature) {
-      return res.status(400).json({ message: 'Missing Konnect-Signature header.' });
-    }
-
-    if (!req.rawBody) {
-      console.error('Raw body not available for signature verification.');
-      return res.status(500).json({ message: 'Internal server error.' });
-    }
-
-    const computedSignature = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(req.rawBody)
-      .digest('hex');
-
-    if (computedSignature !== signature) {
-      return res.status(403).json({ message: 'Invalid signature.' });
-    }
-
-    const body = req.body;
-    const paymentRef = body.payment_ref as string;
+    const paymentRef = req.query.payment_ref as string;
 
     if (!paymentRef) {
       return res.status(400).json({ message: 'Missing payment_ref in webhook.' });
