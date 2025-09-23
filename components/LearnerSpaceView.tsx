@@ -42,7 +42,9 @@ const LearnerSpaceView: React.FC = () => {
         setViewedMediaIds(progressData.viewedMediaIds || []);
         setQuizHistory(progressData.quizHistory || []);
 
-        const allMemofichesResponse = await fetch('/api/memofiches');
+        const allMemofichesResponse = await fetch('/api/memofiches', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
         if (!allMemofichesResponse.ok) throw new Error('Failed to fetch all memo fiches');
         const allMemofiches: MemoFiche[] = await allMemofichesResponse.json();
 
