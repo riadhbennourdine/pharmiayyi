@@ -34,6 +34,8 @@ export interface User {
   readFicheIds?: string[]; // Add this
   viewedMediaIds?: string[]; // Add this
   quizHistory?: { quizId: string; score: number; completedAt: Date }[]; // Add this
+  hasActiveSubscription?: boolean;
+  subscriptionEndDate?: Date;
 }
 
 export interface Flashcard {

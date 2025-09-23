@@ -83,6 +83,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: User;
+      rawBody?: Buffer;
     }
   }
 }
@@ -90,7 +91,13 @@ declare global {
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(express.json());
+app.use(express.json({
+  verify: (req: Request & { rawBody: Buffer }, res, buf, encoding) => {
+    if (buf && buf.length) {
+      req.rawBody = buf;
+    }
+  },
+}));
 
 // Middleware to protect routes
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -180,7 +187,7 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
       phoneNumber: req.user?.phoneNumber || '',
       email: req.user?.email || '',
       orderId: paymentId.toHexString(), // Use our internal payment ID
-      webhook: `${req.protocol}://${req.get('host')}/api/payment/webhook`, // Dynamic webhook URL
+      webhook: `${req.protocol}://${req.get('host')}/api/payment/webhook/konnect`, // Dynamic webhook URL
       theme: 'light',
     };
 
@@ -210,9 +217,36 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
   }
 });
 
-app.get('/api/payment/webhook', async (req: Request, res: Response) => {
+app.post('/api/payment/webhook/konnect', async (req: Request, res: Response) => {
   try {
-    const paymentRef = req.query.payment_ref as string;
+    const signature = req.headers['konnect-signature'] as string;
+    const webhookSecret = process.env.KONNECT_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      console.error('Konnect webhook secret not configured.');
+      return res.status(500).json({ message: 'Webhook service not configured.' });
+    }
+
+    if (!signature) {
+      return res.status(400).json({ message: 'Missing Konnect-Signature header.' });
+    }
+
+    if (!req.rawBody) {
+      console.error('Raw body not available for signature verification.');
+      return res.status(500).json({ message: 'Internal server error.' });
+    }
+
+    const computedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(req.rawBody)
+      .digest('hex');
+
+    if (computedSignature !== signature) {
+      return res.status(403).json({ message: 'Invalid signature.' });
+    }
+
+    const body = req.body;
+    const paymentRef = body.payment_ref as string;
 
     if (!paymentRef) {
       return res.status(400).json({ message: 'Missing payment_ref in webhook.' });
@@ -230,11 +264,13 @@ app.get('/api/payment/webhook', async (req: Request, res: Response) => {
     const usersCollection = db.collection<User>('users');
 
     // Get payment details from Konnect
-    const konnectResponse = await axios.get(`https://api.konnect.network/api/v2/payments/${paymentRef}`, {
-      headers: {
-        'x-api-key': konnectApiKey,
-      },
-    });
+    const konnectResponse = await axios.get(`https://api.konnect.network/api/v2/payments/${paymentRef}`,
+      {
+        headers: {
+          'x-api-key': konnectApiKey,
+        },
+      }
+    );
 
     console.log('Konnect Webhook API Response Status:', konnectResponse.status);
     console.log('Konnect Webhook API Response Data:', JSON.stringify(konnectResponse.data, null, 2));
@@ -260,13 +296,24 @@ app.get('/api/payment/webhook', async (req: Request, res: Response) => {
       // Update user's subscription based on the plan
       const user = await usersCollection.findOne({ _id: internalPayment.userId });
       if (user) {
-        // TODO: Implement actual subscription logic (e.g., update user.role, user.subscriptionEndDate)
-        console.log(`User ${user.email} successfully subscribed to ${internalPayment.planName}.`);
-        // Example: Update user role to 'SUBSCRIBER' or similar
+        const subscriptionEndDate = new Date();
+        if (internalPayment.isAnnual) {
+          subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1);
+        } else {
+          subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
+        }
+
         await usersCollection.updateOne(
           { _id: internalPayment.userId },
-          { $set: { role: UserRole.PHARMACIEN, updatedAt: new Date() } } // Example: Set role to PHARMACIEN
+          { 
+            $set: { 
+              hasActiveSubscription: true,
+              subscriptionEndDate: subscriptionEndDate,
+              updatedAt: new Date() 
+            }
+          }
         );
+        console.log(`User ${user.email} successfully subscribed to ${internalPayment.planName}. Subscription ends on ${subscriptionEndDate.toISOString()}`);
       }
     } else if (konnectPayment.status === 'failed') {
       newStatus = 'failed';
