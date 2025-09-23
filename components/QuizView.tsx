@@ -17,6 +17,19 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack, quizI
   const [submittedAnswer, setSubmittedAnswer] = useState<number | null>(null);
   const { user } = useAuth();
 
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg animate-fade-in text-center">
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">Quiz non disponible</h2>
+        <p className="text-slate-600 mb-6">Il n'y a pas de questions pour ce quiz pour le moment.</p>
+        <button onClick={onBack} className="mt-4 bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-colors">
+          Retour
+        </button>
+      </div>
+    );
+  }
+
+
   const handleAnswerSelect = (optionIndex: number) => {
     if (submittedAnswer !== null) return;
 
