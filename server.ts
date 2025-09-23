@@ -88,6 +88,7 @@ declare global {
 }
 
 const app = express();
+app.set('trust proxy', 1); // Trust proxy headers from Railway
 const port = process.env.PORT || 3001;
 
 app.use(express.json());
