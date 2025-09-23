@@ -47,7 +47,8 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack, quizI
       setShowResults(true);
       // Track quiz completion
       if (user && quizId) {
-        const score = calculateScore();
+        const rawScore = calculateScore();
+        const percentageScore = Math.round((rawScore / questions.length) * 100);
         try {
           const token = localStorage.getItem('token');
           const response = await fetch('/api/user/track-quiz-completion', {
@@ -56,7 +57,7 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack, quizI
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ quizId, score, ficheId: quizId }),
+            body: JSON.stringify({ quizId, score: percentageScore, ficheId: quizId }),
           });
 
           if (!response.ok) {
