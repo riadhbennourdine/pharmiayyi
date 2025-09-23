@@ -90,19 +90,6 @@ const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> 
     return null; // Or a message indicating no data
   }
 
-  // Create a map of ficheId to the latest quiz score
-  const quizScoresByFicheId = new Map<string, number>();
-  if (learningJourney?.quizHistory) {
-    for (const quiz of learningJourney.quizHistory) {
-      // Assuming the quiz object has a ficheId. We take the latest score if multiple are present.
-      // @ts-ignore
-      if (quiz.ficheId) {
-        // @ts-ignore
-        quizScoresByFicheId.set(quiz.ficheId, quiz.score);
-      }
-    }
-  }
-
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-3xl w-full relative">
@@ -119,19 +106,13 @@ const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> 
             <h3 className="text-xl font-semibold text-gray-700 mb-3">MémoFiches Lues ({readFichesDetails?.length ?? 0})</h3>
             {readFichesDetails && readFichesDetails.length > 0 ? (
               <ul className="list-disc pl-5 space-y-2">
-                {readFichesDetails.map(fiche => {
-                  const score = quizScoresByFicheId.get(fiche._id);
-                  return (
-                    <li key={fiche._id} className="text-gray-600">
-                      <Link to={`/memofiche/${fiche._id}`} onClick={onClose} className="text-teal-600 hover:underline">
-                        {fiche.title}
-                      </Link>
-                      {score !== undefined && (
-                        <span className="ml-2 font-semibold text-teal-700">- Validée à {score}%</span>
-                      )}
-                    </li>
-                  );
-                })}
+                {readFichesDetails.map(fiche => (
+                  <li key={fiche._id} className="text-gray-600">
+                    <Link to={`/memofiche/${fiche._id}`} onClick={onClose} className="text-teal-600 hover:underline">
+                      {fiche.title}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className="text-gray-500 italic">Aucune fiche lue pour le moment.</p>
