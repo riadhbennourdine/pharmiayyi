@@ -202,10 +202,25 @@ const Dashboard: React.FC = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                )}
-            </div>
-        </div>
-
+                        )}
+                      </div>
+                      {showSubscribeModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center" onClick={() => setShowSubscribeModal(false)}>
+                          <div className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-sm mx-auto" onClick={(e) => e.stopPropagation()}>
+                            <h3 className="text-2xl font-bold text-slate-800 mb-4">Contenu réservé aux abonnés</h3>
+                            <p className="text-slate-600 mb-6">Cette mémofiche est réservée aux abonnés. Passez à un plan supérieur pour débloquer tout le contenu.</p>
+                            <div className="flex justify-center gap-4">
+                              <button onClick={() => setShowSubscribeModal(false)} className="px-6 py-2 font-semibold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300">
+                                Plus tard
+                              </button>
+                              <Link to="/pricing" className="px-6 py-2 font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700">
+                                Voir les offres
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
         {/* Removed category buttons div */}
 
         {/* Conditional rendering based on filters */}
