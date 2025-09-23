@@ -129,11 +129,11 @@ export const updateKnowledgeBase = async (): Promise<{ processed: number; chunks
                 continue;
             }
             
-            // Step 4: Generate embeddings for each chunk
+            // Step 4: Generate embeddings for all chunks of the current fiche in a single batch call
             const textsToEmbed = chunksWithoutEmbedding.map(c => c.content);
             console.log(`Generating ${textsToEmbed.length} embeddings for fiche: ${fiche.title}`);
             
-            const embeddings = await Promise.all(textsToEmbed.map(text => getEmbedding(text)));
+            const embeddings = await getEmbedding(textsToEmbed);
 
             const chunksToInsert: MemoFicheChunk[] = chunksWithoutEmbedding.map((chunk, i) => ({
                 ...chunk,
@@ -145,6 +145,9 @@ export const updateKnowledgeBase = async (): Promise<{ processed: number; chunks
             await chunksCollection.insertMany(chunksToInsert);
             totalChunksCreated += chunksToInsert.length;
             console.log(`Inserted ${chunksToInsert.length} chunks for fiche: ${fiche.title}`);
+
+            // Add a delay to respect API rate limits
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
         }
 
         console.log(`Knowledge base update complete. Processed ${allFiches.length} fiches and created ${totalChunksCreated} chunks.`);

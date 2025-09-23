@@ -53,19 +53,16 @@ function extractJsonFromString(text: string): string {
     return text;
 }
 
-export const getEmbedding = async (text: string): Promise<number[]> => {
+export async function getEmbedding(texts: string[]): Promise<number[][]> {
     try {
-        const result = await embeddingModel.embedContent(text);
-        const embedding = result.embedding;
-        if (!embedding || !embedding.values) {
-            throw new Error("L'embedding n'a pas pu être généré.");
-        }
-        return embedding.values;
+        const model = genAI.getGenerativeModel({ model: "embedding-001" });
+        const result = await model.embedContent({ content: texts });
+        return result.embedding.values;
     } catch (error) {
         console.error("Erreur lors de la génération de l'embedding:", error);
         throw new Error("Échec de la génération de l'embedding à partir du texte.");
     }
-};
+}
 
 export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
     const prompt = `
