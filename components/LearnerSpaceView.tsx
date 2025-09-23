@@ -252,19 +252,9 @@ const LearnerStats = ({ readMemoficheIds, totalMemofiches, totalQuizzesCompleted
 
 const ManagerDashboard = ({ loading, error, preparateurs, onViewJourney }) => (
   <div>
-    <div className="mb-6 bg-white p-4 rounded-lg shadow-lg">
-      <h3 className="text-xl font-bold text-gray-800 mb-3">Actions rapides</h3>
-      <div className="flex flex-wrap gap-4">
-        <button className="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg">
-          Faire une recommandation à l'équipe
-        </button>
-        <button className="bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition-colors shadow-md hover:shadow-lg">
-          Demander une nouvelle formation
-        </button>
-      </div>
-    </div>
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">Suivi de l'équipe</h3>
+    <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
+      <h3 className="text-xl font-bold text-gray-800 mb-2">Suivi de l'équipe</h3>
+      <p className="text-sm text-gray-500 mb-4 italic">Cliquez sur une carte pour voir le parcours d'apprentissage détaillé.</p>
       {loading ? (
         <div className="text-center text-slate-600">Chargement des préparateurs...</div>
       ) : error ? (
@@ -279,13 +269,23 @@ const ManagerDashboard = ({ loading, error, preparateurs, onViewJourney }) => (
               className="bg-gray-50 rounded-xl shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow duration-300"
               onClick={() => onViewJourney(prep._id?.toString() || '')}
             >
-              <h3 className="text-2xl font-bold text-teal-600 mb-2">{prep.firstName} {prep.lastName}</h3>
+              <h3 className="text-3xl font-bold text-teal-600 mb-2">{prep.firstName} {prep.lastName}</h3>
               <p className="text-gray-600">{prep.email}</p>
-              <p className="text-sm text-gray-500 mt-3 italic">Voir le parcours d'apprentissage</p>
             </div>
           ))}
         </div>
       )}
+    </div>
+    <div className="bg-white p-4 rounded-lg shadow-lg">
+      <h3 className="text-xl font-bold text-gray-800 mb-3">Actions rapides</h3>
+      <div className="flex flex-wrap gap-4">
+        <button className="bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg">
+          Faire une recommandation à l'équipe
+        </button>
+        <button className="bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700 transition-colors shadow-md hover:shadow-lg">
+          Demander une nouvelle formation
+        </button>
+      </div>
     </div>
   </div>
 );
