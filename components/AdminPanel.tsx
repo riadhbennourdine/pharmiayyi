@@ -11,6 +11,7 @@ const AdminPanel: React.FC = () => {
   const [assignmentLoading, setAssignmentLoading] = useState(false);
   const [assignmentFeedback, setAssignmentFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('knowledge'); // Add activeTab state
 
   const fetchUsers = async () => {
     const token = localStorage.getItem('token');
