@@ -140,9 +140,9 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
       return res.status(400).json({ message: 'Missing required payment details.' });
     }
 
-    const konnectApiKey = process.env.KONNECT_API_KEY;
-    const konnectWalletId = process.env.KONNECT_WALLET_ID;
-
+            const konnectApiKey = process.env.KONNECT_API_KEY;
+            console.log(`[DEBUG] Using Konnect API Key ending with: ...${konnectApiKey?.slice(-4)}`);
+            const konnectWalletId = process.env.KONNECT_WALLET_ID;
     if (!konnectApiKey || !konnectWalletId) {
       console.error('Konnect API keys not configured.');
       return res.status(500).json({ message: 'Payment service not configured.' });
