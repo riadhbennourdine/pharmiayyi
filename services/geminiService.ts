@@ -56,8 +56,9 @@ function extractJsonFromString(text: string): string {
 export async function getEmbedding(texts: string[]): Promise<number[][]> {
     try {
         const model = genAI.getGenerativeModel({ model: "embedding-001" });
-        const result = await model.embedContent({ content: texts });
-        return result.embedding.values;
+        const requests = texts.map(text => ({ content: text }));
+        const result = await model.batchEmbedContents({ requests });
+        return result.embeddings.map(embedding => embedding.values);
     } catch (error) {
         console.error("Erreur lors de la génération de l'embedding:", error);
         throw new Error("Échec de la génération de l'embedding à partir du texte.");
