@@ -8,6 +8,7 @@ interface AuthContextType {
   login: (identifier: string, password: string) => Promise<boolean>;
   logout: () => void;
   register: (email: string, username: string, password: string, role: UserRole, pharmacistId?: string, firstName?: string, lastName?: string, city?: string) => Promise<boolean>;
+  refreshUser: () => void; // Add refreshUser function
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -22,6 +23,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setIsAuthenticated(false);
+    setUser(null);
+  }, []);
+
   // On mount, check for existing token in localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -29,8 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (token && storedUser) {
       try {
         const parsedUser: User = JSON.parse(storedUser);
-        // Basic validation of the token (could be more robust with backend validation)
-        // For now, just check if it exists and user data is there
         setIsAuthenticated(true);
         setUser(parsedUser);
       } catch (e) {
@@ -38,7 +44,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout(); // Clear invalid data
       }
     }
-  }, []);
+  }, [logout]);
+
+  const refreshUser = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (!token || !storedUser) return;
+
+    try {
+        const parsedUser: User = JSON.parse(storedUser);
+        const response = await fetch(`/api/users/${parsedUser._id}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (response.ok) {
+            const updatedUser = await response.json();
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setUser(updatedUser);
+        } else {
+            logout();
+        }
+    } catch (error) {
+        console.error("Failed to refresh user:", error);
+        logout();
+    }
+  }, [logout]);
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
@@ -68,13 +97,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setIsAuthenticated(false);
-    setUser(null);
-  }, []);
-
   const register = useCallback(async (email: string, username: string, password: string, role: UserRole, pharmacistId?: string, firstName?: string, lastName?: string, city?: string): Promise<boolean> => {
     const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -95,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 }, []);
 
-  const value = useMemo(() => ({ isAuthenticated, user, login, logout, register }), [isAuthenticated, user, login, logout, register]);
+  const value = useMemo(() => ({ isAuthenticated, user, login, logout, register, refreshUser }), [isAuthenticated, user, login, logout, register, refreshUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

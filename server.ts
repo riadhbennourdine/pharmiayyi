@@ -409,12 +409,9 @@ app.post('/api/auth/login', async (req, res) => {
     const { passwordHash: _, ...userWithoutPassword } = user;
 
     // Check if profile is incomplete
-    let profileIncomplete = false;
-    if (!user.email || (user.role === UserRole.PREPARATEUR && !user.pharmacistId)) {
-        profileIncomplete = true;
-    }
+    const profileIncomplete = !user.firstName || !user.lastName || !user.email || (user.role === UserRole.PREPARATEUR && !user.pharmacistId);
 
-    res.status(200).json({ message: 'Logged in successfully.', token, user: userWithoutPassword, profileIncomplete });
+    res.status(200).json({ message: 'Logged in successfully.', token, user: { ...userWithoutPassword, profileIncomplete } });
   } catch (error) {
     console.error('Error during user login:', error);
     res.status(500).json({ message: 'Internal server error during login.' });

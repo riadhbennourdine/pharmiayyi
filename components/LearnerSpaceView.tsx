@@ -2,13 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { MemoFiche, UserRole, User } from '../types'; // Assuming MemoFiche type is available
-import AdminPanel from './AdminPanel'; // Import AdminPanel
-import PreparerLearningJourneyPopup from './PreparerLearningJourneyPopup'; // Import the popup component
+import ProfileView from './ProfileView'; // Import the new ProfileView component
 
 const LearnerSpaceView: React.FC = () => {
   const { user } = useAuth();
   const username = user?.firstName || user?.username || 'cher apprenant';
 
+  // ... (keep all existing state and useEffect hooks) ...
   const [totalMemofiches, setTotalMemofiches] = useState<number>(0);
   const [readMemoficheIds, setReadMemoficheIds] = useState<string[]>([]);
   const [viewedMediaIds, setViewedMediaIds] = useState<string[]>([]);
@@ -18,8 +18,6 @@ const LearnerSpaceView: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [referentPharmacistName, setReferentPharmacistName] = useState<string | null>(null);
-
-  // State for Pharmacist Dashboard functionality
   const [preparateurs, setPreparateurs] = useState<User[]>([]);
   const [pharmacistDashboardLoading, setPharmacistDashboardLoading] = useState<boolean>(true);
   const [pharmacistDashboardError, setPharmacistDashboardError] = useState<string | null>(null);
@@ -30,14 +28,11 @@ const LearnerSpaceView: React.FC = () => {
     const fetchStatsAndPharmacist = async () => {
       try {
         const token = localStorage.getItem('token');
-
-        // Fetch total memo fiches count
         const countResponse = await fetch('/api/memofiches/count');
         if (!countResponse.ok) throw new Error('Failed to fetch memo fiches count');
         const { count } = await countResponse.json();
         setTotalMemofiches(count);
 
-        // Fetch user progress
         const progressResponse = await fetch('/api/user/progress', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
@@ -47,19 +42,14 @@ const LearnerSpaceView: React.FC = () => {
         setViewedMediaIds(progressData.viewedMediaIds || []);
         setQuizHistory(progressData.quizHistory || []);
 
-        // Fetch all memo fiches details to determine read/unread
-        const allMemofichesResponse = await fetch('/api/memofiches'); // Assuming this endpoint returns all memofiches
+        const allMemofichesResponse = await fetch('/api/memofiches');
         if (!allMemofichesResponse.ok) throw new Error('Failed to fetch all memo fiches');
         const allMemofiches: MemoFiche[] = await allMemofichesResponse.json();
 
         const readIds = new Set(progressData.readFicheIds || []);
-        const existingReadFiches = allMemofiches.filter(fiche => readIds.has(fiche._id));
-        const unreadFiches = allMemofiches.filter(fiche => !readIds.has(fiche._id));
+        setReadMemofichesDetails(allMemofiches.filter(fiche => readIds.has(fiche._id)));
+        setUnreadMemofichesDetails(allMemofiches.filter(fiche => !readIds.has(fiche._id)));
 
-        setReadMemofichesDetails(existingReadFiches);
-        setUnreadMemofichesDetails(unreadFiches);
-
-        // Fetch referent pharmacist details if user is PREPARATEUR and has a pharmacistId
         if (user?.role === UserRole.PREPARATEUR && user.pharmacistId) {
           const pharmacistResponse = await fetch(`/api/users/${user.pharmacistId}`, {
             headers: { 'Authorization': `Bearer ${token}` },
@@ -67,42 +57,28 @@ const LearnerSpaceView: React.FC = () => {
           if (pharmacistResponse.ok) {
             const pharmacistData = await pharmacistResponse.json();
             setReferentPharmacistName(`${pharmacistData.firstName} ${pharmacistData.lastName}`);
-          } else {
-            console.error('Failed to fetch referent pharmacist details');
-            setReferentPharmacistName(null); // Clear if fetch fails
           }
         }
-
       } catch (err: any) {
         setError(err.message);
-        console.error('Error fetching learner stats:', err);
       } finally {
         setLoading(false);
       }
     };
 
     const fetchPreparateursForPharmacist = async () => {
-      if (user?.role !== UserRole.PHARMACIEN || !user?._id) {
-        setPharmacistDashboardError('Accès non autorisé ou ID pharmacien manquant.');
-        setPharmacistDashboardLoading(false);
-        return;
-      }
-
+      if (user?.role !== UserRole.PHARMACIEN || !user?._id) return;
+      setPharmacistDashboardLoading(true);
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`/api/users/preparateurs-by-pharmacist/${user._id}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch preparateurs.');
-        }
-
+        if (!response.ok) throw new Error('Failed to fetch preparateurs.');
         const data: User[] = await response.json();
         setPreparateurs(data);
       } catch (err: any) {
         setPharmacistDashboardError(err.message);
-        console.error('Error fetching preparateurs for pharmacist:', err);
       } finally {
         setPharmacistDashboardLoading(false);
       }
@@ -129,30 +105,25 @@ const LearnerSpaceView: React.FC = () => {
   const averageScore = totalQuizzesCompleted > 0 ? (totalScore / totalQuizzesCompleted).toFixed(2) : 'N/A';
 
   if (loading) {
-    return <div className="container mx-auto p-8 text-center text-slate-600">Chargement de votre espace apprenant...</div>;
+    return <div className="container mx-auto p-8 text-center text-slate-600">Chargement...</div>;
   }
 
   if (error) {
-    return <div className="container mx-auto p-8 text-center text-red-600">Erreur lors du chargement : {error}</div>;
+    return <div className="container mx-auto p-8 text-center text-red-600">Erreur: {error}</div>;
   }
 
-  const learnerStatsProps = {
-    readMemoficheIds,
-    totalMemofiches,
-    totalQuizzesCompleted,
-    averageScore,
-    viewedMediaIds,
-    readMemofichesDetails,
-    unreadMemofichesDetails,
-  };
+  const learnerStatsProps = { readMemoficheIds, totalMemofiches, totalQuizzesCompleted, averageScore, viewedMediaIds, readMemofichesDetails, unreadMemofichesDetails };
+  const managerDashboardProps = { loading: pharmacistDashboardLoading, error: pharmacistDashboardError, preparateurs, onViewJourney: handleViewPreparateurJourney };
 
-  const pharmacistTabsProps = {
-    ...learnerStatsProps,
-    pharmacistDashboardLoading,
-    pharmacistDashboardError,
-    preparateurs,
-    handleViewPreparateurJourney,
-  };
+  const tabs = [];
+  if (user?.role === UserRole.PHARMACIEN) {
+    tabs.push({ name: 'Mon Apprentissage', content: <LearnerStats {...learnerStatsProps} /> });
+    tabs.push({ name: 'Tableau de Bord Manager', content: <ManagerDashboard {...managerDashboardProps} /> });
+    tabs.push({ name: 'Mon Profil', content: <ProfileView /> });
+  } else if (user?.role === UserRole.PREPARATEUR) {
+    tabs.push({ name: 'Mon Apprentissage', content: <LearnerStats {...learnerStatsProps} /> });
+    tabs.push({ name: 'Mon Profil', content: <ProfileView /> });
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
@@ -162,23 +133,17 @@ const LearnerSpaceView: React.FC = () => {
         </h1>
         <p className="text-lg text-gray-600 mb-6">
           {user?.role === UserRole.PHARMACIEN
-            ? "Basculez entre votre espace d'apprentissage et le tableau de bord de votre équipe."
+            ? "Basculez entre vos différents panneaux de contrôle."
             : "Votre tableau de bord personnalisé pour suivre votre progression."}
         </p>
 
-        {user?.role === UserRole.ADMIN && <AdminPanel />}
+        {user?.role === UserRole.ADMIN ? <AdminPanel /> : <GenericTabs tabs={tabs} />}
 
-        {user?.role === UserRole.PHARMACIEN ? (
-          <PharmacistTabs {...pharmacistTabsProps} />
-        ) : (
-          <LearnerStats {...learnerStatsProps} />
-        )}
       </div>
-
       {showPreparerPopup && selectedPreparerId && (
         <PreparerLearningJourneyPopup
           preparerId={selectedPreparerId}
-          preparerName={`${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.firstName} ${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.lastName}`}
+          preparerName={preparateurs.find(p => p._id?.toString() === selectedPreparerId) ? `${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.firstName || ''} ${preparateurs.find(p => p._id?.toString() === selectedPreparerId)?.lastName || ''}` : ''}
           onClose={handleClosePreparerPopup}
         />
       )}
@@ -186,9 +151,44 @@ const LearnerSpaceView: React.FC = () => {
   );
 };
 
+// --- SUB-COMPONENTS ---
+
 // @ts-nocheck
 
-// Component for displaying learner statistics and memo fiches
+const GenericTabs = ({ tabs }) => {
+  const [activeTab, setActiveTab] = useState(tabs[0]?.name || '');
+
+  const tabStyle = "px-3 py-2 font-medium text-sm rounded-md cursor-pointer transition-colors";
+  const activeTabStyle = "bg-teal-600 text-white shadow";
+  const inactiveTabStyle = "text-gray-500 hover:text-gray-700 hover:bg-gray-100";
+
+  return (
+    <div>
+      <div className="mb-6">
+        <div className="sm:hidden">
+          <select id="tabs" name="tabs" className="block w-full rounded-md border-gray-300 focus:border-teal-500 focus:ring-teal-500" onChange={(e) => setActiveTab(e.target.value)} value={activeTab}>
+            {tabs.map(tab => <option key={tab.name} value={tab.name}>{tab.name}</option>)}
+          </select>
+        </div>
+        <div className="hidden sm:block">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-4" aria-label="Tabs">
+              {tabs.map(tab => (
+                <button key={tab.name} onClick={() => setActiveTab(tab.name)} className={`${tabStyle} ${activeTab === tab.name ? activeTabStyle : inactiveTabStyle}`}>
+                  {tab.name}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4">
+        {tabs.find(tab => tab.name === activeTab)?.content}
+      </div>
+    </div>
+  );
+}
+
 const LearnerStats = ({ readMemoficheIds, totalMemofiches, totalQuizzesCompleted, averageScore, viewedMediaIds, readMemofichesDetails, unreadMemofichesDetails }) => (
   <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
     <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
