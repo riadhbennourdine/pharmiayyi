@@ -127,36 +127,38 @@ const RegisterView: React.FC = () => {
                                 onChange={(e) => setUsername(e.target.value)}
                             />
                         </div>
+                        {/* Name Fields - Common to all roles */}
+                        <div>
+                            <label htmlFor="first-name-register" className="sr-only">Prénom</label>
+                            <input
+                                id="first-name-register"
+                                name="firstName"
+                                type="text"
+                                autoComplete="given-name"
+                                required
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                placeholder="Prénom"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="last-name-register" className="sr-only">Nom</label>
+                            <input
+                                id="last-name-register"
+                                name="lastName"
+                                type="text"
+                                autoComplete="family-name"
+                                required
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
+                                placeholder="Nom"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                            />
+                        </div>
+                        {/* Role-specific fields */}
                         {role === UserRole.PHARMACIEN && (
                             <>
-                                <div>
-                                    <label htmlFor="first-name-register" className="sr-only">Prénom</label>
-                                    <input
-                                        id="first-name-register"
-                                        name="firstName"
-                                        type="text"
-                                        autoComplete="given-name"
-                                        required
-                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
-                                        placeholder="Prénom"
-                                        value={firstName}
-                                        onChange={(e) => setFirstName(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="last-name-register" className="sr-only">Nom</label>
-                                    <input
-                                        id="last-name-register"
-                                        name="lastName"
-                                        type="text"
-                                        autoComplete="family-name"
-                                        required
-                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-500 text-slate-900 focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
-                                        placeholder="Nom"
-                                        value={lastName}
-                                        onChange={(e) => setLastName(e.target.value)}
-                                    />
-                                </div>
                                 <div>
                                     <label htmlFor="city-register" className="sr-only">Ville</label>
                                     <input

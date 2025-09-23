@@ -312,10 +312,10 @@ app.get('/api/mongo-test', async (req, res) => {
 // Register endpoint
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, username, password, role, pharmacistId } = req.body;
+    const { email, username, password, role, pharmacistId, firstName, lastName } = req.body;
 
-    if (!email || !username || !password || !role) {
-      return res.status(400).json({ message: 'Email, username, password, and role are required.' });
+    if (!email || !username || !password || !role || !firstName || !lastName) {
+      return res.status(400).json({ message: 'Tous les champs sont requis.' });
     }
 
     const client = await clientPromise;
@@ -354,6 +354,8 @@ app.post('/api/auth/register', async (req, res) => {
       username,
       passwordHash,
       role,
+      firstName,
+      lastName,
       pharmacistId: role === UserRole.PREPARATEUR ? new ObjectId(pharmacistId) : undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
