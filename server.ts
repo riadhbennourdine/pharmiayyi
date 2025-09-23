@@ -1185,17 +1185,18 @@ app.post('/api/user/track-quiz-completion', authMiddleware, async (req, res) => 
       return res.status(401).json({ message: 'User not authenticated.' });
     }
 
-    const { quizId, score } = req.body;
+    const { quizId, score, ficheId } = req.body; // Add ficheId
 
     const client = await clientPromise;
     const db = client.db('pharmia');
     const usersCollection = db.collection('users');
 
     // Ensure quizId is a string and score is a number
-    const newQuizEntry: { quizId: string; score: number; completedAt: Date } = {
+    const newQuizEntry: { quizId: string; score: number; completedAt: Date; ficheId?: string } = {
       quizId: String(quizId),
       score: Number(score),
       completedAt: new Date(),
+      ficheId: ficheId ? String(ficheId) : undefined, // Add ficheId
     };
 
     // Add quiz completion to quizHistory array

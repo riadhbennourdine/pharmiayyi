@@ -43,7 +43,7 @@ const QuizView: React.FC<QuizViewProps> = ({ questions, caseTitle, onBack, quizI
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ quizId, score }),
+            body: JSON.stringify({ quizId, score, ficheId: quizId }),
           });
 
           if (!response.ok) {
