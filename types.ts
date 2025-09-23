@@ -102,6 +102,7 @@ export interface CaseStudy {
   sourceText?: string; // Nouveau champ pour le texte source complet
   youtubeUrl?: string; // Add this
   knowledgeBaseUrl?: string; // New field for Google Doc URL
+  isLocked?: boolean; // Flag for non-subscriber access
 }
 
 export interface ChatMessage {

@@ -964,12 +964,27 @@ app.post('/api/custom-chat', authMiddleware, subscriptionMiddleware, async (req,
     }
 });
 
-app.get('/api/memofiches', authMiddleware, subscriptionMiddleware, async (req, res) => {
+app.get('/api/memofiches', authMiddleware, async (req, res) => {
   try {
     const client = await clientPromise;
     const db = client.db('pharmia'); // Specify the database name
+
+    const usersCollection = db.collection<User>('users');
+    const user = await usersCollection.findOne({ _id: new ObjectId(req.user!._id) });
+
+    const hasActiveSub = user?.hasActiveSubscription === true && user?.subscriptionEndDate && user.subscriptionEndDate > new Date();
+    const isAdminOrFormateur = user?.role === UserRole.ADMIN || user?.role === UserRole.FORMATEUR;
+
     const memofiches = await db.collection('memofiches_v2').find({}).toArray();
-    res.status(200).json(memofiches);
+
+    if (hasActiveSub || isAdminOrFormateur) {
+      // User is a subscriber, send full data
+      res.status(200).json(memofiches);
+    } else {
+      // User is not a subscriber, send full data but with a locked flag
+      const lockedMemofiches = memofiches.map(fiche => ({ ...fiche, isLocked: true }));
+      res.status(200).json(lockedMemofiches);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch memofiches' });
   }

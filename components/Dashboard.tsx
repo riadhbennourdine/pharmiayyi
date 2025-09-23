@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from './contexts/DataContext'; // Import the hook
 import { useAuth } from './contexts/AuthContext';
 import { UserRole } from '../types';
 import { TOPIC_CATEGORIES } from '../constants';
-import { CapsuleIcon } from './icons';
+import { CapsuleIcon, LockClosedIcon } from './icons';
 import { CaseStudy } from '../types';
-
-
 
 const Dashboard: React.FC = () => {
   const { selectCase } = useData(); // Use the context
@@ -17,6 +16,7 @@ const Dashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('');
   const [selectedSystem, setSelectedSystem] = useState('');
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
   useEffect(() => {
     const fetchMemofiches = async () => {
@@ -216,13 +216,18 @@ const Dashboard: React.FC = () => {
                     {recentMemofiches.map(study => (
                         <div
                             key={study.title}
-                            onClick={() => selectCase(study)} // Use selectCase from context
+                            onClick={() => study.isLocked ? setShowSubscribeModal(true) : selectCase(study)}
                             className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
                         >
                             {study.coverImageUrl ? (
                                 <div className="relative w-full h-40">
                                     <img src={study.coverImageUrl} alt={study.title} className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
+                                    {study.isLocked && (
+                                      <div className="absolute top-2 right-2 bg-slate-800 bg-opacity-50 p-2 rounded-full">
+                                        <LockClosedIcon className="h-5 w-5 text-white" />
+                                      </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
@@ -262,13 +267,18 @@ const Dashboard: React.FC = () => {
                                     {topicCases.map(study => (
                                         <div
                                             key={study.title}
-                                            onClick={() => selectCase(study)} // Use selectCase from context
+                                            onClick={() => study.isLocked ? setShowSubscribeModal(true) : selectCase(study)}
                                             className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
                                         >
                                             {study.coverImageUrl ? (
                                                 <div className="relative w-full h-40">
                                                     <img src={study.coverImageUrl} alt={study.title} className="w-full h-full object-cover" />
                                                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
+                                                    {study.isLocked && (
+                                                      <div className="absolute top-2 right-2 bg-slate-800 bg-opacity-50 p-2 rounded-full">
+                                                        <LockClosedIcon className="h-5 w-5 text-white" />
+                                                      </div>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
@@ -304,6 +314,22 @@ const Dashboard: React.FC = () => {
             )
         )}
       </div>
+      {showSubscribeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center" onClick={() => setShowSubscribeModal(false)}>
+          <div className="bg-white p-8 rounded-lg shadow-2xl text-center max-w-sm mx-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-2xl font-bold text-slate-800 mb-4">Contenu réservé aux abonnés</h3>
+            <p className="text-slate-600 mb-6">Cette mémofiche est réservée aux abonnés. Passez à un plan supérieur pour débloquer tout le contenu.</p>
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setShowSubscribeModal(false)} className="px-6 py-2 font-semibold text-slate-700 bg-slate-200 rounded-lg hover:bg-slate-300">
+                Plus tard
+              </button>
+              <Link to="/pricing" className="px-6 py-2 font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700">
+                Voir les offres
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
