@@ -130,6 +130,36 @@ const adminOnly = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+const subscriptionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentification requise.' });
+  }
+
+  const client = await clientPromise;
+  const db = client.db('pharmia');
+  const usersCollection = db.collection<User>('users');
+
+  const user = await usersCollection.findOne({ _id: new ObjectId(req.user._id) });
+
+  if (!user) {
+    return res.status(401).json({ message: 'Utilisateur non trouvé.' });
+  }
+
+  // Admins and Formateurs have unrestricted access
+  if (user.role === UserRole.ADMIN || user.role === UserRole.FORMATEUR) {
+    return next();
+  }
+
+  const hasActiveSub = user.hasActiveSubscription === true;
+  const subNotExpired = user.subscriptionEndDate && user.subscriptionEndDate > new Date();
+
+  if (hasActiveSub && subNotExpired) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Accès réservé aux abonnés.' });
+  }
+};
+
 // --- KONNECT PAYMENT ENDPOINTS ---
 app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Response) => {
   try {
@@ -916,7 +946,7 @@ app.post('/api/generate', async (req, res) => {
 
 
 // New endpoint for custom chat bot
-app.post('/api/custom-chat', authMiddleware, async (req, res) => {
+app.post('/api/custom-chat', authMiddleware, subscriptionMiddleware, async (req, res) => {
     try {
         const { userMessage, chatHistory, context } = req.body;
 
@@ -934,7 +964,7 @@ app.post('/api/custom-chat', authMiddleware, async (req, res) => {
     }
 });
 
-app.get('/api/memofiches', async (req, res) => {
+app.get('/api/memofiches', authMiddleware, subscriptionMiddleware, async (req, res) => {
   try {
     const client = await clientPromise;
     const db = client.db('pharmia'); // Specify the database name
@@ -959,7 +989,7 @@ app.get('/api/memofiches/count', async (req, res) => {
 });
 
 // Endpoint to get a single memo fiche by ID
-app.get('/api/memofiches/:id', async (req, res) => {
+app.get('/api/memofiches/:id', authMiddleware, subscriptionMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -1142,7 +1172,7 @@ app.post('/api/user/track-media-view', authMiddleware, async (req, res) => {
 });
 
 // Endpoint to get details of specific memo fiches
-app.post('/api/memofiches/details', async (req, res) => {
+app.post('/api/memofiches/details', authMiddleware, subscriptionMiddleware, async (req, res) => {
   try {
     const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {
