@@ -150,6 +150,24 @@ const subscriptionMiddleware = async (req: Request, res: Response, next: NextFun
     return next();
   }
 
+  // Check for free week (1 week from registration date)
+  const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
+  const isWithinFreeWeek = user.createdAt && (new Date().getTime() - user.createdAt.getTime() <= oneWeekInMs);
+
+  if (isWithinFreeWeek) {
+    return next(); // Allow access during free week
+  }
+
+  // Check if the specific memo fiche is free (only if accessing a fiche by ID)
+  if (req.params.id && ObjectId.isValid(req.params.id)) {
+    const memofichesCollection = db.collection('memofiches_v2');
+    const fiche = await memofichesCollection.findOne({ _id: new ObjectId(req.params.id) });
+    if (fiche && fiche.isFree) {
+      return next(); // Allow access if fiche is marked as free
+    }
+  }
+
+  // Standard subscription check
   const hasActiveSub = user.hasActiveSubscription === true;
   const subNotExpired = user.subscriptionEndDate && user.subscriptionEndDate > new Date();
 
@@ -975,16 +993,21 @@ app.get('/api/memofiches', authMiddleware, async (req, res) => {
     const hasActiveSub = user?.hasActiveSubscription === true && user?.subscriptionEndDate && user.subscriptionEndDate > new Date();
     const isAdminOrFormateur = user?.role === UserRole.ADMIN || user?.role === UserRole.FORMATEUR;
 
+    // Check for free week
+    const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
+    const isWithinFreeWeek = user?.createdAt && (new Date().getTime() - user.createdAt.getTime() <= oneWeekInMs);
+
     const memofiches = await db.collection('memofiches_v2').find({}).toArray();
 
-    if (hasActiveSub || isAdminOrFormateur) {
-      // User is a subscriber, send full data
-      res.status(200).json(memofiches);
-    } else {
-      // User is not a subscriber, send full data but with a locked flag
-      const lockedMemofiches = memofiches.map(fiche => ({ ...fiche, isLocked: true }));
-      res.status(200).json(lockedMemofiches);
-    }
+    const processedMemofiches = memofiches.map(fiche => {
+      const shouldBeLocked = !(isAdminOrFormateur || hasActiveSub || isWithinFreeWeek || fiche.isFree);
+      return {
+        ...fiche,
+        isLocked: shouldBeLocked,
+      };
+    });
+
+    res.status(200).json(processedMemofiches);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch memofiches' });
   }

@@ -103,6 +103,7 @@ export interface CaseStudy {
   youtubeUrl?: string; // Add this
   knowledgeBaseUrl?: string; // New field for Google Doc URL
   isLocked?: boolean; // Flag for non-subscriber access
+  isFree?: boolean; // Flag for always free memo fiches
 }
 
 export interface ChatMessage {
