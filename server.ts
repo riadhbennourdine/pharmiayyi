@@ -140,9 +140,9 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
       return res.status(400).json({ message: 'Missing required payment details.' });
     }
 
-            const konnectApiKey = process.env.KONNECT_API_KEY;
-            console.log(`[DEBUG] Using Konnect API Key ending with: ...${konnectApiKey?.slice(-4)}`);
-            const konnectWalletId = process.env.KONNECT_WALLET_ID;
+                const konnectApiKey = process.env.KONNECT_API_KEY;            const konnectWalletId = process.env.KONNECT_WALLET_ID;
+    const konnectApiBaseUrl = process.env.KONNECT_API_BASE_URL || 'https://api.konnect.network/api/v2';
+
     if (!konnectApiKey || !konnectWalletId) {
       console.error('Konnect API keys not configured.');
       return res.status(500).json({ message: 'Payment service not configured.' });
@@ -185,7 +185,7 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
       theme: 'light',
     };
 
-    const konnectResponse = await axios.post('https://api.konnect.network/api/v2/payments/init-payment', konnectPayload, {
+    const konnectResponse = await axios.post(`${konnectApiBaseUrl}/payments/init-payment`, konnectPayload, {
       headers: {
         'x-api-key': konnectApiKey,
         'Content-Type': 'application/json',
@@ -230,8 +230,10 @@ app.get('/api/payment/webhook/konnect', async (req: Request, res: Response) => {
     const paymentsCollection = db.collection<Payment>('payments');
     const usersCollection = db.collection<User>('users');
 
+    const konnectApiBaseUrl = process.env.KONNECT_API_BASE_URL || 'https://api.konnect.network/api/v2';
+
     // Get payment details from Konnect
-    const konnectResponse = await axios.get(`https://api.konnect.network/api/v2/payments/${paymentRef}`,
+    const konnectResponse = await axios.get(`${konnectApiBaseUrl}/payments/${paymentRef}`,
       {
         headers: {
           'x-api-key': konnectApiKey,
