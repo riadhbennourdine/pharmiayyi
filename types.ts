@@ -36,6 +36,7 @@ export interface User {
   quizHistory?: { quizId: string; score: number; completedAt: Date }[]; // Add this
   hasActiveSubscription?: boolean;
   subscriptionEndDate?: Date;
+  planName?: string; // New field for user's subscription plan name
 }
 
 export interface Flashcard {

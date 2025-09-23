@@ -1357,6 +1357,86 @@ app.post('/api/admin/update-knowledge-base', authMiddleware, adminOnly, async (r
   }
 });
 
+// Endpoint for admin to get a list of subscribers
+app.get('/api/admin/subscribers', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const subscribers = await usersCollection.find(
+      { 
+        $or: [
+          { hasActiveSubscription: true, subscriptionEndDate: { $gt: new Date() } },
+          { role: { $in: [UserRole.ADMIN, UserRole.FORMATEUR, UserRole.PHARMACIEN, UserRole.PREPARATEUR] } } // Include all roles for admin view
+        ]
+      },
+      { 
+        projection: {
+          _id: 1,
+          email: 1,
+          firstName: 1,
+          lastName: 1,
+          role: 1,
+          hasActiveSubscription: 1,
+          subscriptionEndDate: 1,
+          createdAt: 1,
+          pharmacistId: 1,
+        }
+      }
+    ).toArray();
+
+    res.status(200).json(subscribers);
+  } catch (error) {
+    console.error('Error fetching subscribers:', error);
+    res.status(500).json({ message: 'Failed to fetch subscribers.' });
+  }
+});
+
+// Endpoint for admin to grant/modify subscriptions
+app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+  try {
+    const { userId, durationInDays, planName } = req.body;
+
+    if (!userId || !durationInDays || !planName) {
+      return res.status(400).json({ message: 'Missing required fields: userId, durationInDays, planName.' });
+    }
+
+    if (!ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid userId format.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const usersCollection = db.collection<User>('users');
+
+    const subscriptionEndDate = new Date();
+    subscriptionEndDate.setDate(subscriptionEndDate.getDate() + durationInDays);
+
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: {
+          hasActiveSubscription: true,
+          subscriptionEndDate: subscriptionEndDate,
+          planName: planName, // Assuming planName can be stored on user
+          updatedAt: new Date(),
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    res.status(200).json({ message: 'Subscription granted/modified successfully.' });
+
+  } catch (error) {
+    console.error('Error granting subscription:', error);
+    res.status(500).json({ message: 'Failed to grant subscription.' });
+  }
+});
+
 // For any other request (client-side routing), serve index.html
 app.get(/.* /, (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
