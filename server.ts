@@ -107,6 +107,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as { _id: string; email: string; role: UserRole };
+    console.log(`[DEBUG] AuthMiddleware decoded _id: ${decoded._id}`);
     req.user = { _id: new ObjectId(decoded._id), email: decoded.email, role: decoded.role }; // Attach user info to request
     next();
   } catch (error) {

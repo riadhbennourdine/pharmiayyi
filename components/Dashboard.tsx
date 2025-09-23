@@ -23,6 +23,7 @@ const Dashboard: React.FC = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
+        console.log('[DEBUG] Dashboard fetching memofiches with token:', token ? token.substring(0, 10) + '...' : 'No token');
         const response = await fetch('/api/memofiches', { 
           cache: 'no-store',
           headers: {
