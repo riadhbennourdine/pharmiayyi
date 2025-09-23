@@ -56,7 +56,7 @@ function extractJsonFromString(text: string): string {
 export async function getEmbedding(texts: string[]): Promise<number[][]> {
     try {
         const model = genAI.getGenerativeModel({ model: "embedding-001" });
-        const requests = texts.map(text => ({ content: text }));
+        const requests = texts.map(text => ({ content: { parts: [{ text: text }] } }));
         const result = await model.batchEmbedContents({ requests });
         return result.embeddings.map(embedding => embedding.values);
     } catch (error) {
