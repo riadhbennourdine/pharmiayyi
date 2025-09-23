@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import { MemoFiche, UserRole, User } from '../types'; // Assuming MemoFiche type is available
 import ProfileView from './ProfileView'; // Import the new ProfileView component
+import AdminPanel from './AdminPanel'; // Import AdminPanel
 
 const LearnerSpaceView: React.FC = () => {
   const { user } = useAuth();
