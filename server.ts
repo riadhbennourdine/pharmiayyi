@@ -996,7 +996,8 @@ app.get('/api/memofiches', authMiddleware, async (req, res) => {
 
     // Check for free week
     const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
-    const isWithinFreeWeek = user?.createdAt && (new Date().getTime() - new Date(user.createdAt).getTime() <= oneWeekInMs);
+    const userCreationDate = user?.createdAt ? new Date(user.createdAt) : null;
+    const isWithinFreeWeek = userCreationDate && !isNaN(userCreationDate.getTime()) && (new Date().getTime() - userCreationDate.getTime() <= oneWeekInMs);
 
     const memofiches = await db.collection('memofiches_v2').find({}).toArray();
 
@@ -1009,8 +1010,9 @@ app.get('/api/memofiches', authMiddleware, async (req, res) => {
     });
 
     res.status(200).json(processedMemofiches);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch memofiches' });
+  } catch (error: any) {
+    console.error('Error in /api/memofiches handler:', error);
+    res.status(500).json({ message: 'Failed to fetch memofiches list.' });
   }
 });
 
