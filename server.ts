@@ -990,14 +990,13 @@ app.get('/api/memofiches', authMiddleware, async (req, res) => {
 
     const usersCollection = db.collection<User>('users');
     const user = await usersCollection.findOne({ _id: new ObjectId(req.user!._id) });
-    console.log(`[DEBUG] /api/memofiches handler fetched user: ${JSON.stringify(user?.email)} (createdAt: ${user?.createdAt})`);
 
     const hasActiveSub = user?.hasActiveSubscription === true && user?.subscriptionEndDate && user.subscriptionEndDate > new Date();
     const isAdminOrFormateur = user?.role === UserRole.ADMIN || user?.role === UserRole.FORMATEUR;
 
     // Check for free week
     const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
-    const isWithinFreeWeek = user?.createdAt && (new Date().getTime() - user.createdAt.getTime() <= oneWeekInMs);
+    const isWithinFreeWeek = user?.createdAt && (new Date().getTime() - new Date(user.createdAt).getTime() <= oneWeekInMs);
 
     const memofiches = await db.collection('memofiches_v2').find({}).toArray();
 
