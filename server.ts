@@ -153,7 +153,7 @@ const subscriptionMiddleware = async (req: Request, res: Response, next: NextFun
 
   // Check for free week (1 week from registration date)
   const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
-  const isWithinFreeWeek = user.createdAt && (new Date().getTime() - user.createdAt.getTime() <= oneWeekInMs);
+  const isWithinFreeWeek = user.createdAt && (new Date().getTime() - new Date(user.createdAt).getTime() <= oneWeekInMs);
 
   if (isWithinFreeWeek) {
     return next(); // Allow access during free week
