@@ -103,7 +103,7 @@ const PreparerLearningJourneyPopup: React.FC<PreparerLearningJourneyPopupProps> 
         <div className="space-y-6">
           {/* Fiches Lues */}
           <div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-3">MémoFiches Lues ({readFichesDetails?.length ?? 0})</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-3">Fiches Consultées ({readFichesDetails?.length ?? 0})</h3>
             {readFichesDetails && readFichesDetails.length > 0 ? (
               <ul className="list-disc pl-5 space-y-2">
                 {readFichesDetails.map(fiche => (
