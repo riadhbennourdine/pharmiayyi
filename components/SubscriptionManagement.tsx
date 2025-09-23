@@ -34,7 +34,7 @@ const SubscriptionManagement: React.FC = () => {
       const processedSubscribers: Subscriber[] = data.map(sub => {
         let duration = 'N/A';
         if (sub.subscriptionEndDate && sub.createdAt) {
-          const diffTime = Math.abs(sub.subscriptionEndDate.getTime() - sub.createdAt.getTime());
+          const diffTime = Math.abs(new Date(sub.subscriptionEndDate).getTime() - new Date(sub.createdAt).getTime());
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
           duration = `${diffDays} jours`;
         }
