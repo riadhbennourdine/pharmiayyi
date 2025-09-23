@@ -111,6 +111,14 @@ const ContactFormView: React.FC = () => {
             </button>
           </div>
         </form>
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="font-medium text-teal-600 hover:text-teal-500"
+          >
+            Retour au menu principal
+          </button>
+        </div>
       </div>
     </div>
   );
