@@ -605,7 +605,7 @@ app.post('/api/contact', async (req, res) => {
 // Profile update endpoint
 app.put('/api/user/profile', authMiddleware, async (req, res) => {
   try {
-    const { email, password, pharmacistId } = req.body; // Added pharmacistId
+    const { email, password, pharmacistId, firstName, lastName } = req.body; // Added firstName and lastName
     const userId = req.user?._id; // Get user ID from authenticated request
 
     if (!userId) {
@@ -638,17 +638,20 @@ app.put('/api/user/profile', authMiddleware, async (req, res) => {
       updateFields.passwordHash = await bcrypt.hash(password, salt);
     }
 
+    // Add firstName and lastName to updateFields if provided
+    if (firstName) updateFields.firstName = firstName;
+    if (lastName) updateFields.lastName = lastName;
+
     // Handle pharmacistId update only if the user is a PREPARATEUR
     if (currentUser.role === UserRole.PREPARATEUR) {
-        if (!pharmacistId) {
-            return res.status(400).json({ message: 'Pharmacien référent est requis pour les préparateurs.' });
+        if (pharmacistId) { // Only update if pharmacistId is explicitly provided
+            // Verify if pharmacistId corresponds to an existing PHARMACIEN user
+            const pharmacist = await usersCollection.findOne({ _id: new ObjectId(pharmacistId), role: UserRole.PHARMACIEN });
+            if (!pharmacist) {
+                return res.status(400).json({ message: 'Pharmacien référent invalide.' });
+            }
+            updateFields.pharmacistId = new ObjectId(pharmacistId);
         }
-        // Verify if pharmacistId corresponds to an existing PHARMACIEN user
-        const pharmacist = await usersCollection.findOne({ _id: new ObjectId(pharmacistId), role: UserRole.PHARMACIEN });
-        if (!pharmacist) {
-            return res.status(400).json({ message: 'Pharmacien référent invalide.' });
-        }
-        updateFields.pharmacistId = new ObjectId(pharmacistId);
     }
 
     const result = await usersCollection.updateOne(
