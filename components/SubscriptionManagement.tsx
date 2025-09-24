@@ -11,7 +11,7 @@ interface CollaboratorModalProps {
 const CollaboratorDetailsModal: React.FC<CollaboratorModalProps> = ({ collaborators, onClose }) => {
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center">
-      <div className="bg-white p-8 rounded-lg shadow-xl max-w-2xl w-full">
+      <div className="bg-white p-8 rounded-lg shadow-xl max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl w-full">
         <h3 className="text-xl font-bold mb-4">Détails des Collaborateurs</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
