@@ -39,6 +39,25 @@ export interface User {
   planName?: string; // New field for user's subscription plan name
 }
 
+export interface Subscription {
+  _id?: ObjectId;
+  userId: ObjectId;
+  plan: 'free' | 'basic' | 'premium';
+  status: 'active' | 'cancelled' | 'past_due';
+  subscriptionStartDate: Date;
+  subscriptionEndDate: Date;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  last4?: string;
+  cardBrand?: string;
+  cancelAtPeriodEnd?: boolean;
+  currentPeriodEnd?: Date;
+}
+
+export interface PharmacistWithCollaborators extends User {
+  collaborators?: User[]; // Array of preparers associated with this pharmacist
+}
+
 export interface Flashcard {
   question: string;
   answer: string;
