@@ -220,7 +220,7 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
     const konnectPayload = {
       receiverWalletId: konnectWalletId,
       token: 'TND', // Assuming TND for now
-      amount: totalAmount * 1000, // Convert to millimes
+      amount: Math.round(totalAmount * 1000), // Convert to millimes and round to nearest integer
       type: 'immediate',
       description: `Subscription for ${planName} plan`,
       acceptedPaymentMethods: ['wallet', 'bank_card', 'e-DINAR'],
