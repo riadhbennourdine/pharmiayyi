@@ -1364,15 +1364,19 @@ app.get('/api/admin/subscribers', authMiddleware, adminOnly, async (req: Request
     const db = client.db('pharmia');
     const usersCollection = db.collection<User>('users');
 
-    const subscribers = await usersCollection.find(
-      { 
-        $or: [
-          { hasActiveSubscription: true, subscriptionEndDate: { $gt: new Date() } },
-          { role: { $in: [UserRole.ADMIN, UserRole.FORMATEUR, UserRole.PHARMACIEN, UserRole.PREPARATEUR] } } // Include all roles for admin view
-        ]
+    const pharmacistsWithCollaborators = await usersCollection.aggregate<PharmacistWithCollaborators>([
+      { $match: { role: UserRole.PHARMACIEN } },
+      { $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: 'pharmacistId',
+          as: 'collaborators',
+          pipeline: [
+            { $project: { _id: 1, email: 1, firstName: 1, lastName: 1, role: 1, hasActiveSubscription: 1, subscriptionEndDate: 1, planName: 1 } }
+          ]
+        }
       },
-      { 
-        projection: {
+      { $project: {
           _id: 1,
           email: 1,
           firstName: 1,
@@ -1380,16 +1384,17 @@ app.get('/api/admin/subscribers', authMiddleware, adminOnly, async (req: Request
           role: 1,
           hasActiveSubscription: 1,
           subscriptionEndDate: 1,
+          planName: 1,
           createdAt: 1,
-          pharmacistId: 1,
+          collaborators: 1,
         }
       }
-    ).toArray();
+    ]).toArray();
 
-    res.status(200).json(subscribers);
+    res.status(200).json(pharmacistsWithCollaborators);
   } catch (error) {
-    console.error('Error fetching subscribers:', error);
-    res.status(500).json({ message: 'Failed to fetch subscribers.' });
+    console.error('Error fetching pharmacists with collaborators:', error);
+    res.status(500).json({ message: 'Failed to fetch pharmacists with collaborators.' });
   }
 });
 
