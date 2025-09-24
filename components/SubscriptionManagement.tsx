@@ -1,49 +1,105 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
-import { User, UserRole } from '../types';
+import { User, UserRole, PharmacistWithCollaborators } from '../types';
 import { PencilIcon } from './icons';
 
-interface Subscriber extends User {
-  duration?: string; // For display purposes
+interface CollaboratorModalProps {
+  collaborators: User[];
+  onClose: () => void;
 }
+
+const CollaboratorDetailsModal: React.FC<CollaboratorModalProps> = ({ collaborators, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center">
+      <div className="bg-white p-8 rounded-lg shadow-xl max-w-2xl w-full">
+        <h3 className="text-xl font-bold mb-4">Détails des Collaborateurs</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Abonné</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fin Abonnement</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {collaborators.map((collab) => (
+                <tr key={collab._id?.toString()}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{collab.firstName} {collab.lastName}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{collab.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{collab.hasActiveSubscription ? 'Oui' : 'Non'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{collab.planName || 'N/A'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {collab.subscriptionEndDate ? new Date(collab.subscriptionEndDate).toLocaleDateString() : 'N/A'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SubscriptionManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [pharmacists, setPharmacists] = useState<PharmacistWithCollaborators[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showGrantModal, setShowGrantModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [durationInDays, setDurationInDays] = useState<string>('30');
   const [planName, setPlanName] = useState<string>('Free Trial');
+  const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
+  const [currentCollaborators, setCurrentCollaborators] = useState<User[]>([]);
 
-  const fetchSubscribers = async () => {
+  const fetchPharmacists = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/subscribers', {
+      const response = await fetch('/api/admin/subscribers', { // This endpoint now returns pharmacists with collaborators
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch subscribers.');
+        throw new Error('Failed to fetch pharmacists and their collaborators.');
       }
-      const data: User[] = await response.json();
-      const processedSubscribers: Subscriber[] = data.map(sub => {
-        let duration = 'N/A';
-        if (sub.subscriptionEndDate && sub.createdAt) {
-          const diffTime = Math.abs(new Date(sub.subscriptionEndDate).getTime() - new Date(sub.createdAt).getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          duration = `${diffDays} jours`;
+      const data: PharmacistWithCollaborators[] = await response.json();
+
+      // Process dates for pharmacists and their collaborators
+      const processedData = data.map(pharmacist => {
+        // Convert pharmacist's dates
+        if (pharmacist.createdAt) pharmacist.createdAt = new Date(pharmacist.createdAt);
+        if (pharmacist.subscriptionEndDate) pharmacist.subscriptionEndDate = new Date(pharmacist.subscriptionEndDate);
+
+        // Convert collaborators' dates
+        if (pharmacist.collaborators) {
+          pharmacist.collaborators = pharmacist.collaborators.map(collab => {
+            if (collab.createdAt) collab.createdAt = new Date(collab.createdAt);
+            if (collab.subscriptionEndDate) collab.subscriptionEndDate = new Date(collab.subscriptionEndDate);
+            return collab;
+          });
         }
-        return { ...sub, duration };
+        return pharmacist;
       });
-      setSubscribers(processedSubscribers);
+
+      setPharmacists(processedData);
     } catch (err: any) {
-      console.error('Error fetching subscribers:', err);
-      setError(err.message || 'Failed to load subscribers.');
+      console.error('Error fetching pharmacists with collaborators:', err);
+      setError(err.message || 'Failed to load pharmacists and collaborators.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +107,7 @@ const SubscriptionManagement: React.FC = () => {
 
   useEffect(() => {
     if (currentUser?.role === UserRole.ADMIN) {
-      fetchSubscribers();
+      fetchPharmacists();
     }
   }, [currentUser]);
 
@@ -76,48 +132,62 @@ const SubscriptionManagement: React.FC = () => {
 
       alert('Abonnement octroyé avec succès !');
       setShowGrantModal(false);
-      fetchSubscribers(); // Refresh list
+      fetchPharmacists(); // Refresh list
     } catch (err: any) {
       console.error('Error granting subscription:', err);
       alert(`Erreur: ${err.message || 'Échec de l\'octroi de l\'abonnement.'}`);
     }
   };
 
-  if (loading) return <div className="text-center p-4">Chargement des abonnés...</div>;
+  const openCollaboratorModal = (collaborators: User[]) => {
+    setCurrentCollaborators(collaborators);
+    setShowCollaboratorModal(true);
+  };
+
+  if (loading) return <div className="text-center p-4">Chargement des pharmaciens...</div>;
   if (error) return <div className="text-center p-4 text-red-600">Erreur: {error}</div>;
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Gestion des Abonnements</h2>
+      <h2 className="text-2xl font-bold mb-4">Gestion des Abonnements Pharmaciens</h2>
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom Pharmacien</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Abonné</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Début</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fin</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durée</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fin Abonnement</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collaborateurs</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {subscribers.map(sub => (
-              <tr key={sub._id?.toString()}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{sub.firstName} {sub.lastName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.role}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.hasActiveSubscription ? 'Oui' : 'Non'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.planName || 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.createdAt ? new Date(sub.createdAt).toLocaleDateString() : 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.subscriptionEndDate ? new Date(sub.subscriptionEndDate).toLocaleDateString() : 'N/A'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.duration}</td>
+            {pharmacists.map(pharmacist => (
+              <tr key={pharmacist._id?.toString()}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pharmacist.firstName} {pharmacist.lastName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pharmacist.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pharmacist.hasActiveSubscription ? 'Oui' : 'Non'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pharmacist.planName || 'N/A'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {pharmacist.subscriptionEndDate ? pharmacist.subscriptionEndDate.toLocaleDateString() : 'N/A'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {pharmacist.collaborators && pharmacist.collaborators.length > 0 ? (
+                    <button
+                      onClick={() => openCollaboratorModal(pharmacist.collaborators || [])}
+                      className="text-teal-600 hover:text-teal-900 font-bold"
+                    >
+                      ({pharmacist.collaborators.length})
+                    </button>
+                  ) : (
+                    '(0)'
+                  )}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => { setSelectedUser(sub); setShowGrantModal(true); }}
+                    onClick={() => { setSelectedUser(pharmacist); setShowGrantModal(true); }}
                     className="text-teal-600 hover:text-teal-900 mr-2"
                   >
                     <PencilIcon className="h-5 w-5" />
@@ -169,6 +239,13 @@ const SubscriptionManagement: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {showCollaboratorModal && (
+        <CollaboratorDetailsModal
+          collaborators={currentCollaborators}
+          onClose={() => setShowCollaboratorModal(false)}
+        />
       )}
     </div>
   );
