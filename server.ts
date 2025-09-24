@@ -1415,23 +1415,45 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
     const db = client.db('pharmia');
     const usersCollection = db.collection<User>('users');
 
+    // Fetch the user to determine their role
+    const targetUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    if (!targetUser) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
     const subscriptionEndDate = new Date();
     subscriptionEndDate.setDate(subscriptionEndDate.getDate() + durationInDays);
 
-    const result = await usersCollection.updateOne(
+    // Update the target user's subscription
+    const updateResult = await usersCollection.updateOne(
       { _id: new ObjectId(userId) },
       { 
         $set: {
           hasActiveSubscription: true,
           subscriptionEndDate: subscriptionEndDate,
-          planName: planName, // Assuming planName can be stored on user
+          planName: planName,
           updatedAt: new Date(),
         }
       }
     );
 
-    if (result.matchedCount === 0) {
+    if (updateResult.matchedCount === 0) {
       return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // If the target user is a pharmacist, update their preparers' subscriptions
+    if (targetUser.role === UserRole.PHARMACIEN) {
+      await usersCollection.updateMany(
+        { pharmacistId: new ObjectId(userId) },
+        { 
+          $set: {
+            hasActiveSubscription: true,
+            subscriptionEndDate: subscriptionEndDate,
+            planName: planName,
+            updatedAt: new Date(),
+          }
+        }
+      );
     }
 
     res.status(200).json({ message: 'Subscription granted/modified successfully.' });
