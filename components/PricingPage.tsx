@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext'; // Import useAuth
+import PricingConfirmationModal from './PricingConfirmationModal'; // Import the new modal
+
+interface SelectedPlanDetails {
+  planName: string;
+  basePrice: number;
+  isAnnual: boolean;
+}
 
 const PricingPage: React.FC = () => {
   const [showAnnual, setShowAnnual] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { user, isAuthenticated } = useAuth(); // Get user and isAuthenticated from AuthContext
+
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedPlanDetails, setSelectedPlanDetails] = useState<SelectedPlanDetails | null>(null);
 
   const pricing = {
     solo: {
@@ -47,14 +57,23 @@ const PricingPage: React.FC = () => {
     }
   };
 
-  const handleChoosePlan = async (planName: string, amount: number, isAnnual: boolean) => {
+  const handleChoosePlan = (planName: string, basePrice: number, isAnnual: boolean) => {
     if (!isAuthenticated) {
       setError('Veuillez vous connecter pour choisir un plan.');
       return;
     }
+    setSelectedPlanDetails({ planName, basePrice, isAnnual });
+    setShowConfirmationModal(true);
+  };
+
+  const confirmAndInitiatePayment = async (totalAmount: number) => {
+    if (!selectedPlanDetails) return;
+
+    const { planName, isAnnual } = selectedPlanDetails;
 
     setLoadingPlan(planName);
     setError(null);
+    setShowConfirmationModal(false); // Close the modal
 
     try {
       const response = await fetch('/api/payment/initiate', {
@@ -63,7 +82,7 @@ const PricingPage: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored in localStorage
         },
-        body: JSON.stringify({ planName, amount, isAnnual }),
+        body: JSON.stringify({ planName, amount: totalAmount, isAnnual }), // Send totalAmount
       });
 
       const data = await response.json();
@@ -78,6 +97,7 @@ const PricingPage: React.FC = () => {
       setError('Une erreur réseau est survenue lors de l\'initialisation du paiement.');
     } finally {
       setLoadingPlan(null);
+      setSelectedPlanDetails(null);
     }
   };
 
@@ -145,6 +165,19 @@ const PricingPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {showConfirmationModal && selectedPlanDetails && (
+        <PricingConfirmationModal
+          planName={selectedPlanDetails.planName}
+          basePrice={selectedPlanDetails.basePrice}
+          isAnnual={selectedPlanDetails.isAnnual}
+          onConfirm={confirmAndInitiatePayment}
+          onCancel={() => {
+            setShowConfirmationModal(false);
+            setSelectedPlanDetails(null);
+          }}
+        />
+      )}
     </div>
   );
 };
