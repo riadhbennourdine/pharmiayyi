@@ -1417,6 +1417,7 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
 
     // Fetch the user to determine their role
     const targetUser = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    console.log(`[DEBUG] Grant Subscription: Target User ID: ${userId}, Role: ${targetUser?.role}`);
     if (!targetUser) {
       return res.status(404).json({ message: 'User not found.' });
     }
@@ -1436,6 +1437,7 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
         }
       }
     );
+    console.log(`[DEBUG] Grant Subscription: Pharmacist update result: Matched ${updateResult.matchedCount}, Modified ${updateResult.modifiedCount}`);
 
     if (updateResult.matchedCount === 0) {
       return res.status(404).json({ message: 'User not found.' });
@@ -1443,7 +1445,8 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
 
     // If the target user is a pharmacist, update their preparers' subscriptions
     if (targetUser.role === UserRole.PHARMACIEN) {
-      await usersCollection.updateMany(
+      console.log(`[DEBUG] Grant Subscription: Target user is a PHARMACIEN. Updating collaborators for pharmacistId: ${userId}`);
+      const preparersUpdateResult = await usersCollection.updateMany(
         { pharmacistId: new ObjectId(userId) },
         { 
           $set: {
@@ -1454,6 +1457,7 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
           }
         }
       );
+      console.log(`[DEBUG] Grant Subscription: Collaborators update result: Matched ${preparersUpdateResult.matchedCount}, Modified ${preparersUpdateResult.modifiedCount}`);
     }
 
     res.status(200).json({ message: 'Subscription granted/modified successfully.' });
