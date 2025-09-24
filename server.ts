@@ -182,10 +182,10 @@ const subscriptionMiddleware = async (req: Request, res: Response, next: NextFun
 // --- KONNECT PAYMENT ENDPOINTS ---
 app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const { planName, amount, isAnnual } = req.body;
+    const { planName, amount: totalAmount, isAnnual } = req.body; // Renamed amount to totalAmount
     const userId = req.user?._id;
 
-    if (!userId || !planName || !amount) {
+    if (!userId || !planName || !totalAmount) {
       return res.status(400).json({ message: 'Missing required payment details.' });
     }
 
@@ -205,7 +205,7 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
     const newPayment: Payment = {
       userId: new ObjectId(userId),
       planName,
-      amount,
+      amount: totalAmount,
       isAnnual,
       status: 'pending',
       createdAt: new Date(),
@@ -218,7 +218,7 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
     const konnectPayload = {
       receiverWalletId: konnectWalletId,
       token: 'TND', // Assuming TND for now
-      amount: amount * 1000, // Convert to millimes
+      amount: totalAmount * 1000, // Convert to millimes
       type: 'immediate',
       description: `Subscription for ${planName} plan`,
       acceptedPaymentMethods: ['wallet', 'bank_card', 'e-DINAR'],
