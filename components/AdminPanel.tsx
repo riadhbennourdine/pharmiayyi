@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { User, UserRole } from '../types';
 import SubscriptionManagement from './SubscriptionManagement'; // Import SubscriptionManagement
+import Newsletter from './Newsletter'; // Import Newsletter
 
 const AdminPanel: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,7 +12,7 @@ const AdminPanel: React.FC = () => {
   const [assignmentLoading, setAssignmentLoading] = useState(false);
   const [assignmentFeedback, setAssignmentFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('knowledge'); // Add activeTab state
+  const [activeTab, setActiveTab] = useState('subscriptions'); // Set subscriptions as default
 
   const fetchUsers = async () => {
     const token = localStorage.getItem('token');
@@ -45,8 +46,10 @@ const AdminPanel: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (activeTab === 'assignment') {
+      fetchUsers();
+    }
+  }, [activeTab]);
 
   const handleUpdate = async () => {
     setIsLoading(true);
@@ -136,19 +139,19 @@ const AdminPanel: React.FC = () => {
             value={activeTab}
             onChange={(e) => setActiveTab(e.target.value)}
           >
-            <option value="knowledge">Base de Connaissances</option>
-            <option value="assignment">Attributions</option>
             <option value="subscriptions">Abonnements</option>
+            <option value="assignment">Attributions</option>
+            <option value="newsletter">Newsletter</option>
           </select>
         </div>
         <div className="hidden sm:block">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-4" aria-label="Tabs">
               <button
-                onClick={() => setActiveTab('knowledge')}
-                className={`px-3 py-2 font-medium text-sm rounded-md cursor-pointer transition-colors ${activeTab === 'knowledge' ? 'bg-teal-600 text-white shadow' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                onClick={() => setActiveTab('subscriptions')}
+                className={`px-3 py-2 font-medium text-sm rounded-md cursor-pointer transition-colors ${activeTab === 'subscriptions' ? 'bg-teal-600 text-white shadow' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
               >
-                Base de Connaissances
+                Abonnements
               </button>
               <button
                 onClick={() => setActiveTab('assignment')}
@@ -157,10 +160,10 @@ const AdminPanel: React.FC = () => {
                 Attributions
               </button>
               <button
-                onClick={() => setActiveTab('subscriptions')}
-                className={`px-3 py-2 font-medium text-sm rounded-md cursor-pointer transition-colors ${activeTab === 'subscriptions' ? 'bg-teal-600 text-white shadow' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                onClick={() => setActiveTab('newsletter')}
+                className={`px-3 py-2 font-medium text-sm rounded-md cursor-pointer transition-colors ${activeTab === 'newsletter' ? 'bg-teal-600 text-white shadow' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
               >
-                Abonnements
+                Newsletter
               </button>
             </nav>
           </div>
@@ -168,23 +171,8 @@ const AdminPanel: React.FC = () => {
       </div>
 
       <div className="mt-6">
-        {activeTab === 'knowledge' && (
-          <div className="bg-gray-50 p-6 rounded-lg shadow-sm"> 
-            <h3 className="text-xl font-bold text-gray-800 mb-3">Mise à jour de la Base de Connaissances</h3>
-            <p className="text-gray-600 mb-4">Lancez la mise à jour de l'index de la base de connaissances pour inclure les dernières mémofiches.</p>
-            <button
-              onClick={handleUpdate}
-              disabled={isLoading}
-              className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-colors disabled:bg-teal-300 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Mise à jour en cours...' : 'Lancer la mise à jour'}
-            </button>
-            {feedback && (
-              <p className={`mt-4 text-sm font-semibold ${feedback.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
-                {feedback.message}
-              </p>
-            )}
-          </div>
+        {activeTab === 'subscriptions' && (
+          <SubscriptionManagement />
         )}
 
         {activeTab === 'assignment' && (
@@ -251,8 +239,8 @@ const AdminPanel: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'subscriptions' && (
-          <SubscriptionManagement />
+        {activeTab === 'newsletter' && (
+          <Newsletter />
         )}
       </div>
     </div>
