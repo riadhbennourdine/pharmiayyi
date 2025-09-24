@@ -189,6 +189,8 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
       return res.status(400).json({ message: 'Missing required payment details.' });
     }
 
+    console.log(`[DEBUG] Initiate Payment: Plan: ${planName}, Total Amount: ${totalAmount}, Is Annual: ${isAnnual}, User ID: ${userId}`);
+
                 const konnectApiKey = process.env.KONNECT_API_KEY;            const konnectWalletId = process.env.KONNECT_WALLET_ID;
     const konnectApiBaseUrl = process.env.KONNECT_API_BASE_URL || 'https://api.konnect.network/api/v2';
 
@@ -233,6 +235,8 @@ app.post('/api/payment/initiate', authMiddleware, async (req: Request, res: Resp
       webhook: `${req.protocol}://${req.get('host')}/api/payment/webhook/konnect`, // Dynamic webhook URL
       theme: 'light',
     };
+
+    console.log(`[DEBUG] Konnect Payload for ${planName}:`, JSON.stringify(konnectPayload, null, 2));
 
     const konnectResponse = await axios.post(`${konnectApiBaseUrl}/payments/init-payment`, konnectPayload, {
       headers: {
