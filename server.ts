@@ -9,7 +9,7 @@ import clientPromise from './services/mongo';
 import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { User, UserRole } from './types'; // Import User and UserRole
+import { User, UserRole, PharmacistWithCollaborators } from './types'; // Import User, UserRole, and PharmacistWithCollaborators
 import crypto from 'crypto';
 import * as Brevo from '@getbrevo/brevo';
 import axios from 'axios';
