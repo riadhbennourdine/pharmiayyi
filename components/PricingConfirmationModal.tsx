@@ -22,6 +22,8 @@ const PricingConfirmationModal: React.FC<PricingConfirmationModalProps> = ({
   const priceTTC = basePrice + vatAmount;
   const totalAmount = priceTTC + FIXED_TAX;
 
+  console.log(`[DEBUG] Pricing Confirmation - Plan: ${planName}, Base Price: ${basePrice.toFixed(3)} DT, VAT Amount: ${vatAmount.toFixed(3)} DT, Price TTC: ${priceTTC.toFixed(3)} DT, Fixed Tax: ${FIXED_TAX.toFixed(3)} DT, Total Amount: ${totalAmount.toFixed(3)} DT`);
+
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
