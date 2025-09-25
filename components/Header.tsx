@@ -5,7 +5,10 @@ import { UserRole } from '../types';
 
 const Header: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuth();
-  const isAdmin = user?.role?.toUpperCase() === UserRole.ADMIN;
+  const userRole = user?.role?.toUpperCase();
+  const isAdmin = userRole === UserRole.ADMIN;
+  const isFormateur = userRole === UserRole.FORMATEUR;
+  const showAdminFeatures = isAdmin || isFormateur;
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -66,9 +69,14 @@ const Header: React.FC = () => {
         <NavLink to="/contact" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Contact
         </NavLink>
-        {isAdmin && (
+        {showAdminFeatures && (
             <NavLink to="/generateur" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
             Générateur
+            </NavLink>
+        )}
+        {showAdminFeatures && (
+            <NavLink to="/newsletter" className={navLinkClass} onClick={() => isMobile && setIsMenuOpen(false)}>
+            Newsletter
             </NavLink>
         )}
         <button onClick={() => { handleLogout(); isMobile && setIsMenuOpen(false); }} className="text-sm font-medium px-3 py-2 rounded-md transition-colors text-gray-500 hover:text-teal-600">

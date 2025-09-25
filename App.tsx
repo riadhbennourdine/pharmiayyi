@@ -26,6 +26,7 @@ import LearnerSpaceView from './components/LearnerSpaceView';
 import CustomChatBot from './components/CustomChatBot';
 import ContactFormView from './components/ContactFormView'; // Import ContactFormView
 import UnsubscribePage from './components/UnsubscribePage'; // Import UnsubscribePage
+import NewsletterManager from './components/NewsletterManager';
 
 // --- ROUTE GUARDS & LAYOUT ---
 const AppLayout: React.FC = () => {
@@ -153,6 +154,10 @@ const MemoFicheEditorPage = () => {
     return <MemoFicheEditor initialCaseStudy={currentCase} onSave={saveEditedCase} onCancel={backToMemoFiche} />
 }
 
+const NewsletterManagerPage = () => {
+    return <NewsletterManager />
+}
+
 // --- MAIN APP COMPONENT ---
 const App: React.FC = () => (
   <AuthProvider>
@@ -180,6 +185,7 @@ const App: React.FC = () => (
                     <Route element={<AdminRoute />}>
                         <Route path="/generateur" element={<GeneratorPage />} />
                         <Route path="/edit-memofiche/:id" element={<MemoFicheEditorPage />} />
+                        <Route path="/newsletter" element={<NewsletterManagerPage />} />
                     </Route>
                 </Route>
             </Routes>
