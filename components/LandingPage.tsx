@@ -51,7 +51,7 @@ const LandingPage: React.FC = () => {
                         onClick={handleStartLearning}
                         className="hidden sm:inline-block bg-teal-600 text-white font-bold px-6 py-2 rounded-lg hover:bg-teal-700 transition-transform duration-300 hover:scale-105"
                     >
-                        Essai Gratuit
+                        Connexion
                     </button>
                 </div>
             </header>
