@@ -1,82 +1,69 @@
-import { ServerResponse, IncomingMessage } from 'http';
+import { Request, Response } from 'express';
+import clientPromise from './services/mongo';
 
-// Simuler une base de données d'abonnés en mémoire
-const subscribers: string[] = [];
+interface Subscriber {
+  email: string;
+  subscribedAt: Date;
+}
 
-export function handleSubscription(req: IncomingMessage, res: ServerResponse) {
-  if (req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
+export async function handleSubscription(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      return res.status(400).json({ message: 'Adresse e-mail invalide.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const subscribersCollection = db.collection<Subscriber>('subscribers');
+
+    const existingSubscriber = await subscribersCollection.findOne({ email });
+
+    if (existingSubscriber) {
+      return res.status(400).json({ message: 'Cet e-mail est déjà abonné.' });
+    }
+
+    await subscribersCollection.insertOne({
+      email,
+      subscribedAt: new Date(),
     });
-    req.on('end', () => {
-      try {
-        const { email } = JSON.parse(body);
 
-        if (!email || !/\S+@\S+\.\S+/.test(email)) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ message: 'Adresse e-mail invalide.' }));
-          return;
-        }
+    console.log('Nouvel abonné:', email);
 
-        if (subscribers.includes(email)) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ message: 'Cet e-mail est déjà abonné.' }));
-          return;
-        }
+    res.status(200).json({ message: 'Merci pour votre abonnement !' });
 
-        subscribers.push(email);
-        console.log('N nouvel abonné:', email);
-        console.log('Toute la liste:', subscribers);
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Merci pour votre abonnement !' }));
-
-      } catch (error) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Erreur interne du serveur.' }));
-      }
-    });
-  } else {
-    res.writeHead(405, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'Méthode non autorisée.' }));
+  } catch (error) {
+    console.error('Erreur lors de l\'abonnement:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
 }
 
-export function handleUnsubscription(req: IncomingMessage, res: ServerResponse) {
-    if (req.method === 'POST') {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
-      req.on('end', () => {
-        try {
-          const { email } = JSON.parse(body);
-  
-          if (!email || !/\S+@\S+\.\S+/.test(email)) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Adresse e-mail invalide.' }));
-            return;
-          }
-  
-          const index = subscribers.indexOf(email);
-          if (index > -1) {
-            subscribers.splice(index, 1);
-          }
-  
-          console.log('Désabonnement:', email);
-          console.log('Toute la liste:', subscribers);
-  
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ message: 'Vous avez été désabonné avec succès.' }));
-  
-        } catch (error) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ message: 'Erreur interne du serveur.' }));
-        }
-      });
-    } else {
-      res.writeHead(405, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Méthode non autorisée.' }));
+export async function handleUnsubscription(req: Request, res: Response) {
+  try {
+    const { email } = req.body;
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      return res.status(400).json({ message: 'Adresse e-mail invalide.' });
     }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const subscribersCollection = db.collection<Subscriber>('subscribers');
+
+    const result = await subscribersCollection.deleteOne({ email });
+
+    if (result.deletedCount === 0) {
+        // It's good practice to not reveal if an email exists or not in an unsubscribe flow
+        console.log('Tentative de désabonnement pour un email non trouvé:', email);
+    } else {
+        console.log('Désabonnement:', email);
+    }
+
+    res.status(200).json({ message: 'Vous avez été désabonné avec succès.' });
+
+  } catch (error) {
+    console.error('Erreur lors du désabonnement:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
   }
+}

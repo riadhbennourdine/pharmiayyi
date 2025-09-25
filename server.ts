@@ -1477,6 +1477,51 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
 app.post('/api/subscribe', (req, res) => handleSubscription(req, res));
 app.post('/api/unsubscribe', (req, res) => handleUnsubscription(req, res));
 
+app.post('/api/newsletter/send', authMiddleware, adminOrFormateurOnly, async (req: Request, res: Response) => {
+  try {
+    const { subject, htmlContent } = req.body;
+
+    if (!subject || !htmlContent) {
+      return res.status(400).json({ message: 'Le sujet et le contenu HTML sont requis.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const subscribersCollection = db.collection('subscribers');
+
+    const subscribers = await subscribersCollection.find({}).toArray();
+
+    if (subscribers.length === 0) {
+      return res.status(404).json({ message: 'Aucun abonné trouvé.' });
+    }
+
+    for (const subscriber of subscribers) {
+      // Replace placeholders in the htmlContent
+      let personalizedHtml = htmlContent.replace(/{{NOM_DESTINATAIRE}}/g, subscriber.email.split('@')[0]); // Simple name from email
+      personalizedHtml = personalizedHtml.replace(/{{EMAIL_DESTINATAIRE}}/g, subscriber.email);
+      if (req.user && req.user.firstName) {
+        personalizedHtml = personalizedHtml.replace(/{{NOM_EXPEDITEUR}}/g, req.user.firstName);
+      }
+      const unsubscribeUrl = `http://${req.headers.host}/#/unsubscribe?email=${subscriber.email}`;
+      personalizedHtml = personalizedHtml.replace(/{{LIEN_DESINSCRIPTION}}/g, `<a href="${unsubscribeUrl}">Se désinscrire</a>`);
+
+
+      await sendEmail({
+        to: subscriber.email,
+        subject: subject,
+        html: personalizedHtml,
+        text: 'Veuillez activer le HTML pour voir cet email.', // Simple text version
+      });
+    }
+
+    res.status(200).json({ message: `Newsletter envoyée à ${subscribers.length} abonné(s).` });
+
+  } catch (error) {
+    console.error('Erreur lors de l\'envoi de la newsletter:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur lors de l\'envoi de la newsletter.' });
+  }
+});
+
 app.get(/.* /, (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
