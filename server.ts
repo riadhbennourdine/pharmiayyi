@@ -1477,6 +1477,45 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
 app.post('/api/subscribe', (req, res) => handleSubscription(req, res));
 app.post('/api/unsubscribe', (req, res) => handleUnsubscription(req, res));
 
+app.get('/api/subscribers/groups', authMiddleware, adminOrFormateurOnly, async (req: Request, res: Response) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const groups = await db.collection('subscribers').distinct('groups');
+    res.status(200).json(groups.filter(g => g)); // Filter out null/empty values
+  } catch (error) {
+    console.error('Erreur lors de la récupération des groupes:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+});
+
+app.put('/api/subscribers/:id/groups', authMiddleware, adminOrFormateurOnly, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { groups } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'ID d\'abonné invalide.' });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const result = await db.collection('subscribers').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { groups: groups } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Abonné non trouvé.' });
+    }
+
+    res.status(200).json({ message: 'Groupes mis à jour avec succès.' });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour des groupes:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+});
+
 app.get('/api/subscribers', authMiddleware, adminOrFormateurOnly, async (req: Request, res: Response) => {
   try {
     const client = await clientPromise;
@@ -1491,7 +1530,7 @@ app.get('/api/subscribers', authMiddleware, adminOrFormateurOnly, async (req: Re
 
 app.post('/api/newsletter/send', authMiddleware, adminOrFormateurOnly, async (req: Request, res: Response) => {
   try {
-    const { subject, htmlContent } = req.body;
+    const { subject, htmlContent, groups } = req.body;
 
     if (!subject || !htmlContent) {
       return res.status(400).json({ message: 'Le sujet et le contenu HTML sont requis.' });
@@ -1501,7 +1540,12 @@ app.post('/api/newsletter/send', authMiddleware, adminOrFormateurOnly, async (re
     const db = client.db('pharmia');
     const subscribersCollection = db.collection('subscribers');
 
-    const subscribers = await subscribersCollection.find({}).toArray();
+    let query = {};
+    if (groups && Array.isArray(groups) && groups.length > 0) {
+        query = { groups: { $in: groups } };
+    }
+
+    const subscribers = await subscribersCollection.find(query).toArray();
 
     if (subscribers.length === 0) {
       return res.status(404).json({ message: 'Aucun abonné trouvé.' });

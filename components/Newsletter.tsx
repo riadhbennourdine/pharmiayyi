@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { PharmIaLogo } from './icons'; // Importer le nouveau logo
+import React, { useState, useRef, useEffect } from 'react';
+import { PharmIaLogo } from './icons';
 
 // Définir les types pour les templates
 interface Template {
@@ -31,107 +31,148 @@ const getYoutubeEmbedUrl = (url: string) => {
   return '';
 };
 
-// Template 1: Simple avec image
+// --- EMAIL TEMPLATES REFACTORED FOR COMPATIBILITY ---
+
+// Template 1: Simple avec image (Table-based layout)
 const SimpleTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtubeUrl }) => (
-    <div style={{ fontFamily: 'Arial, sans-serif', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', maxWidth: '600px', margin: 'auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-    <header style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <PharmIaLogo width={120} height={32} color="#0d9488" />
-      <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Newsletter</span>
-    </header>
-    <main style={{ padding: '24px 32px' }}>
-      <h2 style={{ color: '#111827', fontSize: '22px', fontWeight: 'bold' }}>Bonjour {recipientName},</h2>
-      <p style={{ lineHeight: '1.6', color: '#4b5563', marginTop: '16px' }}>{content}</p>
-      {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-        <div style={{ marginTop: '24px', borderRadius: '8px', overflow: 'hidden' }}>
-          <iframe
-            width="100%"
-            height="315"
-            src={getYoutubeEmbedUrl(youtubeUrl)}
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-      )}
-    </main>
-    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
-      <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
-      <p style={{ marginTop: '8px' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
-    </footer>
-  </div>
+  <table cellPadding="0" cellSpacing="0" border="0" width="100%" style={{ backgroundColor: '#f3f4f6' }}>
+    <tr>
+      <td align="center" style={{ padding: '20px' }}>
+        <table cellPadding="0" cellSpacing="0" border="0" width="600" style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+          {/* Header */}
+          <tr>
+            <td style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
+              <table cellPadding="0" cellSpacing="0" border="0" width="100%">
+                <tr>
+                  <td><PharmIaLogo width={120} height={32} color="#0d9488" /></td>
+                  <td align="right" style={{ fontFamily: 'Arial, sans-serif', fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Newsletter</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          {/* Main Content */}
+          <tr>
+            <td style={{ padding: '24px 32px', fontFamily: 'Arial, sans-serif', color: '#111827' }}>
+              <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 16px 0' }}>Bonjour {recipientName},</h2>
+              <p style={{ lineHeight: '1.6', color: '#4b5563', margin: '0' }}>{content}</p>
+              {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
+                <div style={{ marginTop: '24px' }}>
+                  <a href={youtubeUrl}>
+                    <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ borderRadius: '8px' }} />
+                  </a>
+                </div>
+              )}
+            </td>
+          </tr>
+          {/* Footer */}
+          <tr>
+            <td style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280', fontFamily: 'Arial, sans-serif' }}>
+              <p style={{ margin: '0 0 8px 0' }}>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
+              <p style={{ margin: '0' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 );
 
-// Template 2: Promotion avec CTA
+// Template 2: Promotion avec CTA (Table-based layout)
 const PromotionTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtubeUrl }) => (
-    <div style={{ fontFamily: 'Arial, sans-serif', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', maxWidth: '600px', margin: 'auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-    <header style={{ padding: '24px', backgroundColor: '#0d9488', color: 'white', textAlign: 'center' }}>
-        <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold' }}>🎉 Offre Spéciale ! 🎉</h1>
-    </header>
-    <main style={{ padding: '32px', textAlign: 'center' }}>
-      <h2 style={{ color: '#111827', fontSize: '22px', fontWeight: 'bold' }}>Bonjour {recipientName},</h2>
-      <p style={{ lineHeight: '1.6', color: '#4b5563', fontSize: '18px', marginTop: '16px' }}>{content}</p>
-      <a href="#" style={{ backgroundColor: '#f59e0b', color: 'white', padding: '14px 28px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block', marginTop: '24px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-        Profiter de l&#39;offre
-      </a>
-      {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-        <div style={{ marginTop: '24px', borderRadius: '8px', overflow: 'hidden' }}>
-          <iframe 
-            width="100%" 
-            height="315" 
-            src={getYoutubeEmbedUrl(youtubeUrl)} 
-            title="YouTube video player" 
-            frameBorder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowFullScreen
-          ></iframe>
-        </div>
-      )}
-    </main>
-    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
-      <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
-      <p style={{ marginTop: '8px' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
-    </footer>
-  </div>
+    <table cellPadding="0" cellSpacing="0" border="0" width="100%" style={{ backgroundColor: '#f3f4f6' }}>
+        <tr>
+            <td align="center" style={{ padding: '20px' }}>
+                <table cellPadding="0" cellSpacing="0" border="0" width="600" style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+                    {/* Header */}
+                    <tr>
+                        <td align="center" style={{ padding: '24px', backgroundColor: '#0d9488', color: 'white', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
+                            <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', fontFamily: 'Arial, sans-serif' }}>🎉 Offre Spéciale ! 🎉</h1>
+                        </td>
+                    </tr>
+                    {/* Main Content */}
+                    <tr>
+                        <td align="center" style={{ padding: '32px', fontFamily: 'Arial, sans-serif', color: '#111827' }}>
+                            <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 16px 0' }}>Bonjour {recipientName},</h2>
+                            <p style={{ lineHeight: '1.6', color: '#4b5563', fontSize: '18px', margin: '0 0 24px 0' }}>{content}</p>
+                            <a href="#" style={{ backgroundColor: '#f59e0b', color: 'white', padding: '14px 28px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block' }}>
+                                Profiter de l&#39;offre
+                            </a>
+                            {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
+                                <div style={{ marginTop: '24px' }}>
+                                    <a href={youtubeUrl}>
+                                        <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ borderRadius: '8px' }} />
+                                    </a>
+                                </div>
+                            )}
+                        </td>
+                    </tr>
+                    {/* Footer */}
+                    <tr>
+                        <td style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280', fontFamily: 'Arial, sans-serif' }}>
+                            <p style={{ margin: '0 0 8px 0' }}>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
+                            <p style={{ margin: '0' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 );
 
-// Template 3: Nouveau Contenu
+// Template 3: Nouveau Contenu (Table-based layout)
 const NewContentTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtubeUrl }) => (
-    <div style={{ fontFamily: 'Arial, sans-serif', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', maxWidth: '600px', margin: 'auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
-    <header style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <PharmIaLogo width={120} height={32} color="#0d9488" />
-      <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Nouveau Contenu</span>
-    </header>
-    <main style={{ padding: '24px 32px' }}>
-      <h2 style={{ color: '#111827', fontSize: '22px', fontWeight: 'bold' }}>Bonjour {recipientName},</h2>
-      <p style={{ lineHeight: '1.6', color: '#4b5563', marginTop: '16px' }}>Nous avons publi&#233; de nouvelles ressources qui pourraient vous int&#233;resser :</p>
-      <div style={{ marginTop: '24px', backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px' }}>
-        <p style={{ flex: '1' }}>{content}</p>
-      </div>
-      {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-        <div style={{ marginTop: '24px', borderRadius: '8px', overflow: 'hidden' }}>
-          <iframe 
-            width="100%" 
-            height="315" 
-            src={getYoutubeEmbedUrl(youtubeUrl)} 
-            title="YouTube video player" 
-            frameBorder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowFullScreen
-          ></iframe>
-        </div>
-      )}
-       <div style={{ textAlign: 'center', marginTop: '24px' }}>
-         <a href="#" style={{ backgroundColor: '#0d9488', color: 'white', padding: '12px 24px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          D&#233;couvrir
-        </a>
-      </div>
-    </main>
-    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
-      <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
-      <p style={{ marginTop: '8px' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se d&#233;sinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
-    </footer>
-  </div>
+    <table cellPadding="0" cellSpacing="0" border="0" width="100%" style={{ backgroundColor: '#f3f4f6' }}>
+        <tr>
+            <td align="center" style={{ padding: '20px' }}>
+                <table cellPadding="0" cellSpacing="0" border="0" width="600" style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+                    {/* Header */}
+                    <tr>
+                        <td style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
+                            <table cellPadding="0" cellSpacing="0" border="0" width="100%">
+                                <tr>
+                                    <td><PharmIaLogo width={120} height={32} color="#0d9488" /></td>
+                                    <td align="right" style={{ fontFamily: 'Arial, sans-serif', fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Nouveau Contenu</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    {/* Main Content */}
+                    <tr>
+                        <td style={{ padding: '24px 32px', fontFamily: 'Arial, sans-serif', color: '#111827' }}>
+                            <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 16px 0' }}>Bonjour {recipientName},</h2>
+                            <p style={{ lineHeight: '1.6', color: '#4b5563', margin: '0 0 24px 0' }}>Nous avons publi&#233; de nouvelles ressources qui pourraient vous int&#233;resser :</p>
+                            <table cellPadding="0" cellSpacing="0" border="0" width="100%" style={{ backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+                                <tr>
+                                    <td style={{ padding: '20px' }}>
+                                        <p style={{ margin: '0' }}>{content}</p>
+                                    </td>
+                                </tr>
+                            </table>
+                            {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
+                                <div style={{ marginTop: '24px' }}>
+                                    <a href={youtubeUrl}>
+                                        <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ borderRadius: '8px' }} />
+                                    </a>
+                                </div>
+                            )}
+                            <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                                <a href="#" style={{ backgroundColor: '#0d9488', color: 'white', padding: '12px 24px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block' }}>
+                                    D&#233;couvrir
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {/* Footer */}
+                    <tr>
+                        <td style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280', fontFamily: 'Arial, sans-serif' }}>
+                            <p style={{ margin: '0 0 8px 0' }}>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
+                            <p style={{ margin: '0' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se d&#233;sinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 );
 
 
@@ -150,11 +191,36 @@ const Newsletter: React.FC = () => {
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [sendStatus, setSendStatus] = useState('');
+  const [allGroups, setAllGroups] = useState<string[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/subscribers/groups', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch groups');
+        const data = await response.json();
+        setAllGroups(data);
+      } catch (err: any) {
+        console.error(err);
+      }
+    };
+    fetchGroups();
+  }, []);
+
+  const handleGroupToggle = (group: string) => {
+    setSelectedGroups(prev => 
+        prev.includes(group) ? prev.filter(g => g !== group) : [...prev, group]
+    );
+  };
 
   const insertTag = (tag: string) => {
     if (contentRef.current) {
       const { selectionStart, selectionEnd, value } = contentRef.current;
-      const newContent =
+      const newContent = 
         value.substring(0, selectionStart) + `{{${tag}}}` + value.substring(selectionEnd);
       setContent(newContent);
       // Optional: focus and move cursor after the inserted tag
@@ -191,7 +257,7 @@ const Newsletter: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ subject, htmlContent }),
+        body: JSON.stringify({ subject, htmlContent, groups: selectedGroups }),
       });
 
       const data = await response.json();
@@ -242,6 +308,27 @@ const Newsletter: React.FC = () => {
               onChange={(e) => setSubject(e.target.value)}
               className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
             />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">
+                Envoyer aux groupes
+            </label>
+            <div className="mt-2 flex flex-wrap gap-2">
+                {allGroups.map(group => (
+                    <div key={group} className="flex items-center">
+                        <input
+                            type="checkbox"
+                            id={`group-select-${group}`}
+                            checked={selectedGroups.includes(group)}
+                            onChange={() => handleGroupToggle(group)}
+                            className="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                        />
+                        <label htmlFor={`group-select-${group}`} className="ml-2 text-sm text-gray-700">{group}</label>
+                    </div>
+                ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Si aucun groupe n&#39;est s&#233;lectionn&#233;, la newsletter sera envoy&#233;e &#224; tous les abonn&#233;s.</p>
           </div>
 
           <div className="mb-4">
