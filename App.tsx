@@ -25,6 +25,7 @@ import ProfileCompletionView from './components/ProfileCompletionView';
 import LearnerSpaceView from './components/LearnerSpaceView';
 import CustomChatBot from './components/CustomChatBot';
 import ContactFormView from './components/ContactFormView'; // Import ContactFormView
+import UnsubscribePage from './components/UnsubscribePage'; // Import UnsubscribePage
 
 // --- ROUTE GUARDS & LAYOUT ---
 const AppLayout: React.FC = () => {
@@ -166,6 +167,7 @@ const App: React.FC = () => (
                 <Route path="/activate-account" element={<ActivateAccountView />} />
                 <Route path="/complete-profile" element={<ProfileCompletionView />} />
                 <Route path="/contact" element={<ContactFormView />} /> {/* New Contact Route */}
+                <Route path="/unsubscribe" element={<UnsubscribePage />} />
                 <Route element={<LoggedInRoute />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/tarifs" element={<PricingPage />} />
