@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { PharmIaLogo } from './icons';
+
 
 // Définir les types pour les templates
 interface Template {
@@ -44,8 +44,7 @@ const SimpleTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtu
             <td style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
               <table cellPadding="0" cellSpacing="0" border="0" width="100%">
                 <tr>
-                  <td><PharmIaLogo width={120} height={32} color="#0d9488" /></td>
-                  <td align="right" style={{ fontFamily: 'Arial, sans-serif', fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Newsletter</td>
+                  <td><img src="https://pharmaconseilbmb.com/photos/site/logo-pharmia.png" alt="PharmIA Logo" width="120" /></td>
                 </tr>
               </table>
             </td>
@@ -130,7 +129,7 @@ const NewContentTemplate: React.FC<TemplateProps> = ({ recipientName, content, y
                         <td style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
                             <table cellPadding="0" cellSpacing="0" border="0" width="100%">
                                 <tr>
-                                    <td><PharmIaLogo width={120} height={32} color="#0d9488" /></td>
+                                    <td><img src="https://pharmaconseilbmb.com/photos/site/logo-pharmia.png" alt="PharmIA Logo" width="120" /></td>
                                     <td align="right" style={{ fontFamily: 'Arial, sans-serif', fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Nouveau Contenu</td>
                                 </tr>
                             </table>
