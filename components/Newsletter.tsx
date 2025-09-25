@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PharmIaLogo } from './icons'; // Importer le nouveau logo
 
 // Définir les types pour les templates
@@ -33,6 +32,30 @@ const getYoutubeEmbedUrl = (url: string) => {
 };
 
 // Template 1: Simple avec image
+const SimpleTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtubeUrl }) => (
+    <div style={{ fontFamily: 'Arial, sans-serif', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', maxWidth: '600px', margin: 'auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+    <header style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <PharmIaLogo width={120} height={32} color="#0d9488" />
+      <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Newsletter</span>
+    </header>
+    <main style={{ padding: '24px 32px' }}>
+      <h2 style={{ color: '#111827', fontSize: '22px', fontWeight: 'bold' }}>Bonjour {recipientName},</h2>
+      <p style={{ lineHeight: '1.6', color: '#4b5563', marginTop: '16px' }}>{content}</p>
+      {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
+        <div style={{ marginTop: '24px', borderRadius: '8px', overflow: 'hidden' }}>
+          <iframe
+            width="100%"
+            height="315"
+            src={getYoutubeEmbedUrl(youtubeUrl)}
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      )}
+    </main>
+    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
       <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
       <p style={{ marginTop: '8px' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
     </footer>
@@ -63,6 +86,9 @@ const PromotionTemplate: React.FC<TemplateProps> = ({ recipientName, content, yo
             allowFullScreen
           ></iframe>
         </div>
+      )}
+    </main>
+    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
       <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
       <p style={{ marginTop: '8px' }}><a href={`/#/unsubscribe?email=${recipientName}`} style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
     </footer>
@@ -122,6 +148,24 @@ const Newsletter: React.FC = () => {
   const [content, setContent] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [recipientName, setRecipientName] = useState('Nom du Destinataire'); // Pour la prévisualisation
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertTag = (tag: string) => {
+    if (contentRef.current) {
+      const { selectionStart, selectionEnd, value } = contentRef.current;
+      const newContent =
+        value.substring(0, selectionStart) + `{{${tag}}}` + value.substring(selectionEnd);
+      setContent(newContent);
+      // Optional: focus and move cursor after the inserted tag
+      setTimeout(() => {
+        if (contentRef.current) {
+          contentRef.current.focus();
+          const newCursorPosition = selectionStart + tag.length + 4; // +4 for {{ and }}
+          contentRef.current.setSelectionRange(newCursorPosition, newCursorPosition);
+        }
+      }, 0);
+    }
+  };
 
   const handleSend = () => {
     // Logique d'envoi simulée
@@ -175,7 +219,13 @@ const Newsletter: React.FC = () => {
             <label htmlFor="content" className="block text-sm font-medium text-gray-700">
               Contenu de la newsletter
             </label>
+            <div className="mt-1 mb-2 flex flex-wrap gap-2">
+              <button onClick={() => insertTag('NOM_DESTINATAIRE')} className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300">Nom du destinataire</button>
+              <button onClick={() => insertTag('NOM_EXPEDITEUR')} className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300">Nom de l'expéditeur</button>
+              <button onClick={() => insertTag('LIEN_DESINSCRIPTION')} className="px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300">Lien de désinscription</button>
+            </div>
             <textarea
+              ref={contentRef}
               id="content"
               rows={10}
               value={content}
