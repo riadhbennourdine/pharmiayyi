@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { PharmIaLogo } from './icons'; // Importer le nouveau logo
 
 // Définir les types pour les templates
 interface Template {
@@ -33,15 +34,15 @@ const getYoutubeEmbedUrl = (url: string) => {
 
 // Template 1: Simple avec image
 const SimpleTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtubeUrl }) => (
-  <div style={{ fontFamily: 'sans-serif', color: '#333', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', maxWidth: '600px', margin: 'auto' }}>
-    <header style={{ backgroundColor: '#0d9488', padding: '20px', color: 'white', textAlign: 'center' }}>
-      <h1 style={{ margin: '0', fontSize: '24px' }}>Pharmiayyi</h1>
+  <div style={{ fontFamily: 'Arial, sans-serif', color: '#374151', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', maxWidth: '600px', margin: 'auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+    <header style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
+      <PharmIaLogo width={120} height={32} color="#0d9488" />
     </header>
-    <main style={{ padding: '30px' }}>
-      <h2 style={{ color: '#0d9488', fontSize: '20px' }}>Bonjour {recipientName},</h2>
-      <p style={{ lineHeight: '1.6' }}>{content}</p>
+    <main style={{ padding: '24px 32px' }}>
+      <h2 style={{ color: '#111827', fontSize: '22px', fontWeight: 'bold' }}>Bonjour {recipientName},</h2>
+      <p style={{ lineHeight: '1.6', color: '#4b5563', marginTop: '16px' }}>{content}</p>
       {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-        <div style={{ marginTop: '20px' }}>
+        <div style={{ marginTop: '24px', borderRadius: '8px', overflow: 'hidden' }}>
           <iframe 
             width="100%" 
             height="315" 
@@ -53,29 +54,28 @@ const SimpleTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtu
           ></iframe>
         </div>
       )}
-      <img src="https://via.placeholder.com/540x200" alt="Placeholder" style={{ maxWidth: '100%', marginTop: '20px' }} />
     </main>
-    <footer style={{ backgroundColor: '#f8f8f8', padding: '20px', textAlign: 'center', fontSize: '12px', color: '#666' }}>
+    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
       <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
-      <p><a href="#" style={{ color: '#0d9488' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488' }}>Voir dans le navigateur</a></p>
+      <p style={{ marginTop: '8px' }}><a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
     </footer>
   </div>
 );
 
 // Template 2: Promotion avec CTA
 const PromotionTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtubeUrl }) => (
-  <div style={{ fontFamily: 'sans-serif', color: '#333', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', maxWidth: '600px', margin: 'auto' }}>
-    <header style={{ backgroundColor: '#0d9488', padding: '20px', color: 'white', textAlign: 'center' }}>
-      <h1 style={{ margin: '0', fontSize: '24px' }}>🎉 Offre Spéciale ! 🎉</h1>
+    <div style={{ fontFamily: 'Arial, sans-serif', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', maxWidth: '600px', margin: 'auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+    <header style={{ padding: '24px', backgroundColor: '#0d9488', color: 'white', textAlign: 'center' }}>
+        <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold' }}>🎉 Offre Spéciale ! 🎉</h1>
     </header>
-    <main style={{ padding: '30px', textAlign: 'center' }}>
-      <h2 style={{ color: '#0d9488', fontSize: '20px' }}>Bonjour {recipientName},</h2>
-      <p style={{ lineHeight: '1.6', fontSize: '18px' }}>{content}</p>
-      <a href="#" style={{ backgroundColor: '#f59e0b', color: 'white', padding: '15px 30px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold', display: 'inline-block', marginTop: '20px' }}>
+    <main style={{ padding: '32px', textAlign: 'center' }}>
+      <h2 style={{ color: '#111827', fontSize: '22px', fontWeight: 'bold' }}>Bonjour {recipientName},</h2>
+      <p style={{ lineHeight: '1.6', color: '#4b5563', fontSize: '18px', marginTop: '16px' }}>{content}</p>
+      <a href="#" style={{ backgroundColor: '#f59e0b', color: 'white', padding: '14px 28px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block', marginTop: '24px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
         Profiter de l'offre
       </a>
       {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-        <div style={{ marginTop: '20px' }}>
+        <div style={{ marginTop: '24px', borderRadius: '8px', overflow: 'hidden' }}>
           <iframe 
             width="100%" 
             height="315" 
@@ -88,28 +88,28 @@ const PromotionTemplate: React.FC<TemplateProps> = ({ recipientName, content, yo
         </div>
       )}
     </main>
-    <footer style={{ backgroundColor: '#f8f8f8', padding: '20px', textAlign: 'center', fontSize: '12px', color: '#666' }}>
+    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
       <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
-      <p><a href="#" style={{ color: '#0d9488' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488' }}>Voir dans le navigateur</a></p>
+      <p style={{ marginTop: '8px' }}><a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
     </footer>
   </div>
 );
 
 // Template 3: Nouveau Contenu
 const NewContentTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtubeUrl }) => (
-  <div style={{ fontFamily: 'sans-serif', color: '#333', border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden', maxWidth: '600px', margin: 'auto' }}>
-    <header style={{ backgroundColor: '#0d9488', padding: '20px', color: 'white', textAlign: 'center' }}>
-      <h1 style={{ margin: '0', fontSize: '24px' }}>Nouveau contenu disponible !</h1>
+    <div style={{ fontFamily: 'Arial, sans-serif', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', maxWidth: '600px', margin: 'auto', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+    <header style={{ padding: '24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <PharmIaLogo width={120} height={32} color="#0d9488" />
+      <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#0d9488' }}>Nouveau Contenu</span>
     </header>
-    <main style={{ padding: '30px' }}>
-      <h2 style={{ color: '#0d9488', fontSize: '20px' }}>Bonjour {recipientName},</h2>
-      <p style={{ lineHeight: '1.6' }}>Nous avons publié de nouvelles ressources qui pourraient vous intéresser :</p>
-      <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <img src="https://via.placeholder.com/150x150" alt="Nouveau contenu" style={{ maxWidth: '150px' }} />
+    <main style={{ padding: '24px 32px' }}>
+      <h2 style={{ color: '#111827', fontSize: '22px', fontWeight: 'bold' }}>Bonjour {recipientName},</h2>
+      <p style={{ lineHeight: '1.6', color: '#4b5563', marginTop: '16px' }}>Nous avons publié de nouvelles ressources qui pourraient vous intéresser :</p>
+      <div style={{ marginTop: '24px', backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px' }}>
         <p style={{ flex: '1' }}>{content}</p>
       </div>
       {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-        <div style={{ marginTop: '20px' }}>
+        <div style={{ marginTop: '24px', borderRadius: '8px', overflow: 'hidden' }}>
           <iframe 
             width="100%" 
             height="315" 
@@ -121,15 +121,15 @@ const NewContentTemplate: React.FC<TemplateProps> = ({ recipientName, content, y
           ></iframe>
         </div>
       )}
-       <div style={{ textAlign: 'center', marginTop: '20px' }}>
-         <a href="#" style={{ backgroundColor: '#0d9488', color: 'white', padding: '10px 20px', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold', display: 'inline-block' }}>
+       <div style={{ textAlign: 'center', marginTop: '24px' }}>
+         <a href="#" style={{ backgroundColor: '#0d9488', color: 'white', padding: '12px 24px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
           Découvrir
         </a>
       </div>
     </main>
-    <footer style={{ backgroundColor: '#f8f8f8', padding: '20px', textAlign: 'center', fontSize: '12px', color: '#666' }}>
+    <footer style={{ backgroundColor: '#f3f4f6', padding: '20px 32px', textAlign: 'center', fontSize: '12px', color: '#6b7280' }}>
       <p>Pharmiayyi | 123 Rue de la Pharmacie, 75001 Paris</p>
-      <p><a href="#" style={{ color: '#0d9488' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488' }}>Voir dans le navigateur</a></p>
+      <p style={{ marginTop: '8px' }}><a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Se désinscrire</a> | <a href="#" style={{ color: '#0d9488', textDecoration: 'none' }}>Voir dans le navigateur</a></p>
     </footer>
   </div>
 );

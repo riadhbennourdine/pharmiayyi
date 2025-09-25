@@ -210,3 +210,15 @@ export const LockClosedIcon = (props: IconProps) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 0 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
     </svg>
 );
+
+export const PharmIaLogo = ({ width = 150, height = 40, color = "#0d9488" }) => (
+  <svg width={width} height={height} viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 30C25.5228 30 30 25.5228 30 20C30 14.4772 25.5228 10 20 10C14.4772 10 10 14.4772 10 20C10 25.5228 14.4772 30 20 30Z" stroke={color} strokeWidth="2"/>
+    <path d="M20 10V0" stroke={color} strokeWidth="2"/>
+    <path d="M12.9289 12.9289L9.3934 9.3934" stroke={color} strokeWidth="2"/>
+    <path d="M27.0711 12.9289L30.6066 9.3934" stroke={color} strokeWidth="2"/>
+    <text x="40" y="28" fontFamily="Arial, sans-serif" fontSize="24" fontWeight="bold" fill={color}>
+      PharmIA
+    </text>
+  </svg>
+);
