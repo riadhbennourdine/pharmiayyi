@@ -10,6 +10,7 @@ import { ObjectId } from 'mongodb'; // Ajout de l'import ObjectId
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, UserRole, PharmacistWithCollaborators } from './types'; // Import User, UserRole, and PharmacistWithCollaborators
+import handleSubscription from './subscribe'; // Import subscription handler
 import crypto from 'crypto';
 import * as Brevo from '@getbrevo/brevo';
 import axios from 'axios';
@@ -1473,6 +1474,8 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
 });
 
 // For any other request (client-side routing), serve index.html
+app.post('/api/subscribe', (req, res) => handleSubscription(req, res));
+
 app.get(/.* /, (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });

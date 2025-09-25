@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TOPIC_CATEGORIES } from '../constants';
 import { LogoIcon, CapsuleIcon, BookOpenIcon, DocumentTextIcon, CheckCircleIcon, SparklesIcon, QuestionMarkCircleIcon, CommunicationIcon } from './icons';
+import SubscriptionForm from './SubscriptionForm'; // Importer le nouveau composant
 
 const FeatureCard: React.FC<{ step: number; title: string; children: React.ReactNode }> = ({ step, title, children }) => (
     <div className="bg-white rounded-xl shadow-md p-6 text-center flex flex-col items-center h-full border border-slate-200/80">
@@ -208,6 +209,13 @@ const LandingPage: React.FC = () => {
                         Démarrer mon essai de 07 jours
                     </button>
                      <p className="mt-4 text-sm text-slate-500">Sans engagement. Sans paiement préalable</p>
+                </div>
+            </section>
+
+            {/* Newsletter Subscription Section */}
+            <section className="py-20 bg-slate-100">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
+                    <SubscriptionForm />
                 </div>
             </section>
 
