@@ -1477,6 +1477,18 @@ app.post('/api/admin/grant-subscription', authMiddleware, adminOnly, async (req:
 app.post('/api/subscribe', (req, res) => handleSubscription(req, res));
 app.post('/api/unsubscribe', (req, res) => handleUnsubscription(req, res));
 
+app.get('/api/subscribers', authMiddleware, adminOrFormateurOnly, async (req: Request, res: Response) => {
+  try {
+    const client = await clientPromise;
+    const db = client.db('pharmia');
+    const subscribers = await db.collection('subscribers').find({}).toArray();
+    res.status(200).json(subscribers);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des abonnés:', error);
+    res.status(500).json({ message: 'Erreur interne du serveur.' });
+  }
+});
+
 app.post('/api/newsletter/send', authMiddleware, adminOrFormateurOnly, async (req: Request, res: Response) => {
   try {
     const { subject, htmlContent } = req.body;

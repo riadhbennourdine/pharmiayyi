@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Newsletter from './Newsletter';
-// import SubscriberManager from './SubscriberManager'; // Will be created later
+import SubscriberManager from './SubscriberManager';
 
 const NewsletterManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'editor' | 'subscribers'>('editor');
@@ -23,7 +23,7 @@ const NewsletterManager: React.FC = () => {
       </div>
 
       {activeTab === 'editor' && <Newsletter />}
-      {activeTab === 'subscribers' && <div className="p-4">Gestion des abonnés (à venir)</div> /* <SubscriberManager /> */}
+      {activeTab === 'subscribers' && <SubscriberManager />}
     </div>
   );
 };
