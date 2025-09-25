@@ -55,11 +55,15 @@ const SimpleTemplate: React.FC<TemplateProps> = ({ recipientName, content, youtu
               <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 16px 0' }}>Bonjour {recipientName},</h2>
               <p style={{ lineHeight: '1.6', color: '#4b5563', margin: '0' }}>{content}</p>
               {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-                <div style={{ marginTop: '24px' }}>
-                  <a href={youtubeUrl}>
-                    <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ borderRadius: '8px' }} />
-                  </a>
-                </div>
+                <table cellPadding="0" cellSpacing="0" border="0" width="100%" style={{ marginTop: '24px' }}>
+                  <tr>
+                    <td align="center">
+                      <a href={youtubeUrl} style={{ display: 'block', borderRadius: '8px', overflow: 'hidden' }}>
+                        <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ display: 'block', border: '0', maxWidth: '100%' }} />
+                      </a>
+                    </td>
+                  </tr>
+                </table>
               )}
             </td>
           </tr>
@@ -93,15 +97,16 @@ const PromotionTemplate: React.FC<TemplateProps> = ({ recipientName, content, yo
                         <td align="center" style={{ padding: '32px', fontFamily: 'Arial, sans-serif', color: '#111827' }}>
                             <h2 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 16px 0' }}>Bonjour {recipientName},</h2>
                             <p style={{ lineHeight: '1.6', color: '#4b5563', fontSize: '18px', margin: '0 0 24px 0' }}>{content}</p>
-                            <a href="#" style={{ backgroundColor: '#f59e0b', color: 'white', padding: '14px 28px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block' }}>
-                                Profiter de l&#39;offre
-                            </a>
                             {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-                                <div style={{ marginTop: '24px' }}>
-                                    <a href={youtubeUrl}>
-                                        <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ borderRadius: '8px' }} />
-                                    </a>
-                                </div>
+                                <table cellPadding="0" cellSpacing="0" border="0" width="100%" style={{ marginTop: '24px' }}>
+                                  <tr>
+                                    <td align="center">
+                                      <a href={youtubeUrl} style={{ display: 'block', borderRadius: '8px', overflow: 'hidden' }}>
+                                        <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ display: 'block', border: '0', maxWidth: '100%' }} />
+                                      </a>
+                                    </td>
+                                  </tr>
+                                </table>
                             )}
                         </td>
                     </tr>
@@ -148,11 +153,15 @@ const NewContentTemplate: React.FC<TemplateProps> = ({ recipientName, content, y
                                 </tr>
                             </table>
                             {youtubeUrl && getYoutubeEmbedUrl(youtubeUrl) && (
-                                <div style={{ marginTop: '24px' }}>
-                                    <a href={youtubeUrl}>
-                                        <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ borderRadius: '8px' }} />
-                                    </a>
-                                </div>
+                                <table cellPadding="0" cellSpacing="0" border="0" width="100%" style={{ marginTop: '24px' }}>
+                                  <tr>
+                                    <td align="center">
+                                      <a href={youtubeUrl} style={{ display: 'block', borderRadius: '8px', overflow: 'hidden' }}>
+                                        <img src={`https://img.youtube.com/vi/${new URL(youtubeUrl).searchParams.get('v')}/0.jpg`} alt="YouTube video thumbnail" width="100%" style={{ display: 'block', border: '0', maxWidth: '100%' }} />
+                                      </a>
+                                    </td>
+                                  </tr>
+                                </table>
                             )}
                             <div style={{ textAlign: 'center', marginTop: '24px' }}>
                                 <a href="#" style={{ backgroundColor: '#0d9488', color: 'white', padding: '12px 24px', textDecoration: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'inline-block' }}>
@@ -271,6 +280,10 @@ const Newsletter: React.FC = () => {
     }
   };
 
+  const formatContentForHtml = (text: string) => {
+    return text.split('\n').join('<br />');
+  };
+
   const PreviewComponent = selectedTemplate.component;
 
   return (
@@ -382,7 +395,7 @@ const Newsletter: React.FC = () => {
               <p className="text-sm text-gray-600">Sujet: {subject}</p>
             </div>
             <div ref={previewRef} className="p-4">
-              <PreviewComponent recipientName="{{NOM_DESTINATAIRE}}" content={content} youtubeUrl={youtubeUrl} />
+              <PreviewComponent recipientName="{{NOM_DESTINATAIRE}}" content={formatContentForHtml(content)} youtubeUrl={youtubeUrl} />
             </div>
           </div>
         </div>
