@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content, SchemaType } from "@google/generative-ai";
 import type { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import clientPromise from './mongo';
 import { ObjectId } from 'mongodb';
@@ -42,105 +42,105 @@ const safetySettings = [
 ];
 
 const MEMO_FICHE_SCHEMA = {
-  type: "object",
+  type: SchemaType.OBJECT,
   properties: {
-    title: { type: "string" },
-    patientSituation: { type: "string" },
+    title: { type: SchemaType.STRING },
+    patientSituation: { type: SchemaType.STRING },
     pathologyOverview: {
-      type: "array",
-      items: { type: "string" },
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
     },
     keyQuestions: {
-      type: "array",
-      items: { type: "string" },
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
     },
     redFlags: {
-      type: "array",
-      items: { type: "string" },
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
     },
     recommendations: {
-      type: "object",
+      type: SchemaType.OBJECT,
       properties: {
         mainTreatment: {
-          type: "array",
-          items: { type: "string" },
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
         },
         associatedProducts: {
-          type: "array",
-          items: { type: "string" },
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
         },
         lifestyleAdvice: {
-          type: "array",
-          items: { type: "string" },
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
         },
         dietaryAdvice: {
-          type: "array",
-          items: { type: "string" },
+          type: SchemaType.ARRAY,
+          items: { type: SchemaType.STRING },
         },
       },
       required: ["mainTreatment", "associatedProducts", "lifestyleAdvice", "dietaryAdvice"],
     },
     keyPoints: {
-      type: "array",
-      items: { type: "string" },
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
     },
     references: {
-      type: "array",
-      items: { type: "string" },
+      type: SchemaType.ARRAY,
+      items: { type: SchemaType.STRING },
     },
     flashcards: {
-      type: "array",
+      type: SchemaType.ARRAY,
       items: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          question: { type: "string" },
-          answer: { type: "string" },
+          question: { type: SchemaType.STRING },
+          answer: { type: SchemaType.STRING },
         },
         required: ["question", "answer"],
       },
     },
     glossary: {
-      type: "array",
+      type: SchemaType.ARRAY,
       items: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          term: { type: "string" },
-          definition: { type: "string" },
+          term: { type: SchemaType.STRING },
+          definition: { type: SchemaType.STRING },
         },
         required: ["term", "definition"],
       },
     },
     media: {
-      type: "array",
+      type: SchemaType.ARRAY,
       items: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          type: { type: "string" },
-          title: { type: "string" },
-          url: { type: "string" },
+          type: { type: SchemaType.STRING },
+          title: { type: SchemaType.STRING },
+          url: { type: SchemaType.STRING },
         },
         required: ["type", "title", "url"],
       },
     },
     quiz: {
-      type: "array",
+      type: SchemaType.ARRAY,
       items: {
-        type: "object",
+        type: SchemaType.OBJECT,
         properties: {
-          question: { type: "string" },
+          question: { type: SchemaType.STRING },
           options: {
-            type: "array",
-            items: { type: "string" },
+            type: SchemaType.ARRAY,
+            items: { type: SchemaType.STRING },
           },
-          correctAnswerIndex: { type: "number" },
-          explanation: { type: "string" },
-          type: { type: "string" },
+          correctAnswerIndex: { type: SchemaType.NUMBER },
+          explanation: { type: SchemaType.STRING },
+          type: { type: SchemaType.STRING },
         },
         required: ["question", "options", "correctAnswerIndex", "explanation", "type"],
       },
     },
-    coverImageUrl: { type: "string" },
-    youtubeUrl: { type: "string" },
+    coverImageUrl: { type: SchemaType.STRING },
+    youtubeUrl: { type: SchemaType.STRING },
   },
   required: [
     "title",
