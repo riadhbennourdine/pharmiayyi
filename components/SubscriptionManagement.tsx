@@ -54,7 +54,7 @@ const CollaboratorDetailsModal: React.FC<CollaboratorModalProps> = ({ collaborat
 
 const SubscriptionManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
-  const [pharmacists, setPharmacists] = useState<PharmacistWithCollaborators[]>([]);
+  const [users, setUsers] = useState<PharmacistWithCollaborators[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showGrantModal, setShowGrantModal] = useState(false);
@@ -64,7 +64,7 @@ const SubscriptionManagement: React.FC = () => {
   const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
   const [currentCollaborators, setCurrentCollaborators] = useState<User[]>([]);
 
-  const fetchPharmacists = async () => {
+  const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -75,31 +75,31 @@ const SubscriptionManagement: React.FC = () => {
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch pharmacists and their collaborators.');
+        throw new Error('Failed to fetch users and their collaborators.');
       }
       const data: PharmacistWithCollaborators[] = await response.json();
 
-      // Process dates for pharmacists and their collaborators
-      const processedData = data.map(pharmacist => {
-        // Convert pharmacist's dates
-        if (pharmacist.createdAt) pharmacist.createdAt = new Date(pharmacist.createdAt);
-        if (pharmacist.subscriptionEndDate) pharmacist.subscriptionEndDate = new Date(pharmacist.subscriptionEndDate);
+      // Process dates for users and their collaborators
+      const processedData = data.map(user => {
+        // Convert user's dates
+        if (user.createdAt) user.createdAt = new Date(user.createdAt);
+        if (user.subscriptionEndDate) user.subscriptionEndDate = new Date(user.subscriptionEndDate);
 
         // Convert collaborators' dates
-        if (pharmacist.collaborators) {
-          pharmacist.collaborators = pharmacist.collaborators.map(collab => {
+        if (user.collaborators) {
+          user.collaborators = user.collaborators.map(collab => {
             if (collab.createdAt) collab.createdAt = new Date(collab.createdAt);
             if (collab.subscriptionEndDate) collab.subscriptionEndDate = new Date(collab.subscriptionEndDate);
             return collab;
           });
         }
-        return pharmacist;
+        return user;
       });
 
-      setPharmacists(processedData);
+      setUsers(processedData);
     } catch (err: any) {
-      console.error('Error fetching pharmacists with collaborators:', err);
-      setError(err.message || 'Failed to load pharmacists and collaborators.');
+      console.error('Error fetching users with collaborators:', err);
+      setError(err.message || 'Failed to load users and collaborators.');
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ const SubscriptionManagement: React.FC = () => {
 
   useEffect(() => {
     if (currentUser?.role === UserRole.ADMIN) {
-      fetchPharmacists();
+      fetchUsers();
     }
   }, [currentUser]);
 
@@ -132,7 +132,7 @@ const SubscriptionManagement: React.FC = () => {
 
       alert('Abonnement octroyé avec succès !');
       setShowGrantModal(false);
-      fetchPharmacists(); // Refresh list
+      fetchUsers(); // Refresh list
     } catch (err: any) {
       console.error('Error granting subscription:', err);
       alert(`Erreur: ${err.message || 'Échec de l\'octroi de l\'abonnement.'}`);
@@ -144,18 +144,19 @@ const SubscriptionManagement: React.FC = () => {
     setShowCollaboratorModal(true);
   };
 
-  if (loading) return <div className="text-center p-4">Chargement des pharmaciens...</div>;
+  if (loading) return <div className="text-center p-4">Chargement des utilisateurs...</div>;
   if (error) return <div className="text-center p-4 text-red-600">Erreur: {error}</div>;
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Gestion des Abonnements Pharmaciens</h2>
+      <h2 className="text-2xl font-bold mb-4">Gestion des Abonnements</h2>
       <div className="overflow-x-auto bg-white shadow-md rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom Pharmacien</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Abonné</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fin Abonnement</th>
@@ -164,22 +165,23 @@ const SubscriptionManagement: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {pharmacists.map(pharmacist => (
-              <tr key={pharmacist._id?.toString()}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pharmacist.firstName} {pharmacist.lastName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pharmacist.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pharmacist.hasActiveSubscription ? 'Oui' : 'Non'}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pharmacist.planName || 'N/A'}</td>
+            {users.map(user => (
+              <tr key={user._id?.toString()}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.role}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.hasActiveSubscription ? 'Oui' : 'Non'}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.planName || 'N/A'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {pharmacist.subscriptionEndDate ? pharmacist.subscriptionEndDate.toLocaleDateString() : 'N/A'}
+                  {user.subscriptionEndDate ? user.subscriptionEndDate.toLocaleDateString() : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {pharmacist.collaborators && pharmacist.collaborators.length > 0 ? (
+                  {user.collaborators && user.collaborators.length > 0 ? (
                     <button
-                      onClick={() => openCollaboratorModal(pharmacist.collaborators || [])}
+                      onClick={() => openCollaboratorModal(user.collaborators || [])}
                       className="text-teal-600 hover:text-teal-900 font-bold"
                     >
-                      ({pharmacist.collaborators.length})
+                      ({user.collaborators.length})
                     </button>
                   ) : (
                     '(0)'
@@ -187,7 +189,7 @@ const SubscriptionManagement: React.FC = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    onClick={() => { setSelectedUser(pharmacist); setShowGrantModal(true); }}
+                    onClick={() => { setSelectedUser(user); setShowGrantModal(true); }}
                     className="text-teal-600 hover:text-teal-900 mr-2"
                   >
                     <PencilIcon className="h-5 w-5" />

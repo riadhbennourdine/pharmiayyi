@@ -999,6 +999,9 @@ app.get('/api/memofiches', authMiddleware, async (req, res) => {
     const hasActiveSub = user?.hasActiveSubscription === true && user?.subscriptionEndDate && user.subscriptionEndDate > new Date();
     const isAdminOrFormateur = user?.role === UserRole.ADMIN || user?.role === UserRole.FORMATEUR;
 
+    // [DEBUG] Log user object and role check
+    console.log(`[DEBUG] /api/memofiches - User: ${user?.email}, Role: ${user?.role}, isAdminOrFormateur: ${isAdminOrFormateur}`);
+
     // Check for free week
     const oneWeekInMs = 7 * 24 * 60 * 60 * 1000; // One week in milliseconds
     const userCreationDate = user?.createdAt ? new Date(user.createdAt) : null;
@@ -1369,8 +1372,8 @@ app.get('/api/admin/subscribers', authMiddleware, adminOnly, async (req: Request
     const db = client.db('pharmia');
     const usersCollection = db.collection<User>('users');
 
-    const pharmacistsWithCollaborators = await usersCollection.aggregate<PharmacistWithCollaborators>([
-      { $match: { role: UserRole.PHARMACIEN } },
+    const usersWithCollaborators = await usersCollection.aggregate<PharmacistWithCollaborators>([
+      { $match: { role: { $in: [UserRole.PHARMACIEN, UserRole.FORMATEUR] } } },
       { $lookup: {
           from: 'users',
           localField: '_id',
@@ -1396,7 +1399,7 @@ app.get('/api/admin/subscribers', authMiddleware, adminOnly, async (req: Request
       }
     ]).toArray();
 
-    res.status(200).json(pharmacistsWithCollaborators);
+    res.status(200).json(usersWithCollaborators);
   } catch (error) {
     console.error('Error fetching pharmacists with collaborators:', error);
     res.status(500).json({ message: 'Failed to fetch pharmacists with collaborators.' });
