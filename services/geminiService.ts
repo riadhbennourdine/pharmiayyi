@@ -11,7 +11,7 @@ if (!API_KEY || API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
     // throw new Error("GEMINI_API_KEY is not configured."); 
 }
 
-const genAI = new GoogleGenerativeAI(API_KEY || "", { apiVersion: "v1" });
+const genAI = new GoogleGenerativeAI(API_KEY || "");
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const generationConfig: GenerationConfig = {
