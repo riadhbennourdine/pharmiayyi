@@ -69,12 +69,15 @@ export async function getEmbedding(texts: string[]): Promise<number[][]> {
 export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
     const prompt = `Génère une mémofiche au format JSON à partir du texte suivant. Le JSON doit contenir les champs 'title', 'patientSituation', 'pathologyOverview', 'keyQuestions', 'redFlags', 'recommendations', 'flashcards', 'quiz', 'glossary', et 'references'.
 
-Le champ 'recommendations.mainTreatment' doit être un tableau de chaînes de caractères, où chaque chaîne décrit un traitement principal.
+Le champ 'pathologyOverview' doit être une description textuelle concise de la pathologie, et non un objet.
+Le champ 'recommendations.mainTreatment' doit être un tableau de chaînes de caractères, où chaque chaîne décrit un traitement principal de manière détaillée, incluant posologie, durée et conseils de dispensation.
+Le champ 'recommendations.associatedProducts' doit être un tableau de chaînes de caractères, où chaque chaîne représente un produit associé et son titre doit être en gras (ex: "**Titre du produit** : description").
+Le champ 'recommendations.lifestyleAdvice' doit être un tableau de chaînes de caractères détaillant les conseils d'hygiène de vie.
 
 Pour les 'flashcards', génère 10 questions-réponses pertinentes basées sur le texte. Chaque flashcard doit avoir une 'question' et une 'answer'.
 Pour le 'quiz', génère 10 questions basées sur le texte, dont 4 questions Vrai/Faux et 6 questions à choix multiples. Chaque question doit avoir une 'question', un tableau d''options', l'index de la 'correctAnswerIndex', une 'explanation' et un 'type' ('single-choice' ou 'true-false').
 Pour le 'glossary', extrais 10 termes clés du texte avec leurs 'definition' respectives.
-Pour les 'references', génère une liste de 3 à 5 références bibliographiques pertinentes au format string[].
+Pour les 'references', extrais toutes les références bibliographiques pertinentes du texte source, formate-les selon les bonnes pratiques (auteur, titre, année, source) et assure-toi qu'elles soient concises.
 
 Texte à analyser:
 ${text}`;;
@@ -165,7 +168,7 @@ La réponse doit être au format JSON, en respectant la structure suivante :
         'roleOfDiet': 'L'influence de l'alimentation sur le traitement',
         'drugs': [
           {
-            'name': 'Le nom du médicament (DCI)',
+            'name': '**Le nom du médicament (DCI)**',
             'dosages': 'Les posologies précises et courantes. Ne pas dire "selon notice"',
             'precautionsForUse': 'Les principales précautions d'emploi, contre-indications et effets indésirables'
           }
@@ -356,54 +359,50 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
         }
     ], // Génère 10 questions-réponses pertinentes basées sur le texte
 - 'references': [], // Extrait toutes les références bibliographiques du texte source, formate-les selon les bonnes pratiques (auteur, titre, année, source) et assure-toi qu'elles soient concises.
-
----
-Texte source :
-'${sourceText}'
----`;
-
-    console.log("Prompt sent to Gemini for Exhaustive MemoFiche:", prompt);
-
-    const parts = [
-        { text: prompt },
-    ];
-
-    try {
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts }],
-            generationConfig,
-            safetySettings,
-        });
-
-        const response = result.response;
-        let jsonText = response.text();
-        console.log("Raw JSON from Gemini:", jsonText);
-
-        // Extract JSON block from the response
-        jsonText = extractJsonFromString(jsonText);
-        
-        let generatedMemoFiche: ExhaustiveMemoFiche;
-        try {
-            generatedMemoFiche = JSON.parse(jsonText);
-        } catch (parseError) {
-            console.error("Failed to parse JSON, attempting to fix...", parseError);
-            // Attempt to fix the glossary format issue
-            jsonText = jsonText.replace(/"term": ("[^"]+"), "definition": ("[^"]+")/g, '{"term": $1, "definition": $2}');
-            try {
-                generatedMemoFiche = JSON.parse(jsonText);
-                console.log("Successfully parsed JSON after fixing.");
-            } catch (secondParseError) {
-                console.error("Failed to parse JSON even after attempting to fix:", secondParseError);
-                throw new Error("Failed to generate exhaustive memo fiche from text due to malformed JSON.");
+- 'introductionToPathology': {
+        'title': 'Introduction à l'Hypertension Artérielle (HTA)',
+        'definitionAndDiagnosis': 'Inclure la définition de l'HTA (PA ≥ 140/90 mm Hg en consultation, maintenue dans le temps), les objectifs de PA pour différentes populations (générale, diabétiques, > 80 ans).',
+        'prevalenceAndImportance': 'Mentionner que l'HTA est le premier facteur de risque cardiovasculaire mondial, sa nature souvent asymptomatique, et les statistiques sur le traitement et le contrôle.',
+        'riskFactorsAndCauses': 'Lister les facteurs modifiables (surpoids, alcool, tabac, sédentarité, alimentation, hyperlipidémie, diabète) et les causes spécifiques (grossesse, troubles neurologiques, apnée du sommeil). Différencier l'HTA primaire et secondaire.',
+        'complications': 'Décrire les risques liés à une HTA non traitée (AVC, insuffisance cardiaque, infarctus, etc.).',
+        'treatmentGoals': 'Rappeler l'objectif principal de diminution de la morbimortalité cardiovasculaire et les cibles de PA.',
+        'lifestyleMeasures': 'Détailler ces mesures essentielles (perte de poids, réduction du sel, modération de l'alcool, arrêt du tabac, activité physique, gestion du stress) et leur importance dans la prise en charge.'
+    },
+- 'drugClasses': {
+        'title': 'Les Antihypertenseurs : Classes et Détails',
+        'generalPrinciples': 'Indiquer que le traitement est généralement à vie, l'importance de la formation continue et des ouvrages de référence. Expliquer que le choix initial peut se faire entre différentes classes et que les associations sont envisagées en cas d'efficacité insuffisante (avec les associations à éviter comme IEC-ARA2 ou thiazidique-diurétique de l'anse).',
+        'classes': [
+            {
+                'name': 'Antagonistes des Récepteurs de l'Angiotensine II (ARA II)',
+                'examples': 'Noms génériques et commerciaux (avec des exemples).',
+                'mechanismOfAction': 'Mécanisme d'action.',
+                'mainSideEffects': 'Effets secondaires principaux.',
+                'patientAdvice': 'Conseils pour le patient (si spécifiques à la classe, comme la prise des diurétiques ou les précautions d'hypotension orthostatique).',n                'contraindications': 'Contre-indications (y compris la grossesse et l'allaitement si applicable).',
+                'drugInteractions': 'Interactions médicamenteuses importantes (notamment AINS, substituts de sel, lithium, cocaïne).',
             }
+        ]
+    },
+- 'dispensingAndCounseling': {
+        'title': 'Conseil Associé à l'Ordonnance et Rôle du Pharmacien',
+        'essentialDispensingAdvice': {
+            'title': 'A. Conseils Essentiels à la délivrance',
+            'medicationExplanation': 'Explication du traitement médicamenteux : Nom, rôle, posologie, durée (traitement à vie), effets secondaires (insister sur l'hypotension orthostatique et les conseils associés), interactions et contre-indications clés (AINS, alcool, substituts de sel, produits naturels, grossesse/allaitement, cocaïne, marijuana).',
+            'lifestyleReminder': 'Rappel des Mesures Hygiéno-diététiques (MHD) : Importance fondamentale, conseils sur l'alimentation (sel, régime DASH, produits effervescents), poids, activité physique, tabac, alcool.',
+            'monitoringAndSelfMeasurement': 'Encourager l'automesure tensionnelle (AMT), l'utilisation d'autotensiomètres (plus de 60% des patients), la reconnaissance des signes d'alerte, et le contrôle en pharmacie.',
+            'intercurrentEventManagement': 'Avertir des risques de déshydratation (chaleurs, diarrhée, vomissements) surtout sous diurétiques.',
+        },
+        'additionalSalesAndServices': {
+            'title': 'B. Ventes Additionnelles et Services Associés (Valorisation Commerciale et Clinique)',
+            'products': [ 'Autotensiomètres : Produit phare, formation à l'utilisation, interprétation des mesures.', 'Piluliers et dispositifs d'aide à l'observance.', 'Produits liés aux MHD : Substituts de sel (précautions), guides de régime DASH, aides au sevrage tabagique, produits de gestion du poids, compléments de potassium (si hypokaliémie).', 'Autres produits pertinents : Brosses à dents à soies souples/rasoirs électriques pour patients sous anticoagulants, produits d'hydratation.' ],
+            'services': [ 'Services de suivi pharmaceutique : Entretiens pharmaceutiques pour suivi d'observance, tolérance, efficacité.' ],
+        },
+        'pharmacistRoleValorization': {
+            'title': 'C. Valorisation du Rôle du Pharmacien dans la Santé des Patients Hypertendus',
+            'medicationExpertise': 'Expertise en Médication et Sécurité : Spécialiste des médicaments, suivi informatique, prévention des interactions, bilan comparatif des médicaments (BCM), information sur les génériques.',
+            'patientEducation': 'Éducation et Accompagnement du Patient : Éducation sur la maladie et le traitement (observance), explications claires, responsabilisation (automesure), soutien personnalisé sur les MHD.',
+            'interprofessionalCollaboration': 'Travail avec le médecin, communication aux autres professionnels, évaluation des capacités fonctionnelles.',
         }
-
-        return generatedMemoFiche;
-    } catch (error) {
-        console.error("Error generating exhaustive memo fiche:", error);
-        throw new Error("Failed to generate exhaustive memo fiche from text.");
     }
-};
 
 
 
