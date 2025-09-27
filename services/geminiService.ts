@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content, SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content, SchemaType, Schema } from "@google/generative-ai";
 import type { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import clientPromise from './mongo';
 import { ObjectId } from 'mongodb';
@@ -41,7 +41,7 @@ const safetySettings = [
     },
 ];
 
-const MEMO_FICHE_SCHEMA = {
+const MEMO_FICHE_SCHEMA: Schema = {
   type: SchemaType.OBJECT,
   properties: {
     title: { type: SchemaType.STRING },
