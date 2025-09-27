@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content, SchemaType, Schema } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
 import type { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import clientPromise from './mongo';
 import { ObjectId } from 'mongodb';
@@ -11,8 +11,8 @@ if (!API_KEY || API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
     // throw new Error("GEMINI_API_KEY is not configured."); 
 }
 
-const genAI = new GoogleGenerativeAI(API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const genAI = new GoogleGenerativeAI(API_KEY || "", { apiVersion: "v1" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const generationConfig: GenerationConfig = {
     temperature: 0.2,
@@ -40,125 +40,6 @@ const safetySettings = [
         threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
     },
 ];
-
-const MEMO_FICHE_SCHEMA: Schema = {
-  type: SchemaType.OBJECT,
-  properties: {
-    title: { type: SchemaType.STRING },
-    patientSituation: { type: SchemaType.STRING },
-    pathologyOverview: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING },
-    },
-    keyQuestions: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING },
-    },
-    redFlags: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING },
-    },
-    recommendations: {
-      type: SchemaType.OBJECT,
-      properties: {
-        mainTreatment: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-        },
-        associatedProducts: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-        },
-        lifestyleAdvice: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-        },
-        dietaryAdvice: {
-          type: SchemaType.ARRAY,
-          items: { type: SchemaType.STRING },
-        },
-      },
-      required: ["mainTreatment", "associatedProducts", "lifestyleAdvice", "dietaryAdvice"],
-    },
-    keyPoints: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING },
-    },
-    references: {
-      type: SchemaType.ARRAY,
-      items: { type: SchemaType.STRING },
-    },
-    flashcards: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          question: { type: SchemaType.STRING },
-          answer: { type: SchemaType.STRING },
-        },
-        required: ["question", "answer"],
-      },
-    },
-    glossary: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          term: { type: SchemaType.STRING },
-          definition: { type: SchemaType.STRING },
-        },
-        required: ["term", "definition"],
-      },
-    },
-    media: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          type: { type: SchemaType.STRING },
-          title: { type: SchemaType.STRING },
-          url: { type: SchemaType.STRING },
-        },
-        required: ["type", "title", "url"],
-      },
-    },
-    quiz: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          question: { type: SchemaType.STRING },
-          options: {
-            type: SchemaType.ARRAY,
-            items: { type: SchemaType.STRING },
-          },
-          correctAnswerIndex: { type: SchemaType.NUMBER },
-          explanation: { type: SchemaType.STRING },
-          type: { type: SchemaType.STRING },
-        },
-        required: ["question", "options", "correctAnswerIndex", "explanation", "type"],
-      },
-    },
-    coverImageUrl: { type: SchemaType.STRING },
-    youtubeUrl: { type: SchemaType.STRING },
-  },
-  required: [
-    "title",
-    "patientSituation",
-    "pathologyOverview",
-    "keyQuestions",
-    "redFlags",
-    "recommendations",
-    "keyPoints",
-    "references",
-    "flashcards",
-    "glossary",
-    "media",
-    "quiz",
-    "coverImageUrl",
-    "youtubeUrl",
-  ],
-};
 
 
 const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
@@ -233,13 +114,9 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
     
             try {
                 const result = await model.generateContent({
-                    contents: [{ role: "user", parts }],
-                    generationConfig: {
-                        ...generationConfig,
-                        responseSchema: MEMO_FICHE_SCHEMA,
-                    },
-                    safetySettings,
-                });
+                                contents: [{ role: "user", parts }],
+                                generationConfig,
+                                safetySettings,                });
         const response = result.response;
         let jsonText = response.text();
         console.log("Raw JSON from Gemini:", jsonText);
