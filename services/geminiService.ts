@@ -12,7 +12,7 @@ if (!API_KEY || API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
 const generationConfig: GenerationConfig = {
     temperature: 0.2,
@@ -41,7 +41,7 @@ const safetySettings = [
     },
 ];
 
-const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
+const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
 
 // Helper function to extract JSON from a string that might contain markdown or other text
 function extractJsonFromString(text: string): string {
@@ -55,7 +55,7 @@ function extractJsonFromString(text: string): string {
 
 export async function getEmbedding(texts: string[]): Promise<number[][]> {
     try {
-        const model = genAI.getGenerativeModel({ model: "embedding-001" });
+        const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
         const requests = texts.map(text => ({ content: { parts: [{ text: text }] } as Content }));
         const result = await model.batchEmbedContents({ requests });
         return result.embeddings.map(embedding => embedding.values);
