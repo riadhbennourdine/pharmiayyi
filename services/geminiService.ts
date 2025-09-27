@@ -67,44 +67,10 @@ export async function getEmbedding(texts: string[]): Promise<number[][]> {
 }
 
 export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
-    const prompt = `
-      À partir du texte suivant, génère une mémofiche de cas de comptoir pour un préparateur en pharmacie.
-      Le public cible de cette mémofiche est constitué de professionnels de santé (pharmaciens et préparateurs en pharmacie). Le contenu doit être rédigé avec un niveau de détail et de pertinence clinique adapté à cette audience, en évitant les conseils génériques destinés aux patients.
-      La mémofiche doit être pertinente pour le thème "${theme}" et le système/organe "${system}".
-      La mémofiche doit être structurée, claire, et pédagogique.
-      Identifie un scénario patient plausible à partir du texte.
-      Le ton doit être professionnel et didactique.
+    const prompt = `Génère une mémofiche au format JSON à partir du texte suivant. Le JSON doit contenir les champs 'title', 'patientSituation', 'pathologyOverview', 'keyQuestions', 'redFlags', et 'recommendations'.
 
-      **N'utilise PAS de recherche externe ou de connaissances préalables.** Base-toi uniquement sur le texte source fourni.
-
-      Inclus les sections suivantes, en t'assurant que les tableaux sont bien des tableaux de chaînes de caractères ou d'objets selon le type:
-      - "title": "Titre concis de la mémofiche",
-      - "patientSituation": "Scénario patient détaillé",
-      - "pathologyOverview": "Aperçu de la pathologie en 5-7 points clés (string[])",
-      - "keyQuestions": "Tableau de chaînes de caractères (string[]) de questions clés à poser au patient",
-      - "redFlags": "Tableau de chaînes de caractères (string[]) de signaux d'alerte",
-      - "recommendations": {
-        "mainTreatment": "Tableau de chaînes de caractères (string[]) résumant le traitement principal en points clés. Chaque point doit être très détaillé et inclure : le nom du traitement en gras (ex: **Nom du traitement**), la posologie précise (ex: **Amoxicilline**: Posologie: 1g 2 à 3 fois par jour), la durée du traitement (ex: Durée: 7 jours), les principales précautions d'emploi, contre-indications, interactions médicamenteuses pertinentes, et des conseils de dispensation spécifiques pour le pharmacien ou le préparateur (ex: surveillance, conseils au patient sur les effets indésirables spécifiques, gestion des interactions). Si le texte source ne fournit pas de détails précis, génère des exemples de posologies, durées, précautions et conseils plausibles et couramment admis pour un cas d'étude pédagogique destiné à des professionnels. Ne te contente pas de dire 'selon notice' ou des conseils génériques pour le patient.",
-        "associatedProducts": "Tableau de chaînes de caractères (string[]) résumant les produits associés en points clés. Chaque point doit être très détaillé et inclure : la fonction du produit en gras, puis le nom du produit (ex: **Nom du produit**), la posologie précise, la durée d'utilisation, et des conseils de dispensation spécifiques pour le pharmacien ou le préparateur. 
-        "lifestyleAdvice": "Tableau de chaînes de caractères (string[]) de conseils d'hygiène de vie",
-        "dietaryAdvice": "Tableau de chaînes de caractères (string[]) de conseils alimentaires"
-      },
-      - "keyPoints": "Tableau de 3 à 4 points clés ultra-concis",
-      - "references": "Tableau de chaînes de caractères (string[]) de jusqu'à 10 références bibliographiques pertinentes",
-      - "flashcards": "Tableau de 10 flashcards (objets avec 'question' et 'answer')",
-      - "glossary": "Tableau de 10 termes techniques (objets avec 'term' et 'definition')",
-      - "media": "Tableau de 1 à 2 supports médias (objets avec 'title', 'type' ('video' ou 'infographic'), et 'url' - utilise des URLs de placeholder si tu ne peux pas générer de vraies URLs)",
-      - "coverImageUrl": "URL d'une image de couverture pertinente. Utilise une URL de placeholder de https://picsum.photos si tu ne peux pas générer de vraie URL (par exemple, https://picsum.photos/1200/600)",
-      - "youtubeUrl": "URL d'une vidéo YouTube pertinente. Utilise une URL de placeholder si tu ne peux pas générer de vraie URL (par exemple, https://www.youtube.com/watch?v=dQw4w9WgXcQ)",
-      - "quiz": "Tableau de 10 questions de quiz (objets QuizQuestion avec 'question', 'options', 'correctAnswerIndex', 'explanation', 'type' ('single-choice' ou 'true-false')). Pour Vrai/Faux, correctAnswerIndex est 0 pour 'Vrai' et 1 pour 'Faux'."
-
-      Texte source:
-      ---
-      ${text}
-      ---
-
-      Génère la réponse au format JSON.
-    `;
+Texte à analyser:
+${text}`;;
 
             console.log("Prompt sent to Gemini:", prompt); 
     
