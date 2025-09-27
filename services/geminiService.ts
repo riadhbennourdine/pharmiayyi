@@ -41,6 +41,126 @@ const safetySettings = [
     },
 ];
 
+const MEMO_FICHE_SCHEMA = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    patientSituation: { type: "string" },
+    pathologyOverview: {
+      type: "array",
+      items: { type: "string" },
+    },
+    keyQuestions: {
+      type: "array",
+      items: { type: "string" },
+    },
+    redFlags: {
+      type: "array",
+      items: { type: "string" },
+    },
+    recommendations: {
+      type: "object",
+      properties: {
+        mainTreatment: {
+          type: "array",
+          items: { type: "string" },
+        },
+        associatedProducts: {
+          type: "array",
+          items: { type: "string" },
+        },
+        lifestyleAdvice: {
+          type: "array",
+          items: { type: "string" },
+        },
+        dietaryAdvice: {
+          type: "array",
+          items: { type: "string" },
+        },
+      },
+      required: ["mainTreatment", "associatedProducts", "lifestyleAdvice", "dietaryAdvice"],
+    },
+    keyPoints: {
+      type: "array",
+      items: { type: "string" },
+    },
+    references: {
+      type: "array",
+      items: { type: "string" },
+    },
+    flashcards: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          answer: { type: "string" },
+        },
+        required: ["question", "answer"],
+      },
+    },
+    glossary: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          term: { type: "string" },
+          definition: { type: "string" },
+        },
+        required: ["term", "definition"],
+      },
+    },
+    media: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          type: { type: "string" },
+          title: { type: "string" },
+          url: { type: "string" },
+        },
+        required: ["type", "title", "url"],
+      },
+    },
+    quiz: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          question: { type: "string" },
+          options: {
+            type: "array",
+            items: { type: "string" },
+          },
+          correctAnswerIndex: { type: "number" },
+          explanation: { type: "string" },
+          type: { type: "string" },
+        },
+        required: ["question", "options", "correctAnswerIndex", "explanation", "type"],
+      },
+    },
+    coverImageUrl: { type: "string" },
+    youtubeUrl: { type: "string" },
+  },
+  required: [
+    "title",
+    "patientSituation",
+    "pathologyOverview",
+    "keyQuestions",
+    "redFlags",
+    "recommendations",
+    "keyPoints",
+    "references",
+    "flashcards",
+    "glossary",
+    "media",
+    "quiz",
+    "coverImageUrl",
+    "youtubeUrl",
+  ],
+};
+
+
 const embeddingModel = genAI.getGenerativeModel({ model: "embedding-001" });
 
 // Helper function to extract JSON from a string that might contain markdown or other text
@@ -105,19 +225,21 @@ export const generateCaseStudyFromText = async (text: string, theme: string, sys
       Génère la réponse au format JSON.
     `;
 
-    console.log("Prompt sent to Gemini:", prompt); 
-
-    const parts = [
-        { text: prompt },
-    ];
-
-    try {
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts }],
-            generationConfig,
-            safetySettings,
-        });
-
+            console.log("Prompt sent to Gemini:", prompt); 
+    
+            const parts = [
+                { text: prompt },
+            ];
+    
+            try {
+                const result = await model.generateContent({
+                    contents: [{ role: "user", parts }],
+                    generationConfig: {
+                        ...generationConfig,
+                        responseSchema: MEMO_FICHE_SCHEMA,
+                    },
+                    safetySettings,
+                });
         const response = result.response;
         let jsonText = response.text();
         console.log("Raw JSON from Gemini:", jsonText);
