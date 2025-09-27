@@ -67,7 +67,7 @@ export async function getEmbedding(texts: string[]): Promise<number[][]> {
 }
 
 export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
-    const prompt = `Génère une mémofiche au format JSON à partir du texte suivant. Le JSON doit contenir les champs 'title', 'patientSituation', 'pathologyOverview', 'keyQuestions', 'redFlags', et 'recommendations'.
+    const prompt = `Génère une mémofiche au format JSON à partir du texte suivant. Le JSON doit contenir les champs 'title', 'patientSituation', 'pathologyOverview', 'keyQuestions', 'redFlags', et 'recommendations'. Le champ 'recommendations.mainTreatment' doit être un tableau de chaînes de caractères, où chaque chaîne décrit un traitement principal.
 
 Texte à analyser:
 ${text}`;;
