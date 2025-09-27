@@ -67,13 +67,14 @@ export async function getEmbedding(texts: string[]): Promise<number[][]> {
 }
 
 export const generateCaseStudyFromText = async (text: string, theme: string, system: string): Promise<CaseStudy> => {
-    const prompt = `Génère une mémofiche au format JSON à partir du texte suivant. Le JSON doit contenir les champs 'title', 'patientSituation', 'pathologyOverview', 'keyQuestions', 'redFlags', 'recommendations', 'flashcards', 'quiz', et 'glossary'.
+    const prompt = `Génère une mémofiche au format JSON à partir du texte suivant. Le JSON doit contenir les champs 'title', 'patientSituation', 'pathologyOverview', 'keyQuestions', 'redFlags', 'recommendations', 'flashcards', 'quiz', 'glossary', et 'references'.
 
 Le champ 'recommendations.mainTreatment' doit être un tableau de chaînes de caractères, où chaque chaîne décrit un traitement principal.
 
-Pour les 'flashcards', génère 5 questions-réponses pertinentes basées sur le texte. Chaque flashcard doit avoir une 'question' et une 'answer'.
-Pour le 'quiz', génère 3 questions à choix multiples ou vrai/faux basées sur le texte. Chaque question doit avoir une 'question', un tableau d''options', l'index de la 'correctAnswerIndex', une 'explanation' et un 'type' ('single-choice' ou 'true-false').
-Pour le 'glossary', extrais 5 termes clés du texte avec leurs 'definition' respectives.
+Pour les 'flashcards', génère 10 questions-réponses pertinentes basées sur le texte. Chaque flashcard doit avoir une 'question' et une 'answer'.
+Pour le 'quiz', génère 10 questions basées sur le texte, dont 4 questions Vrai/Faux et 6 questions à choix multiples. Chaque question doit avoir une 'question', un tableau d''options', l'index de la 'correctAnswerIndex', une 'explanation' et un 'type' ('single-choice' ou 'true-false').
+Pour le 'glossary', extrais 10 termes clés du texte avec leurs 'definition' respectives.
+Pour les 'references', génère une liste de 3 à 5 références bibliographiques pertinentes au format string[].
 
 Texte à analyser:
 ${text}`;;
@@ -202,7 +203,7 @@ La réponse doit être au format JSON, en respectant la structure suivante :
             'explanation': 'Explication de la réponse correcte',
             'type': 'true-false'
         }
-    ], // Génère 10 questions à choix multiples ou vrai/faux basées sur le texte
+    ], // Génère 10 questions basées sur le texte, dont 4 questions Vrai/Faux et 6 questions à choix multiples.
 -   'flashcards': [
         {
             'question': 'Question flashcard 1',
@@ -343,7 +344,7 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
             'explanation': 'Explication de la réponse correcte',
             'type': 'true-false'
         }
-    ], // Génère 10 questions à choix multiples ou vrai/faux basées sur le texte
+    ], // Génère 10 questions basées sur le texte, dont 4 questions Vrai/Faux et 6 questions à choix multiples.
 - 'flashcards': [
         {
             'question': 'Question flashcard 1',
@@ -353,7 +354,8 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
             'question': 'Question flashcard 2',
             'answer': 'Réponse flashcard 2'
         }
-    ] // Génère 10 questions-réponses pertinentes basées sur le texte
+    ], // Génère 10 questions-réponses pertinentes basées sur le texte
+- 'references': [], // Extrait toutes les références bibliographiques du texte source, formate-les selon les bonnes pratiques (auteur, titre, année, source) et assure-toi qu'elles soient concises.
 
 ---
 Texte source :
