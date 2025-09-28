@@ -84,6 +84,7 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
     const parsedReferences = parseMultiLineStringToArray(memoFiche.references);
 
     const renderContent = (content: any) => {
+        console.log('renderContent received:', content, 'isArray:', Array.isArray(content));
         if (Array.isArray(content)) {
             return (
                 <ul className="list-disc pl-5 space-y-1">
