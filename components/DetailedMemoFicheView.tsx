@@ -51,6 +51,28 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
   const sections = useMemo(() => {
     if (!memoFiche) return [];
 
+    const parseJsonOrDefault = <T,>(jsonString: string | T | undefined, defaultValue: T): T => {
+      if (typeof jsonString === 'string') {
+        try {
+          return JSON.parse(jsonString) as T;
+        } catch (e) {
+          console.error('Error parsing JSON:', e, jsonString);
+          return defaultValue;
+        }
+      }
+      return jsonString !== undefined ? jsonString as T : defaultValue;
+    };
+
+    const parsedFlashcards = parseJsonOrDefault(memoFiche.flashcards, []);
+    const parsedGlossary = parseJsonOrDefault(memoFiche.glossary, []);
+    const parsedMedia = parseJsonOrDefault(memoFiche.media, []);
+    const parsedQuiz = parseJsonOrDefault(memoFiche.quiz, []);
+    const parsedKeyQuestions = parseJsonOrDefault(memoFiche.keyQuestions, []);
+    const parsedPathologyOverview = parseJsonOrDefault(memoFiche.pathologyOverview, []);
+    const parsedRedFlags = parseJsonOrDefault(memoFiche.redFlags, []);
+    const parsedKeyPoints = parseJsonOrDefault(memoFiche.keyPoints, []);
+    const parsedReferences = parseJsonOrDefault(memoFiche.references, []);
+
     const renderContent = (content: any) => {
         if (Array.isArray(content)) {
             return (
@@ -64,18 +86,18 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
 
     const caseStudySections = [
       { id: 'patientSituation', title: 'Situation Patient', content: memoFiche.patientSituation || '' },
-      { id: 'keyQuestions', title: 'Questions Clés', content: Array.isArray(memoFiche.keyQuestions) ? memoFiche.keyQuestions : [] },
-      { id: 'pathologyOverview', title: 'Aperçu Pathologie', content: memoFiche.pathologyOverview || '' },
-      { id: 'redFlags', title: 'Signaux d\'Alerte', content: renderContent(memoFiche.redFlags) },
+      { id: 'keyQuestions', title: 'Questions Clés', content: renderContent(parsedKeyQuestions) },
+      { id: 'pathologyOverview', title: 'Aperçu Pathologie', content: renderContent(parsedPathologyOverview) },
+      { id: 'redFlags', title: 'Signaux d\'Alerte', content: renderContent(parsedRedFlags) },
       { id: 'recommendations.mainTreatment', title: 'Traitement Principal', content: renderContent(memoFiche.recommendations?.mainTreatment) },
       { id: 'recommendations.associatedProducts', title: 'Produits Associés', content: renderContent(memoFiche.recommendations?.associatedProducts) },
       { id: 'recommendations.lifestyleAdvice', title: 'Conseils Hygiène de Vie', content: renderContent(memoFiche.recommendations?.lifestyleAdvice) },
       { id: 'recommendations.dietaryAdvice', title: 'Conseils Alimentaires', content: renderContent(memoFiche.recommendations?.dietaryAdvice) },
-      { id: 'keyPoints', title: 'Points Clés', content: renderContent(memoFiche.keyPoints) },
-      { id: 'references', title: 'Références', content: renderContent(memoFiche.references) },
+      { id: 'keyPoints', title: 'Points Clés', content: renderContent(parsedKeyPoints) },
+      { id: 'references', title: 'Références', content: renderContent(parsedReferences) },
       { id: 'flashcards', title: 'Flashcards', content: (
         <div className="space-y-2">
-          {memoFiche.flashcards?.map((flashcard, index) => (
+          {parsedFlashcards?.map((flashcard: any, index: number) => (
             <div key={index} className="p-3 bg-slate-50 rounded-md">
               <p className="font-semibold">Q: {flashcard.question}</p>
               <p>A: {flashcard.answer}</p>
@@ -85,7 +107,7 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
       ) },
       { id: 'glossary', title: 'Glossaire', content: (
         <ul className="list-disc pl-5 space-y-1">
-          {memoFiche.glossary?.map((term, index) => (
+          {parsedGlossary?.map((term: any, index: number) => (
             <li key={index}>
               <span className="font-semibold">{term.term}</span>: {term.definition}
             </li>
@@ -94,7 +116,7 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
       ) },
       { id: 'media', title: 'Médias', content: (
         <div className="space-y-2">
-          {memoFiche.media?.map((mediaItem, index) => (
+          {parsedMedia?.map((mediaItem: any, index: number) => (
             <div key={index} className="p-3 bg-slate-50 rounded-md">
               <p className="font-semibold">Titre: {mediaItem.title}</p>
               <p>Type: {mediaItem.type}</p>
@@ -105,11 +127,11 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
       ) },
       { id: 'quiz', title: 'Quiz', content: (
         <div className="space-y-4">
-          {memoFiche.quiz?.map((quizQuestion, index) => (
+          {parsedQuiz?.map((quizQuestion: any, index: number) => (
             <div key={index} className="p-4 bg-slate-50 rounded-md">
               <p className="font-semibold">Question {index + 1}: {quizQuestion.question}</p>
               <ul className="list-decimal pl-5 mt-2">
-                {quizQuestion.options.map((option, optIndex) => (
+                {quizQuestion.options.map((option: any, optIndex: number) => (
                   <li key={optIndex} className={optIndex === quizQuestion.correctAnswerIndex ? "font-medium text-teal-700" : ""}>
                     {option}
                   </li>
