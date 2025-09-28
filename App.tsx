@@ -135,7 +135,7 @@ const MemoFichePage = () => {
     if (error) return <div>Erreur: {error}</div>;
     if (!memoFiche) return <Navigate to="/dashboard" replace />; // Rediriger si la mémofiche n'est pas trouvée
 
-    return <MemoFicheView caseStudy={memoFiche} onStartQuiz={startQuiz} onBack={goHome} onEdit={editCase} />;
+    return <MemoFicheView memoFiche={memoFiche} onDeleteSuccess={() => { /* handle deletion success, e.g., redirect */ }} onSelectCase={() => { /* no-op for single view */ }} />;
 }
 
 const GeneratorPage = () => {
