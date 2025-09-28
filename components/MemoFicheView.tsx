@@ -43,7 +43,7 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ memoFiche, onDeleteSucces
       onClick={() => onSelectCase(memoFiche)}
       className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
     >
-      {memoFiche.coverImageUrl ? (
+      {memoFiche.coverImageUrl && ( // Explicitly check if coverImageUrl exists
         <div className="relative w-full h-40">
           <img src={memoFiche.coverImageUrl} alt={memoFiche.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
@@ -53,7 +53,8 @@ const MemoFicheView: React.FC<MemoFicheViewProps> = ({ memoFiche, onDeleteSucces
             </div>
           )}
         </div>
-      ) : (
+      )}
+      {!memoFiche.coverImageUrl && ( // Render CapsuleIcon if no coverImageUrl
         <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
           <CapsuleIcon className="h-6 w-6 text-teal-600" />
         </div>
