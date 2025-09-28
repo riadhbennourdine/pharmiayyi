@@ -14,6 +14,11 @@ interface MemoFicheViewProps {
 const MemoFicheView: React.FC<MemoFicheViewProps> = ({ memoFiche, onDeleteSuccess, onSelectCase }) => {
   const { user } = useAuth();
 
+  if (!memoFiche) {
+    console.warn("MemoFicheView received undefined or null memoFiche prop.");
+    return null; // Don't render if memoFiche is not provided
+  }
+
   const handleDelete = async (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
