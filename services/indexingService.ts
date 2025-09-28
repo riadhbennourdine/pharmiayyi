@@ -185,21 +185,30 @@ export const indexSingleMemoFiche = async (ficheId: ObjectId): Promise<{ process
             return { processed: 1, chunks: 0 };
         }
 
-        // Step 4: Generate embeddings for the chunks
-        const textsToEmbed = chunksWithoutEmbedding.map(c => c.content);
-        const embeddings = await getEmbedding(textsToEmbed);
+        const batchSize = 5;
+        let totalChunksCreated = 0;
 
-        const chunksToInsert: MemoFicheChunk[] = chunksWithoutEmbedding.map((chunk, i) => ({
-            ...chunk,
-            embedding: embeddings[i],
-            createdAt: new Date(),
-        }));
+        for (let i = 0; i < chunksWithoutEmbedding.length; i += batchSize) {
+            const batch = chunksWithoutEmbedding.slice(i, i + batchSize);
+            const textsToEmbed = batch.map(c => c.content);
+            const embeddings = await getEmbedding(textsToEmbed);
 
-        // Step 5: Insert new chunks into the database
-        await chunksCollection.insertMany(chunksToInsert);
+            const chunksToInsert: MemoFicheChunk[] = batch.map((chunk, j) => ({
+                ...chunk,
+                embedding: embeddings[j],
+                createdAt: new Date(),
+            }));
 
-        console.log(`Indexing complete for fiche: ${fiche.title}. Created ${chunksToInsert.length} chunks.`);
-        return { processed: 1, chunks: chunksToInsert.length };
+            await chunksCollection.insertMany(chunksToInsert);
+            totalChunksCreated += chunksToInsert.length;
+
+            if (i + batchSize < chunksWithoutEmbedding.length) {
+                await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
+            }
+        }
+
+        console.log(`Indexing complete for fiche: ${fiche.title}. Created ${totalChunksCreated} chunks.`);
+        return { processed: 1, chunks: totalChunksCreated };
 
     } catch (error) {
         console.error(`Error during single fiche indexing for ${ficheId}:`, error);
