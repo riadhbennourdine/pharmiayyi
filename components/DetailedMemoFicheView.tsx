@@ -73,10 +73,53 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
       { id: 'recommendations.dietaryAdvice', title: 'Conseils Alimentaires', content: renderContent(memoFiche.recommendations?.dietaryAdvice) },
       { id: 'keyPoints', title: 'Points Clés', content: renderContent(memoFiche.keyPoints) },
       { id: 'references', title: 'Références', content: renderContent(memoFiche.references) },
-      { id: 'flashcards', title: 'Flashcards', content: renderContent(JSON.stringify(memoFiche.flashcards, null, 2)) },
-      { id: 'glossary', title: 'Glossaire', content: renderContent(JSON.stringify(memoFiche.glossary, null, 2)) },
-      { id: 'media', title: 'Médias', content: renderContent(JSON.stringify(memoFiche.media, null, 2)) },
-      { id: 'quiz', title: 'Quiz', content: renderContent(JSON.stringify(memoFiche.quiz, null, 2)) },
+      { id: 'flashcards', title: 'Flashcards', content: (
+        <div className="space-y-2">
+          {memoFiche.flashcards?.map((flashcard, index) => (
+            <div key={index} className="p-3 bg-slate-50 rounded-md">
+              <p className="font-semibold">Q: {flashcard.question}</p>
+              <p>A: {flashcard.answer}</p>
+            </div>
+          ))}
+        </div>
+      ) },
+      { id: 'glossary', title: 'Glossaire', content: (
+        <ul className="list-disc pl-5 space-y-1">
+          {memoFiche.glossary?.map((term, index) => (
+            <li key={index}>
+              <span className="font-semibold">{term.term}</span>: {term.definition}
+            </li>
+          ))}
+        </ul>
+      ) },
+      { id: 'media', title: 'Médias', content: (
+        <div className="space-y-2">
+          {memoFiche.media?.map((mediaItem, index) => (
+            <div key={index} className="p-3 bg-slate-50 rounded-md">
+              <p className="font-semibold">Titre: {mediaItem.title}</p>
+              <p>Type: {mediaItem.type}</p>
+              <p>URL: <a href={mediaItem.url} target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">{mediaItem.url}</a></p>
+            </div>
+          ))}
+        </div>
+      ) },
+      { id: 'quiz', title: 'Quiz', content: (
+        <div className="space-y-4">
+          {memoFiche.quiz?.map((quizQuestion, index) => (
+            <div key={index} className="p-4 bg-slate-50 rounded-md">
+              <p className="font-semibold">Question {index + 1}: {quizQuestion.question}</p>
+              <ul className="list-decimal pl-5 mt-2">
+                {quizQuestion.options.map((option, optIndex) => (
+                  <li key={optIndex} className={optIndex === quizQuestion.correctAnswerIndex ? "font-medium text-teal-700" : ""}>
+                    {option}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-sm text-slate-600">Explication: {quizQuestion.explanation}</p>
+            </div>
+          ))}
+        </div>
+      ) }
     ];
 
     const memoSections = memoFiche.memoSections?.map((section, index) => ({
