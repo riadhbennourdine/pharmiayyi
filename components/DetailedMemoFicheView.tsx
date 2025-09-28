@@ -57,13 +57,9 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
 
     const renderContent = (content: any) => {
         if (Array.isArray(content)) {
-            return (
-                <ul className="list-disc pl-5 space-y-1">
-                    {content.map((item, index) => <li key={index}>{typeof item === 'object' ? JSON.stringify(item) : item}</li>)}
-                </ul>
-            );
+            return content.join('\n');
         }
-        return <p>{content}</p>;
+        return content;
     };
 
     const caseStudySections = [
