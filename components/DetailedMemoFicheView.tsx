@@ -42,8 +42,6 @@ const AccordionSection: React.FC<{
 );
 
 export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ memoFiche, onBack }) => {
-  console.log('memoFiche', memoFiche);
-  console.log('memoFiche.keyQuestions', memoFiche.keyQuestions);
   const [openSection, setOpenSection] = React.useState<string | null>(null);
 
   const handleToggle = (title: string) => {
@@ -53,19 +51,21 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
   const sections = useMemo(() => {
     if (!memoFiche) return [];
 
-    console.log('memoFiche.keyQuestions inside useMemo', memoFiche.keyQuestions);
-
     const renderContent = (content: any) => {
         if (Array.isArray(content)) {
-            return content.join('\n');
+            return (
+                <ul className="list-disc pl-5 space-y-1">
+                    {content.map((item, index) => <li key={index}>{typeof item === 'object' ? JSON.stringify(item) : item}</li>)}
+                </ul>
+            );
         }
-        return content;
+        return <p>{content}</p>;
     };
 
     const caseStudySections = [
-      { id: 'patientSituation', title: 'Situation Patient', content: renderContent(memoFiche.patientSituation) },
-      { id: 'keyQuestions', title: 'Questions Clés', content: renderContent(memoFiche.keyQuestions) },
-      { id: 'pathologyOverview', title: 'Aperçu Pathologie', content: renderContent(memoFiche.pathologyOverview) },
+      { id: 'patientSituation', title: 'Situation Patient', content: memoFiche.patientSituation || '' },
+      { id: 'keyQuestions', title: 'Questions Clés', content: Array.isArray(memoFiche.keyQuestions) ? memoFiche.keyQuestions : [] },
+      { id: 'pathologyOverview', title: 'Aperçu Pathologie', content: memoFiche.pathologyOverview || '' },
       { id: 'redFlags', title: 'Signaux d\'Alerte', content: renderContent(memoFiche.redFlags) },
       { id: 'recommendations.mainTreatment', title: 'Traitement Principal', content: renderContent(memoFiche.recommendations?.mainTreatment) },
       { id: 'recommendations.associatedProducts', title: 'Produits Associés', content: renderContent(memoFiche.recommendations?.associatedProducts) },

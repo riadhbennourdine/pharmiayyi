@@ -203,7 +203,7 @@ export const indexSingleMemoFiche = async (ficheId: ObjectId): Promise<{ process
             totalChunksCreated += chunksToInsert.length;
 
             if (i + batchSize < chunksWithoutEmbedding.length) {
-                await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
+                await new Promise(resolve => setTimeout(resolve, 5000)); // 5-second delay
             }
         }
 
