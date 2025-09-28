@@ -232,8 +232,9 @@ const Dashboard: React.FC = () => {
                     {recentMemofiches.map(study => (
                         <MemoFicheView
                             key={study._id}
-                            memoFiche={study as MemoFiche} // Cast to MemoFiche type
+                            memoFiche={study as MemoFiche}
                             onDeleteSuccess={fetchMemofiches}
+                            onSelectCase={(selectedFiche) => selectedFiche.isLocked ? setShowSubscribeModal(true) : selectCase(selectedFiche)}
                         />
                     ))}
                 </div>
@@ -251,8 +252,9 @@ const Dashboard: React.FC = () => {
                                     {topicCases.map(study => (
                                         <MemoFicheView
                                             key={study._id}
-                                            memoFiche={study as MemoFiche} // Cast to MemoFiche type
+                                            memoFiche={study as MemoFiche}
                                             onDeleteSuccess={fetchMemofiches}
+                                            onSelectCase={(selectedFiche) => selectedFiche.isLocked ? setShowSubscribeModal(true) : selectCase(selectedFiche)}
                                         />
                                     ))}
                                 </div>
