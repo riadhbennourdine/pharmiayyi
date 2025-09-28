@@ -120,6 +120,7 @@ const MemoFichePage = () => {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data: MemoFiche = await response.json();
+                console.log("Fetched memoFiche in MemoFichePage:", data);
                 setMemoFiche(data);
             } catch (e: any) {
                 setError(e.message);

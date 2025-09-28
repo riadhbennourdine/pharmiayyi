@@ -23,6 +23,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
   const [memoFicheType, setMemoFicheType] = useState<'maladie' | 'pharmacologie' | 'exhaustive'>('maladie');
   const [pharmaTheme, setPharmaTheme] = useState('');
   const [pharmaPathology, setPharmaPathology] = useState('');
+  const [generationSteps, setGenerationSteps] = useState<string[]>([]);
 
   const handleGenerate = async () => {
     if (memoFicheType === 'maladie' && (!sourceText.trim() || !selectedTheme || !selectedSystem)) return;
@@ -32,6 +33,13 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
     setIsLoading(true);
     setError(null);
     setGeneratedCase(null);
+    setGenerationSteps([]);
+
+    const addStep = (step: string) => {
+      setGenerationSteps(prev => [...prev, step]);
+    };
+
+    addStep("Démarrage de la génération...");
 
     const requestBody = {
       memoFicheType,
@@ -44,6 +52,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
     };
 
     try {
+      addStep("Envoi de la requête à l'IA...");
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
@@ -56,8 +65,10 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
         throw new Error('Failed to generate case study');
       }
 
+      addStep("Réception de la réponse de l'IA...");
       const result = await response.json();
       
+      addStep("Traitement de la mémofiche générée...");
       const finalMemoFiche = {
         ...result,
         ...(memoFicheType === 'maladie' && { 
@@ -282,20 +293,29 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
         <button
           onClick={handleGenerate}
           disabled={isLoading || !sourceText.trim() || (memoFicheType === 'maladie' && (!selectedTheme || !selectedSystem)) || (memoFicheType === 'pharmacologie' && (!pharmaTheme.trim() || !pharmaPathology.trim()))}
+          className="inline-flex items-center px-6 py-3 border border-transparent text-lg font-bold rounded-lg shadow-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300"
         >
           {isLoading ? (
             <>
-              <Spinner />
-              <span className="ml-3">Génération en cours...</span>
+              <Spinner className="-ml-1 mr-3 h-5 w-5 text-white" />
+              <span>Génération en cours...</span>
             </>
           ) : (
             <>
-              <SparklesIcon className="h-6 w-6 mr-2" />
-              Générer la mémofiche
+              <SparklesIcon className="-ml-1 mr-3 h-5 w-5" />
+              <span>Générer la mémofiche</span>
             </>
           )}
         </button>
       </div>
+
+      {isLoading && generationSteps.length > 0 && (
+        <div className="mt-4 text-center text-sm text-slate-500">
+          {generationSteps.map((step, index) => (
+            <p key={index} className="animate-pulse">{step}...</p>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
