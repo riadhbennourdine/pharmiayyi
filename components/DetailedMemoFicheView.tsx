@@ -51,37 +51,43 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
   const sections = useMemo(() => {
     if (!memoFiche) return [];
 
+    const renderContent = (content: any) => {
+        if (Array.isArray(content)) {
+            return (
+                <ul className="list-disc pl-5 space-y-1">
+                    {content.map((item, index) => <li key={index}>{typeof item === 'object' ? JSON.stringify(item) : item}</li>)}
+                </ul>
+            );
+        }
+        return <p>{content}</p>;
+    };
+
     const caseStudySections = [
-      { id: 'patientSituation', title: 'Situation Patient', content: memoFiche.patientSituation },
-      { id: 'keyQuestions', title: 'Questions Clés', content: Array.isArray(memoFiche.keyQuestions) ? memoFiche.keyQuestions : [] },
-      { id: 'pathologyOverview', title: 'Aperçu Pathologie', content: memoFiche.pathologyOverview },
-      { id: 'redFlags', title: 'Signaux d\'Alerte', content: Array.isArray(memoFiche.redFlags) ? memoFiche.redFlags : [] },
-      { id: 'recommendations.mainTreatment', title: 'Traitement Principal', content: Array.isArray(memoFiche.recommendations?.mainTreatment) ? memoFiche.recommendations.mainTreatment : [] },
-      { id: 'recommendations.associatedProducts', title: 'Produits Associés', content: Array.isArray(memoFiche.recommendations?.associatedProducts) ? memoFiche.recommendations.associatedProducts : [] },
-      { id: 'recommendations.lifestyleAdvice', title: 'Conseils Hygiène de Vie', content: Array.isArray(memoFiche.recommendations?.lifestyleAdvice) ? memoFiche.recommendations.lifestyleAdvice : [] },
-      { id: 'recommendations.dietaryAdvice', title: 'Conseils Alimentaires', content: Array.isArray(memoFiche.recommendations?.dietaryAdvice) ? memoFiche.recommendations.dietaryAdvice : [] },
-      { id: 'keyPoints', title: 'Points Clés', content: Array.isArray(memoFiche.keyPoints) ? memoFiche.keyPoints : [] },
-      { id: 'references', title: 'Références', content: Array.isArray(memoFiche.references) ? memoFiche.references : [] },
-      { id: 'flashcards', title: 'Flashcards', content: JSON.stringify(memoFiche.flashcards, null, 2) },
-      { id: 'glossary', title: 'Glossaire', content: JSON.stringify(memoFiche.glossary, null, 2) },
-      { id: 'media', title: 'Médias', content: JSON.stringify(memoFiche.media, null, 2) },
-      { id: 'quiz', title: 'Quiz', content: JSON.stringify(memoFiche.quiz, null, 2) },
+      { id: 'patientSituation', title: 'Situation Patient', content: renderContent(memoFiche.patientSituation) },
+      { id: 'keyQuestions', title: 'Questions Clés', content: renderContent(memoFiche.keyQuestions) },
+      { id: 'pathologyOverview', title: 'Aperçu Pathologie', content: renderContent(memoFiche.pathologyOverview) },
+      { id: 'redFlags', title: 'Signaux d\'Alerte', content: renderContent(memoFiche.redFlags) },
+      { id: 'recommendations.mainTreatment', title: 'Traitement Principal', content: renderContent(memoFiche.recommendations?.mainTreatment) },
+      { id: 'recommendations.associatedProducts', title: 'Produits Associés', content: renderContent(memoFiche.recommendations?.associatedProducts) },
+      { id: 'recommendations.lifestyleAdvice', title: 'Conseils Hygiène de Vie', content: renderContent(memoFiche.recommendations?.lifestyleAdvice) },
+      { id: 'recommendations.dietaryAdvice', title: 'Conseils Alimentaires', content: renderContent(memoFiche.recommendations?.dietaryAdvice) },
+      { id: 'keyPoints', title: 'Points Clés', content: renderContent(memoFiche.keyPoints) },
+      { id: 'references', title: 'Références', content: renderContent(memoFiche.references) },
+      { id: 'flashcards', title: 'Flashcards', content: renderContent(JSON.stringify(memoFiche.flashcards, null, 2)) },
+      { id: 'glossary', title: 'Glossaire', content: renderContent(JSON.stringify(memoFiche.glossary, null, 2)) },
+      { id: 'media', title: 'Médias', content: renderContent(JSON.stringify(memoFiche.media, null, 2)) },
+      { id: 'quiz', title: 'Quiz', content: renderContent(JSON.stringify(memoFiche.quiz, null, 2)) },
     ];
 
     const memoSections = memoFiche.memoSections?.map((section, index) => ({
       id: `memoSection-${index}`,
       title: section.title,
-      content: section.content,
+      content: renderContent(section.content),
     })) || [];
 
     return [...caseStudySections, ...memoSections].map(section => ({
         ...section,
         icon: <span className="mr-3">📄</span>, // Placeholder icon
-        content: Array.isArray(section.content) ? (
-            <ul className="list-disc pl-5 space-y-1">
-              {section.content.map((item, index) => <li key={index}>{typeof item === 'object' ? JSON.stringify(item) : item}</li>)}
-            </ul>
-          ) : <p>{section.content}</p>,
     }));
   }, [memoFiche]);
 
