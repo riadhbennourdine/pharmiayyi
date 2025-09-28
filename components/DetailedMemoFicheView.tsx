@@ -53,6 +53,8 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
   const sections = useMemo(() => {
     if (!memoFiche) return [];
 
+    console.log('memoFiche.keyQuestions inside useMemo', memoFiche.keyQuestions);
+
     const renderContent = (content: any) => {
         if (Array.isArray(content)) {
             return (
