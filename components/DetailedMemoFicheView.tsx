@@ -63,15 +63,25 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
       return jsonString !== undefined ? jsonString as T : defaultValue;
     };
 
+    const parseMultiLineStringToArray = (text: string | string[] | undefined): string[] => {
+      if (Array.isArray(text)) {
+        return text;
+      }
+      if (typeof text === 'string' && text.trim() !== '') {
+        return text.split(/\r?\n/).filter(line => line.trim() !== '');
+      }
+      return [];
+    };
+
     const parsedFlashcards = parseJsonOrDefault(memoFiche.flashcards, []);
     const parsedGlossary = parseJsonOrDefault(memoFiche.glossary, []);
     const parsedMedia = parseJsonOrDefault(memoFiche.media, []);
     const parsedQuiz = parseJsonOrDefault(memoFiche.quiz, []);
-    const parsedKeyQuestions = parseJsonOrDefault(memoFiche.keyQuestions, []);
-    const parsedPathologyOverview = parseJsonOrDefault(memoFiche.pathologyOverview, []);
-    const parsedRedFlags = parseJsonOrDefault(memoFiche.redFlags, []);
-    const parsedKeyPoints = parseJsonOrDefault(memoFiche.keyPoints, []);
-    const parsedReferences = parseJsonOrDefault(memoFiche.references, []);
+    const parsedKeyQuestions = parseMultiLineStringToArray(memoFiche.keyQuestions);
+    const parsedPathologyOverview = parseMultiLineStringToArray(memoFiche.pathologyOverview);
+    const parsedRedFlags = parseMultiLineStringToArray(memoFiche.redFlags);
+    const parsedKeyPoints = parseMultiLineStringToArray(memoFiche.keyPoints);
+    const parsedReferences = parseMultiLineStringToArray(memoFiche.references);
 
     const renderContent = (content: any) => {
         if (Array.isArray(content)) {
