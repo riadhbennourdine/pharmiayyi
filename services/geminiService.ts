@@ -2,6 +2,7 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig,
 import type { CaseStudy, ExhaustiveMemoFiche } from '../types';
 import clientPromise from './mongo';
 import { ObjectId } from 'mongodb';
+import { ensureArray } from '../utils/array';
 
 const API_KEY = process.env.GEMINI_API_KEY;
 
@@ -146,28 +147,39 @@ ${text}`;;
             throw new Error("Failed to generate case study from text due to consistently malformed JSON after multiple retries.");
         }
 
-        // Transform glossary if it's an object
-        if (generatedCase.glossary && typeof generatedCase.glossary === 'object' && !Array.isArray(generatedCase.glossary)) {
-            generatedCase.glossary = Object.entries(generatedCase.glossary).map(([term, definition]) => ({
-                term: term,
-                definition: definition as string
-            }));
-        }
+        const ensureArray = <T>(value: T | T[] | undefined): T[] => {
+            if (Array.isArray(value)) {
+              return value;
+            }
+            if (value === undefined || value === null) {
+              return [];
+            }
+            return [value] as T[]; // If it's a single value, wrap it in an array
+          };
 
-        // Ensure recommendation sub-sections are arrays and conform to expected types
+        // Post-processing to ensure all array fields are indeed arrays
+        generatedCase.keyQuestions = ensureArray(generatedCase.keyQuestions);
+        generatedCase.redFlags = ensureArray(generatedCase.redFlags);
+        generatedCase.keyPoints = ensureArray(generatedCase.keyPoints);
+        generatedCase.references = ensureArray(generatedCase.references);
+        generatedCase.flashcards = ensureArray(generatedCase.flashcards);
+        generatedCase.glossary = ensureArray(generatedCase.glossary);
+        generatedCase.media = ensureArray(generatedCase.media);
+        generatedCase.quiz = ensureArray(generatedCase.quiz);
+        generatedCase.memoSections = ensureArray(generatedCase.memoSections);
+
         if (generatedCase.recommendations) {
-            const assureArray = (field: any) => {
-                if (typeof field === 'string') {
-                    return [field];
-                }
-                return field || [];
+            generatedCase.recommendations.mainTreatment = ensureArray(generatedCase.recommendations.mainTreatment);
+            generatedCase.recommendations.associatedProducts = ensureArray(generatedCase.recommendations.associatedProducts);
+            generatedCase.recommendations.lifestyleAdvice = ensureArray(generatedCase.recommendations.lifestyleAdvice);
+            generatedCase.recommendations.dietaryAdvice = ensureArray(generatedCase.recommendations.dietaryAdvice);
+        } else {
+            generatedCase.recommendations = {
+                mainTreatment: [],
+                associatedProducts: [],
+                lifestyleAdvice: [],
+                dietaryAdvice: [],
             };
-
-            generatedCase.recommendations.lifestyleAdvice = assureArray(generatedCase.recommendations.lifestyleAdvice);
-            generatedCase.recommendations.dietaryAdvice = assureArray(generatedCase.recommendations.dietaryAdvice);
-
-            generatedCase.recommendations.mainTreatment = assureArray(generatedCase.recommendations.mainTreatment);
-            generatedCase.recommendations.associatedProducts = assureArray(generatedCase.recommendations.associatedProducts);
         }
 
         console.log("Parsed CaseStudy object (after transformation):", generatedCase);

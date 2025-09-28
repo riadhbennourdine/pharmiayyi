@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { CaseStudy } from '../types';
+import { ensureArray } from '../utils/array';
 
 interface MemoFicheEditorProps {
   initialCaseStudy?: CaseStudy;
@@ -14,24 +15,24 @@ const createSafeCaseStudy = (caseStudy: CaseStudy | undefined): CaseStudy => {
     theme: caseStudy?.theme || '',
     system: caseStudy?.system || '',
     patientSituation: caseStudy?.patientSituation || '',
-    keyQuestions: caseStudy?.keyQuestions || [],
+    keyQuestions: ensureArray(caseStudy?.keyQuestions),
     pathologyOverview: caseStudy?.pathologyOverview || '',
-    redFlags: caseStudy?.redFlags || [],
+    redFlags: ensureArray(caseStudy?.redFlags),
     recommendations: {
-      mainTreatment: caseStudy?.recommendations?.mainTreatment || [],
-      associatedProducts: caseStudy?.recommendations?.associatedProducts || [],
-      lifestyleAdvice: caseStudy?.recommendations?.lifestyleAdvice || [],
-      dietaryAdvice: caseStudy?.recommendations?.dietaryAdvice || [],
+      mainTreatment: ensureArray(caseStudy?.recommendations?.mainTreatment),
+      associatedProducts: ensureArray(caseStudy?.recommendations?.associatedProducts),
+      lifestyleAdvice: ensureArray(caseStudy?.recommendations?.lifestyleAdvice),
+      dietaryAdvice: ensureArray(caseStudy?.recommendations?.dietaryAdvice),
     },
-    keyPoints: caseStudy?.keyPoints || [],
-    references: caseStudy?.references || [],
-    flashcards: caseStudy?.flashcards || [],
-    glossary: caseStudy?.glossary || [],
-    media: caseStudy?.media || [],
-    quiz: caseStudy?.quiz || [],
+    keyPoints: ensureArray(caseStudy?.keyPoints),
+    references: ensureArray(caseStudy?.references),
+    flashcards: ensureArray(caseStudy?.flashcards),
+    glossary: ensureArray(caseStudy?.glossary),
+    media: ensureArray(caseStudy?.media),
+    quiz: ensureArray(caseStudy?.quiz),
     creationDate: caseStudy?.creationDate || new Date().toISOString(),
     sourceText: caseStudy?.sourceText || '',
-    memoSections: caseStudy?.memoSections || [],
+    memoSections: ensureArray(caseStudy?.memoSections),
     coverImageUrl: caseStudy?.coverImageUrl || '',
     youtubeUrl: caseStudy?.youtubeUrl || '',
     level: caseStudy?.level || '',
