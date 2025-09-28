@@ -8,6 +8,7 @@ interface MemoFicheEditorProps {
 }
 
 const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onSave, onCancel }) => {
+  console.log('initialCaseStudy', initialCaseStudy);
   const [caseStudy, setCaseStudy] = useState<CaseStudy>(initialCaseStudy ? {
     ...initialCaseStudy,
     keyQuestions: initialCaseStudy.keyQuestions || [],
@@ -56,6 +57,8 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
     sourceText: '',
     memoSections: [],
 });
+
+  console.log('caseStudy', caseStudy);
 
   useEffect(() => {
     if (initialCaseStudy) {
