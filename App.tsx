@@ -11,6 +11,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Dashboard from './components/Dashboard';
 import MemoFicheView from './components/MemoFicheView';
+import { DetailedMemoFicheView } from './components/DetailedMemoFicheView';
 import GeneratorView from './components/GeneratorView';
 import LoginView from './components/LoginView';
 import RegisterView from './components/RegisterView';
@@ -135,8 +136,7 @@ const MemoFichePage = () => {
     if (error) return <div>Erreur: {error}</div>;
     if (!memoFiche) return <Navigate to="/dashboard" replace />; // Rediriger si la mémofiche n'est pas trouvée
 
-    return <MemoFicheView memoFiche={memoFiche} onDeleteSuccess={() => { /* handle deletion success, e.g., redirect */ }} onSelectCase={() => { /* no-op for single view */ }} />;
-}
+    return <DetailedMemoFicheView memoFiche={memoFiche} onBack={goHome} />;
 
 const GeneratorPage = () => {
     const { goHome, saveNewCaseStudy } = useData();
