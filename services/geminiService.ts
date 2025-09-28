@@ -186,9 +186,6 @@ ${text}`;;
 };
 
 
-};
-
-
 export async function getCustomChatResponse(
     userMessage: string,
     chatHistory: { role: string; parts: string }[] = [],

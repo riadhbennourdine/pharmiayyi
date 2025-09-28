@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import { IncomingHttpHeaders } from 'http';
 import path from 'path';
-import { generateCaseStudyFromText, generatePharmacologyMemoFiche, generateExhaustiveMemoFiche, getEmbedding } from './services/geminiService';
+import { generateCaseStudyFromText, getEmbedding } from './services/geminiService';
 import { updateKnowledgeBase, indexSingleMemoFiche } from './services/indexingService';
 import { getCustomChatResponse } from './services/geminiService';
 import clientPromise from './services/mongo';
@@ -947,14 +947,7 @@ app.post('/api/generate', async (req, res) => {
             return res.status(400).json({ error: 'Source text is required.' });
         }
 
-        let result;
-        if (memoFicheType === 'pharmacologie') {
-            result = await generatePharmacologyMemoFiche(sourceText, theme, pathology);
-        } else if (memoFicheType === 'exhaustive') {
-            result = await generateExhaustiveMemoFiche(sourceText);
-        } else {
-            result = await generateCaseStudyFromText(sourceText, theme || 'Général', system || 'Général');
-        }
+        let result = await generateCaseStudyFromText(sourceText, theme || 'Général', system || 'Général');
         
         res.json(result);
     } catch (error) {
