@@ -59,7 +59,24 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
 
   useEffect(() => {
     if (initialCaseStudy) {
-      setCaseStudy(initialCaseStudy);
+      setCaseStudy({
+        ...initialCaseStudy,
+        keyQuestions: initialCaseStudy.keyQuestions || [],
+        redFlags: initialCaseStudy.redFlags || [],
+        references: initialCaseStudy.references || [],
+        recommendations: initialCaseStudy.recommendations || {
+            mainTreatment: [],
+            associatedProducts: [],
+            lifestyleAdvice: [],
+            dietaryAdvice: [],
+        },
+        flashcards: initialCaseStudy.flashcards || [],
+        glossary: initialCaseStudy.glossary || [],
+        media: initialCaseStudy.media || [],
+        quiz: initialCaseStudy.quiz || [],
+        keyPoints: initialCaseStudy.keyPoints || [],
+        memoSections: initialCaseStudy.memoSections || [],
+      });
     }
   }, [initialCaseStudy]);
 
