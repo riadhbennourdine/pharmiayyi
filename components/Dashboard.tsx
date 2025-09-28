@@ -23,6 +23,7 @@ const Dashboard: React.FC = () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem('token');
+      console.log('Fetching memofiches with token:', token ? 'present' : 'absent');
       const response = await fetch('/api/memofiches', { 
         cache: 'no-store',
         headers: {
@@ -30,13 +31,16 @@ const Dashboard: React.FC = () => {
         }
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch memofiches');
+        const errorText = await response.text();
+        console.error('Failed to fetch memofiches, response not OK:', response.status, errorText);
+        throw new Error(`Failed to fetch memofiches: ${response.statusText}`);
       }
       const data: CaseStudy[] = await response.json();
+      console.log('Successfully fetched memofiches:', data);
       setMemofiches(data);
     } catch (err) {
       console.error('Error fetching memofiches:', err);
-      setError('Failed to load memo fiches. Please try again later.');
+      setError(`Failed to load memo fiches: ${err instanceof Error ? err.message : String(err)}. Please try again later.`);
     } finally {
       setIsLoading(false);
     }
