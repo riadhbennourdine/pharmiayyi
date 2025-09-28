@@ -112,38 +112,26 @@ ${text}`;;
             } catch (parseError) {
                 console.error(`Failed to parse JSON (attempt ${retries + 1}/${maxRetries}), attempting to fix...`, parseError);
                 // Attempt to fix the glossary format issue (existing fix)
-                jsonText = jsonText.replace(/"term": ("[^"].*?"), "definition": ("[^"].*?")/g, '{"term": $1, "definition": $2}');
-                
-                // If parsing fails, we will re-prompt the model with the malformed JSON to correct it.
-                // No heuristic fixing here, as it's unreliable.
-
-
-                try {
-                    generatedCase = JSON.parse(jsonText);
-                    console.log("Successfully parsed JSON after fixing.");
-                    break; // Exit loop if parsing is successful after fixing
-                } catch (secondParseError) {
-                    console.error(`Failed to parse JSON even after attempting to fix (attempt ${retries + 1}/${maxRetries}):`, secondParseError);
-                    retries++;
-                    if (retries < maxRetries) {
-                        console.log("Retrying Gemini API call...");
-                        const retryPrompt = `The previous JSON output was malformed. Please correct it. Original prompt: ${prompt}\nMalformed JSON: ${jsonText}`;
-                        const retryParts = [
-                            { text: retryPrompt },
-                        ];
-                        // Re-call Gemini API to get a new response
-                        const result = await model.generateContent({
-                            contents: [{ role: "user", parts: retryParts }],
-                            generationConfig,
-                            safetySettings,
-                        });
-                        const response = result.response;
-                        jsonText = response.text();
-                        jsonText = extractJsonFromString(jsonText); // Extract JSON block again
-                        console.log("Raw JSON from Gemini (retry):", jsonText);
-                    } else {
-                        throw new Error("Failed to generate case study from text due to consistently malformed JSON after multiple retries.");
-                    }
+                console.error(`Malformed JSON before parsing (attempt ${retries + 1}/${maxRetries}):`, jsonText);
+                retries++;
+                if (retries < maxRetries) {
+                    console.log("Retrying Gemini API call...");
+                    const retryPrompt = `The previous JSON output was malformed. Please correct it. Original prompt: ${prompt}\nMalformed JSON: ${jsonText}`;
+                    const retryParts = [
+                        { text: retryPrompt },
+                    ];
+                    // Re-call Gemini API to get a new response
+                    const result = await model.generateContent({
+                        contents: [{ role: "user", parts: retryParts }],
+                        generationConfig,
+                        safetySettings,
+                    });
+                    const response = result.response;
+                    jsonText = response.text();
+                    jsonText = extractJsonFromString(jsonText); // Extract JSON block again
+                    console.log("Raw JSON from Gemini (retry):", jsonText);
+                } else {
+                    throw new Error("Failed to generate case study from text due to consistently malformed JSON after multiple retries.");
                 }
             }
         }
