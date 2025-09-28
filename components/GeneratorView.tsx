@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
 import Spinner from './Spinner';
-import MemoFicheView from './MemoFicheView';
 import { DetailedMemoFicheView } from './DetailedMemoFicheView';
 import { ChevronLeftIcon, SparklesIcon } from './icons';
 import { TOPIC_CATEGORIES } from '../constants';
@@ -103,11 +102,7 @@ const GeneratorView: React.FC<GeneratorViewProps> = ({ onBack, onSaveCaseStudy }
     return (
       <div className="animate-fade-in">
         <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">Aperçu de la Mémofiche Générée</h2>
-        {memoFicheType === 'maladie' ? (
-          <MemoFicheView caseStudy={generatedCase as CaseStudy} onStartQuiz={() => {}} onBack={handleReset} isPreview={true} />
-        ) : (
-          <DetailedMemoFicheView memoFiche={generatedCase as PharmacologyMemoFiche | ExhaustiveMemoFiche} onBack={handleReset} />
-        )}
+        <DetailedMemoFicheView memoFiche={generatedCase as CaseStudy} onBack={handleReset} />
         <div className="text-center mt-8 flex justify-center items-center space-x-4">
              <button 
                 onClick={handleReset} 
