@@ -1,9 +1,9 @@
 
 import React, { useMemo } from 'react';
-import { PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
+import { CaseStudy } from '../types';
 
 interface DetailedMemoFicheViewProps {
-  memoFiche: PharmacologyMemoFiche | ExhaustiveMemoFiche;
+  memoFiche: CaseStudy;
   onBack: () => void;
 }
 
@@ -49,16 +49,39 @@ export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ me
   };
 
   const sections = useMemo(() => {
-    if (!memoFiche || !memoFiche.sections) return [];
-    return Object.entries(memoFiche.sections).map(([key, section]) => ({
-      id: key,
+    if (!memoFiche) return [];
+
+    const caseStudySections = [
+      { id: 'patientSituation', title: 'Situation Patient', content: memoFiche.patientSituation },
+      { id: 'keyQuestions', title: 'Questions Clés', content: memoFiche.keyQuestions },
+      { id: 'pathologyOverview', title: 'Aperçu Pathologie', content: memoFiche.pathologyOverview },
+      { id: 'redFlags', title: 'Signaux d\'Alerte', content: memoFiche.redFlags },
+      { id: 'recommendations.mainTreatment', title: 'Traitement Principal', content: memoFiche.recommendations?.mainTreatment },
+      { id: 'recommendations.associatedProducts', title: 'Produits Associés', content: memoFiche.recommendations?.associatedProducts },
+      { id: 'recommendations.lifestyleAdvice', title: 'Conseils Hygiène de Vie', content: memoFiche.recommendations?.lifestyleAdvice },
+      { id: 'recommendations.dietaryAdvice', title: 'Conseils Alimentaires', content: memoFiche.recommendations?.dietaryAdvice },
+      { id: 'keyPoints', title: 'Points Clés', content: memoFiche.keyPoints },
+      { id: 'references', title: 'Références', content: memoFiche.references },
+      { id: 'flashcards', title: 'Flashcards', content: JSON.stringify(memoFiche.flashcards, null, 2) },
+      { id: 'glossary', title: 'Glossaire', content: JSON.stringify(memoFiche.glossary, null, 2) },
+      { id: 'media', title: 'Médias', content: JSON.stringify(memoFiche.media, null, 2) },
+      { id: 'quiz', title: 'Quiz', content: JSON.stringify(memoFiche.quiz, null, 2) },
+    ];
+
+    const memoSections = memoFiche.memoSections?.map((section, index) => ({
+      id: `memoSection-${index}`,
       title: section.title,
-      icon: <span className="mr-3">📄</span>, // Placeholder icon
-      content: Array.isArray(section.content) ? (
-        <ul className="list-disc pl-5 space-y-1">
-          {section.content.map((item, index) => <li key={index}>{item}</li>)}
-        </ul>
-      ) : <p>{section.content}</p>,
+      content: section.content,
+    })) || [];
+
+    return [...caseStudySections, ...memoSections].map(section => ({
+        ...section,
+        icon: <span className="mr-3">📄</span>, // Placeholder icon
+        content: Array.isArray(section.content) ? (
+            <ul className="list-disc pl-5 space-y-1">
+              {section.content.map((item, index) => <li key={index}>{typeof item === 'object' ? JSON.stringify(item) : item}</li>)}
+            </ul>
+          ) : <p>{section.content}</p>,
     }));
   }, [memoFiche]);
 

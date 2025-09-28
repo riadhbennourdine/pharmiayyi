@@ -160,6 +160,49 @@ export const updateKnowledgeBase = async (): Promise<{ processed: number; chunks
 };
 
 export const indexSingleMemoFiche = async (ficheId: ObjectId): Promise<{ processed: number; chunks: number; }> => {
-    console.log(`Indexing for single fiche ${ficheId} is temporarily disabled.`);
-    return { processed: 0, chunks: 0 };
+    console.log(`Starting indexing for single fiche: ${ficheId}`);
+
+    try {
+        const client = await clientPromise;
+        const db = client.db('pharmia');
+        const fichesCollection = db.collection('memofiches_v2');
+        const chunksCollection = db.collection<MemoFicheChunk>('memofiche_chunks');
+
+        // Step 1: Delete existing chunks for this fiche
+        await chunksCollection.deleteMany({ sourceFicheId: ficheId });
+
+        // Step 2: Fetch the memo fiche
+        const fiche = await fichesCollection.findOne({ _id: ficheId });
+        if (!fiche) {
+            throw new Error(`Memo fiche with id ${ficheId} not found.`);
+        }
+
+        // Step 3: Create chunks from the fiche
+        const chunksWithoutEmbedding = createChunksFromFiche(fiche);
+
+        if (chunksWithoutEmbedding.length === 0) {
+            console.log(`No chunks created for fiche: ${fiche.title}`);
+            return { processed: 1, chunks: 0 };
+        }
+
+        // Step 4: Generate embeddings for the chunks
+        const textsToEmbed = chunksWithoutEmbedding.map(c => c.content);
+        const embeddings = await getEmbedding(textsToEmbed);
+
+        const chunksToInsert: MemoFicheChunk[] = chunksWithoutEmbedding.map((chunk, i) => ({
+            ...chunk,
+            embedding: embeddings[i],
+            createdAt: new Date(),
+        }));
+
+        // Step 5: Insert new chunks into the database
+        await chunksCollection.insertMany(chunksToInsert);
+
+        console.log(`Indexing complete for fiche: ${fiche.title}. Created ${chunksToInsert.length} chunks.`);
+        return { processed: 1, chunks: chunksToInsert.length };
+
+    } catch (error) {
+        console.error(`Error during single fiche indexing for ${ficheId}:`, error);
+        throw new Error("Failed to index single memo fiche.");
+    }
 };
