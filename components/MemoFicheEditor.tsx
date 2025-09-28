@@ -13,11 +13,11 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
     keyQuestions: initialCaseStudy.keyQuestions || [],
     redFlags: initialCaseStudy.redFlags || [],
     references: initialCaseStudy.references || [],
-    recommendations: initialCaseStudy.recommendations || { // Assurer que recommendations est un objet
-        mainTreatment: [],
-        associatedProducts: [],
-        lifestyleAdvice: [],
-        dietaryAdvice: [],
+    recommendations: {
+        mainTreatment: initialCaseStudy.recommendations?.mainTreatment || [],
+        associatedProducts: initialCaseStudy.recommendations?.associatedProducts || [],
+        lifestyleAdvice: initialCaseStudy.recommendations?.lifestyleAdvice || [],
+        dietaryAdvice: initialCaseStudy.recommendations?.dietaryAdvice || [],
     },
     flashcards: initialCaseStudy.flashcards || [],
     glossary: initialCaseStudy.glossary || [],
@@ -64,11 +64,11 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
         keyQuestions: initialCaseStudy.keyQuestions || [],
         redFlags: initialCaseStudy.redFlags || [],
         references: initialCaseStudy.references || [],
-        recommendations: initialCaseStudy.recommendations || {
-            mainTreatment: [],
-            associatedProducts: [],
-            lifestyleAdvice: [],
-            dietaryAdvice: [],
+        recommendations: {
+            mainTreatment: initialCaseStudy.recommendations?.mainTreatment || [],
+            associatedProducts: initialCaseStudy.recommendations?.associatedProducts || [],
+            lifestyleAdvice: initialCaseStudy.recommendations?.lifestyleAdvice || [],
+            dietaryAdvice: initialCaseStudy.recommendations?.dietaryAdvice || [],
         },
         flashcards: initialCaseStudy.flashcards || [],
         glossary: initialCaseStudy.glossary || [],
