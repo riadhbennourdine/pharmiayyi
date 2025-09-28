@@ -7,80 +7,48 @@ interface MemoFicheEditorProps {
   onCancel: () => void;
 }
 
-const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onSave, onCancel }) => {
-  console.log('initialCaseStudy', initialCaseStudy);
-  const [caseStudy, setCaseStudy] = useState<CaseStudy>(initialCaseStudy ? {
-    ...initialCaseStudy,
-    keyQuestions: initialCaseStudy.keyQuestions || [],
-    redFlags: initialCaseStudy.redFlags || [],
-    references: initialCaseStudy.references || [],
+const createSafeCaseStudy = (caseStudy: CaseStudy | undefined): CaseStudy => {
+  const safeCaseStudy: CaseStudy = {
+    _id: caseStudy?._id || '',
+    title: caseStudy?.title || '',
+    theme: caseStudy?.theme || '',
+    system: caseStudy?.system || '',
+    patientSituation: caseStudy?.patientSituation || '',
+    keyQuestions: caseStudy?.keyQuestions || [],
+    pathologyOverview: caseStudy?.pathologyOverview || '',
+    redFlags: caseStudy?.redFlags || [],
     recommendations: {
-        mainTreatment: initialCaseStudy.recommendations?.mainTreatment || [],
-        associatedProducts: initialCaseStudy.recommendations?.associatedProducts || [],
-        lifestyleAdvice: initialCaseStudy.recommendations?.lifestyleAdvice || [],
-        dietaryAdvice: initialCaseStudy.recommendations?.dietaryAdvice || [],
+      mainTreatment: caseStudy?.recommendations?.mainTreatment || [],
+      associatedProducts: caseStudy?.recommendations?.associatedProducts || [],
+      lifestyleAdvice: caseStudy?.recommendations?.lifestyleAdvice || [],
+      dietaryAdvice: caseStudy?.recommendations?.dietaryAdvice || [],
     },
-    flashcards: initialCaseStudy.flashcards || [],
-    glossary: initialCaseStudy.glossary || [],
-    media: initialCaseStudy.media || [],
-    quiz: initialCaseStudy.quiz || [],
-    // Assurer que les champs optionnels sont des chaînes vides si null/undefined
-    coverImageUrl: initialCaseStudy.coverImageUrl || '',
-    youtubeUrl: initialCaseStudy.youtubeUrl || '',
-    level: initialCaseStudy.level || '',
-    shortDescription: initialCaseStudy.shortDescription || '',
-    kahootUrl: initialCaseStudy.kahootUrl || '',
-    sourceText: initialCaseStudy.sourceText || '',
-    memoSections: initialCaseStudy.memoSections || [],
-} : {
-    _id: '',
-    title: '',
-    theme: '',
-    system: '',
-    patientSituation: '',
-    keyQuestions: [],
-    pathologyOverview: '',
-    redFlags: [],
-    recommendations: {
-        mainTreatment: [],
-        associatedProducts: [],
-        lifestyleAdvice: [],
-        dietaryAdvice: [],
-    },
-    keyPoints: [],
-    references: [],
-    flashcards: [],
-    glossary: [],
-    media: [],
-    quiz: [],
-    creationDate: new Date().toISOString(),
-    sourceText: '',
-    memoSections: [],
-});
+    keyPoints: caseStudy?.keyPoints || [],
+    references: caseStudy?.references || [],
+    flashcards: caseStudy?.flashcards || [],
+    glossary: caseStudy?.glossary || [],
+    media: caseStudy?.media || [],
+    quiz: caseStudy?.quiz || [],
+    creationDate: caseStudy?.creationDate || new Date().toISOString(),
+    sourceText: caseStudy?.sourceText || '',
+    memoSections: caseStudy?.memoSections || [],
+    coverImageUrl: caseStudy?.coverImageUrl || '',
+    youtubeUrl: caseStudy?.youtubeUrl || '',
+    level: caseStudy?.level || '',
+    shortDescription: caseStudy?.shortDescription || '',
+    kahootUrl: caseStudy?.kahootUrl || '',
+    knowledgeBaseUrl: caseStudy?.knowledgeBaseUrl || '',
+    isLocked: caseStudy?.isLocked || false,
+    isFree: caseStudy?.isFree || false,
+  };
+  return safeCaseStudy;
+};
 
-  console.log('caseStudy', caseStudy);
+const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onSave, onCancel }) => {
+  const [caseStudy, setCaseStudy] = useState<CaseStudy>(createSafeCaseStudy(initialCaseStudy));
 
   useEffect(() => {
-    if (initialCaseStudy) {
-      setCaseStudy({
-        ...initialCaseStudy,
-        keyQuestions: initialCaseStudy.keyQuestions || [],
-        redFlags: initialCaseStudy.redFlags || [],
-        references: initialCaseStudy.references || [],
-        recommendations: {
-            mainTreatment: initialCaseStudy.recommendations?.mainTreatment || [],
-            associatedProducts: initialCaseStudy.recommendations?.associatedProducts || [],
-            lifestyleAdvice: initialCaseStudy.recommendations?.lifestyleAdvice || [],
-            dietaryAdvice: initialCaseStudy.recommendations?.dietaryAdvice || [],
-        },
-        flashcards: initialCaseStudy.flashcards || [],
-        glossary: initialCaseStudy.glossary || [],
-        media: initialCaseStudy.media || [],
-        quiz: initialCaseStudy.quiz || [],
-        keyPoints: initialCaseStudy.keyPoints || [],
-        memoSections: initialCaseStudy.memoSections || [],
-      });
-    }
+    setCaseStudy(createSafeCaseStudy(initialCaseStudy));
   }, [initialCaseStudy]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
