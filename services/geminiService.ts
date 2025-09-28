@@ -60,9 +60,14 @@ export async function getEmbedding(texts: string[]): Promise<number[][]> {
         const requests = texts.map(text => ({ content: { parts: [{ text: text }] } as Content }));
         const result = await model.batchEmbedContents({ requests });
         return result.embeddings.map(embedding => embedding.values);
-    } catch (error) {
-        console.error("Erreur lors de la génération de l'embedding:", error);
-        throw new Error("Échec de la génération de l'embedding à partir du texte.");
+    } catch (error: any) {
+        if (error.name === 'GoogleGenerativeAIFetchError' && error.status === 429) {
+            console.warn("Quota exceeded for embedding generation. Returning empty embeddings. Please check your Google Cloud project's billing and quotas.");
+            return [];
+        } else {
+            console.error("Erreur lors de la génération de l'embedding:", error);
+            throw new Error("Échec de la génération de l'embedding à partir du texte.");
+        }
     }
 }
 
