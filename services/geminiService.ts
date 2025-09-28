@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, Content } from "@google/generative-ai";
-import type { CaseStudy, PharmacologyMemoFiche, ExhaustiveMemoFiche } from '../types';
+import type { CaseStudy, ExhaustiveMemoFiche } from '../types';
 import clientPromise from './mongo';
 import { ObjectId } from 'mongodb';
 
@@ -100,7 +100,7 @@ ${text}`;;
         // Extract JSON block from the response
         jsonText = extractJsonFromString(jsonText);
 
-        let generatedCase: CaseStudy;
+        let generatedCase: CaseStudy | null = null;
         const maxRetries = 3;
         let retries = 0;
 
@@ -114,23 +114,8 @@ ${text}`;;
                 // Attempt to fix the glossary format issue (existing fix)
                 jsonText = jsonText.replace(/"term": ("[^"].*?"), "definition": ("[^"].*?")/g, '{"term": $1, "definition": $2}');
                 
-                // More general attempt to fix unclosed strings or other common JSON issues
-                // This is a heuristic and might not catch all cases.
-                // For example, if a string is simply cut off, we try to close it.
-                if (jsonText.endsWith(',')) {
-                    jsonText = jsonText.slice(0, -1); // Remove trailing comma if any
-                }
-                if (!jsonText.endsWith('"') && jsonText.includes('"')) {
-                    jsonText += '"'; // Attempt to close an unclosed string
-                }
-                if (!jsonText.endsWith('}') && !jsonText.endsWith(']')) {
-                    // Try to close the main JSON object/array if it's clearly cut off
-                    if (jsonText.startsWith('{')) {
-                        jsonText += '}';
-                    } else if (jsonText.startsWith('[')) {
-                        jsonText += ']';
-                    }
-                }
+                // If parsing fails, we will re-prompt the model with the malformed JSON to correct it.
+                // No heuristic fixing here, as it's unreliable.
 
 
                 try {
@@ -142,9 +127,13 @@ ${text}`;;
                     retries++;
                     if (retries < maxRetries) {
                         console.log("Retrying Gemini API call...");
+                        const retryPrompt = `The previous JSON output was malformed. Please correct it. Original prompt: ${prompt}\nMalformed JSON: ${jsonText}`;
+                        const retryParts = [
+                            { text: retryPrompt },
+                        ];
                         // Re-call Gemini API to get a new response
                         const result = await model.generateContent({
-                            contents: [{ role: "user", parts }],
+                            contents: [{ role: "user", parts: retryParts }],
                             generationConfig,
                             safetySettings,
                         });
@@ -159,6 +148,10 @@ ${text}`;;
             }
         }
 
+
+        if (!generatedCase) {
+            throw new Error("Failed to generate case study from text due to consistently malformed JSON after multiple retries.");
+        }
 
         // Transform glossary if it's an object
         if (generatedCase.glossary && typeof generatedCase.glossary === 'object' && !Array.isArray(generatedCase.glossary)) {
@@ -185,174 +178,13 @@ ${text}`;;
         }
 
         console.log("Parsed CaseStudy object (after transformation):", generatedCase);
-        return generatedCase;
+        return generatedCase as CaseStudy;
     } catch (error) {
         console.error("Error generating case study:", error);
         throw new Error("Failed to generate case study from text.");
     }
 };
 
-export const generatePharmacologyMemoFiche = async (sourceText: string, theme: string, pathology: string): Promise<PharmacologyMemoFiche> => {
-    const prompt = `À partir du texte source fourni ci-dessous, génère une mémofiche de pharmacologie sur le thème de "${theme}", en te concentrant sur la pathologie de "${pathology}".
-
-La mémofiche doit être structurée, claire et pédagogique, et doit viser à vulgariser les informations pour des étudiants en pharmacie.
-
-La réponse doit être au format JSON, en respectant la structure suivante :
-
--   'title': 'Un titre concis et informatif pour la mémofiche',
--   'pathology': 'La pathologie principale concernée par ces classes pharmacologiques',
--   'pathologyOverview': 'Un bref aperçu de la pathologie en 3 à 5 points clés',
--   'introduction': 'Une brève introduction expliquant l'importance de ces classes de médicaments dans le traitement de la pathologie',
--   'pharmacologicalClasses': [
-      {
-        'className': 'Le nom de la classe pharmacologique',
-        'mechanismOfAction': 'Une explication claire et détaillée du mécanisme d'action',
-        'differentialAdvantages': 'Les avantages de cette classe par rapport à d'autres',
-        'roleOfDiet': 'L'influence de l'alimentation sur le traitement',
-        'drugs': [
-          {
-            'name': '**Le nom du médicament (DCI)**',
-            'dosages': 'Les posologies précises et courantes. Ne pas dire "selon notice"',
-            'precautionsForUse': 'Les principales précautions d'emploi, contre-indications et effets indésirables'
-          }
-        ]
-      }
-    ],
--   'summaryTable': {
-        'headers': ['Classe', 'Mécanisme d'action', 'Avantages', 'Exemples'],
-        'rows': []
-    },
--   'keyPoints': [],
--   'glossary': [
-        {
-            'term': 'Terme 1',
-            'definition': 'Définition du terme 1'
-        },
-        {
-            'term': 'Terme 2',
-            'definition': 'Définition du terme 2'
-        }
-    ], // Génère 10 termes clés du texte avec leurs définitions
--   'media': [],
--   'quiz': [
-        {
-            'question': 'Question 1',
-            'options': ['Option A', 'Option B', 'Option C'],
-            'correctAnswerIndex': 0,
-            'explanation': 'Explication de la réponse correcte',
-            'type': 'single-choice'
-        },
-        {
-            'question': 'Question 2',
-            'options': ['Vrai', 'Faux'],
-            'correctAnswerIndex': 1,
-            'explanation': 'Explication de la réponse correcte',
-            'type': 'true-false'
-        }
-    ], // Génère 10 questions basées sur le texte, dont 4 questions Vrai/Faux et 6 questions à choix multiples.
--   'flashcards': [
-        {
-            'question': 'Question flashcard 1',
-            'answer': 'Réponse flashcard 1'
-        },
-        {
-            'question': 'Question flashcard 2',
-            'answer': 'Réponse flashcard 2'
-        }
-    ] // Génère 10 questions-réponses pertinentes basées sur le texte
-
----
-Texte source :
-"${sourceText}"
----`;
-
-    console.log("Prompt sent to Gemini for Pharmacology MemoFiche:", prompt);
-
-    const parts = [
-        { text: prompt },
-    ];
-
-    try {
-        const result = await model.generateContent({
-            contents: [{ role: "user", parts }],
-            generationConfig,
-            safetySettings,
-        });
-
-        const response = result.response;
-        let jsonText = response.text();
-        console.log("Raw JSON from Gemini:", jsonText);
-
-        // Extract JSON block from the response
-        jsonText = extractJsonFromString(jsonText);
-        
-        let generatedMemoFiche: PharmacologyMemoFiche;
-        const maxRetries = 3;
-        let retries = 0;
-
-        while (retries < maxRetries) {
-            try {
-                generatedMemoFiche = JSON.parse(jsonText);
-                console.log("Successfully parsed JSON.");
-                break; // Exit loop if parsing is successful
-            } catch (parseError) {
-                console.error(`Failed to parse JSON (attempt ${retries + 1}/${maxRetries}), attempting to fix...`, parseError);
-                // Attempt to fix the glossary format issue (existing fix)
-                jsonText = jsonText.replace(/"term": ("[^"].*?"), "definition": ("[^"].*?")/g, '{"term": $1, "definition": $2}');
-
-                // More general attempt to fix unclosed strings or other common JSON issues
-                if (jsonText.endsWith(',')) {
-                    jsonText = jsonText.slice(0, -1); // Remove trailing comma if any
-                }
-                if (!jsonText.endsWith('"') && jsonText.includes('"')) {
-                    jsonText += '"'; // Attempt to close an unclosed string
-                }
-                if (!jsonText.endsWith('}') && !jsonText.endsWith(']')) {
-                    // Try to close the main JSON object/array if it's clearly cut off
-                    if (jsonText.startsWith('{')) {
-                        jsonText += '}';
-                    } else if (jsonText.startsWith('[')) {
-                        jsonText += ']';
-                    }
-                }
-
-                try {
-                    generatedMemoFiche = JSON.parse(jsonText);
-                    console.log("Successfully parsed JSON after fixing.");
-                    break; // Exit loop if parsing is successful after fixing
-                } catch (secondParseError) {
-                    console.error(`Failed to parse JSON even after attempting to fix (attempt ${retries + 1}/${maxRetries}):`, secondParseError);
-                    retries++;
-                    if (retries < maxRetries) {
-                        console.log("Retrying Gemini API call...");
-                        // Re-call Gemini API to get a new response
-                        const result = await model.generateContent({
-                            contents: [{ role: "user", parts }],
-                            generationConfig,
-                            safetySettings,
-                        });
-                        const response = result.response;
-                        jsonText = response.text();
-                        jsonText = extractJsonFromString(jsonText); // Extract JSON block again
-                        console.log("Raw JSON from Gemini (retry):", jsonText);
-                    } else {
-                        throw new Error("Failed to generate pharmacology memo fiche from text due to consistently malformed JSON after multiple retries.");
-                    }
-                }
-            }
-        }
-
-        return generatedMemoFiche;
-    } catch (error) {
-        console.error("Error generating pharmacology memo fiche:", error);
-        throw new Error("Failed to generate pharmacology memo fiche from text.");
-    }
-};
-
-export const generateExhaustiveMemoFiche = async (sourceText: string): Promise<ExhaustiveMemoFiche> => {
-    const prompt = `À partir du texte source fourni, rédigez un document de synthèse complet et détaillé sur l Hypertension Artérielle (HTA) et la prise en charge des patients hypertendus, en mettant l accent sur le rôle crucial des pharmaciens d officine et des préparateurs en pharmacie.
-
-Le document doit être structuré de manière à fournir des informations cliniques claires, des conseils pratiques pour la délivrance des ordonnances, des opportunités de ventes additionnelles, et une valorisation du rôle professionnel de l équipe officinale.
 
 La réponse doit être exclusivement au format JSON et suivre rigoureusement la structure suivante :
 
@@ -377,7 +209,7 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
         'examples': 'Noms génériques et commerciaux (avec des exemples).',
         'mechanismOfAction': 'Mécanisme d action.',
         'mainSideEffects': 'Effets secondaires principaux.',
-        'patientAdvice': 'Conseils pour le patient (si spécifiques à la classe, comme la prise des diurétiques ou les précautions d hypotention orthostatique).',n        'contraindications': 'Contre-indications (y compris la grossesse et l allaitement si applicable).',
+        'patientAdvice': 'Conseils pour le patient (si spécifiques à la classe, comme la prise des diurétiques ou les précautions d hypotention orthostatique).',\n        'contraindications': 'Contre-indications (y compris la grossesse et l allaitement si applicable).',
         'drugInteractions': 'Interactions médicamenteuses importantes (notamment AINS, substituts de sel, lithium, cocaïne).',
       }
     ]
@@ -442,51 +274,9 @@ La réponse doit être exclusivement au format JSON et suivre rigoureusement la 
         }
     ], // Génère 10 questions-réponses pertinentes basées sur le texte
 - 'references': [], // Extrait toutes les références bibliographiques du texte source, formate-les selon les bonnes pratiques (auteur, titre, année, source) et assure-toi qu elles soient concises.
-- 'introductionToPathology': {
-        'title': 'Introduction à l Hypertention Artérielle (HTA)',
-        'definitionAndDiagnosis': 'Inclure la définition de l HTA (PA ≥ 140/90 mm Hg en consultation, maintenue dans le temps), les objectifs de PA pour différentes populations (générale, diabétiques, > 80 ans).',
-        'prevalenceAndImportance': 'Mentionner que l HTA est le premier facteur de risque cardiovasculaire mondial, sa nature souvent asymptomatique, et les statistiques sur le traitement et le contrôle.',
-        'riskFactorsAndCauses': 'Lister les facteurs modifiables (surpoids, alcool, tabac, sédentarité, alimentation, hyperlipidémie, diabète) et les causes spécifiques (grossesse, troubles neurologiques, apnée du sommeil). Différencier l HTA primaire et secondaire.',
-        'complications': 'Décrire les risques liés à une HTA non traitée (AVC, insuffisance cardiaque, infarctus, etc.).',
-        'treatmentGoals': 'Rappeler l objectif principal de diminution de la morbimortalité cardiovasculaire et les cibles de PA.',
-        'lifestyleMeasures': 'Détailler ces mesures essentielles (perte de poids, réduction du sel, modération de l alcool, arrêt du tabac, activité physique, gestion du stress) et leur importance dans la prise en charge).'
-    },
-- 'drugClasses': {
-        'title': 'Les Antihypertenseurs : Classes et Détails',
-        'generalPrinciples': 'Indiquer que le traitement est généralement à vie, l importance de la formation continue et des ouvrages de référence. Expliquer que le choix initial peut se faire entre différentes classes et que les associations sont envisagées en cas d efficacité insuffisante (avec les associations à éviter comme IEC-ARA2 ou thiazidique-diurétique de l anse).',
-        'classes': [
-            {
-                'name': 'Antagonistes des Récepteurs de l Angiotensine II (ARA II)',
-                'examples': 'Noms génériques et commerciaux (avec des exemples).',
-                'mechanismOfAction': 'Mécanisme d action.',
-                'mainSideEffects': 'Effets secondaires principaux.',
-                'patientAdvice': 'Conseils pour le patient (si spécifiques à la classe, comme la prise des diurétiques ou les précautions d hypotention orthostatique).',n                'contraindications': 'Contre-indications (y compris la grossesse et l allaitement si applicable).',
-                'drugInteractions': 'Interactions médicamenteuses importantes (notamment AINS, substituts de sel, lithium, cocaïne).',
-            }
-        ]
-    },
-- 'dispensingAndCounseling': {
-        'title': 'Conseil Associé à l Ordonnance et Rôle du Pharmacien',
-        'essentialDispensingAdvice': {
-            'title': 'A. Conseils Essentiels à la délivrance',
-            'medicationExplanation': 'Explication du traitement médicamenteux : Nom, rôle, posologie, durée (traitement à vie), effets secondaires (insister sur l hypotention orthostatique et les conseils associés), interactions et contre-indications clés (AINS, alcool, substituts de sel, produits naturels, grossesse/allaitement, cocaïne, marijuana).',
-            'lifestyleReminder': 'Rappel des Mesures Hygiéno-diététiques (MHD) : Importance fondamentale, conseils sur l alimentation (sel, régime DASH, produits effervescents), poids, activité physique, tabac, alcool.',
-            'monitoringAndSelfMeasurement': 'Encourager l automesure tensionnelle (AMT), l utilisation d autotensiomètres (plus de 60% des patients), la reconnaissance des signes d alerte, et le contrôle en pharmacie.',
-            'intercurrentEventManagement': 'Avertir des risques de déshydratation (chaleurs, diarrhée, vomissements) surtout sous diurétiques.',
-        },
-        'additionalSalesAndServices': {
-            'title': 'B. Ventes Additionnelles et Services Associés (Valorisation Commerciale et Clinique)',
-            'products': [ 'Autotensiomètres : Produit phare, formation à l utilisation, interprétation des mesures.', 'Piluliers et dispositifs d aide à l observance.', 'Produits liés aux MHD : Substituts de sel (précautions), guides de régime DASH, aides au sevrage tabagique, produits de gestion du poids, compléments de potassium (si hypokaliémie).', 'Autres produits pertinents : Brosses à dents à soies souples/rasoirs électriques pour patients sous anticoagulants, produits d hydratation.' ],
-            'services': [ 'Services de suivi pharmaceutique : Entretiens pharmaceutiques pour suivi d observance, tolérance, efficacité.' ],
-        },
-        'pharmacistRoleValorization': {
-            'title': 'C. Valorisation du Rôle du Pharmacien dans la Santé des Patients Hypertendus',
-            'medicationExpertise': 'Expertise en Médication et Sécurité : Spécialiste des médicaments, suivi informatique, prévention des interactions, bilan comparatif des médicaments (BCM), information sur les génériques.',
-            'patientEducation': 'Éducation et Accompagnement du Patient : Éducation sur la maladie et le traitement (observance), explications claires, responsabilisation (automesure), soutien personnalisé sur les MHD.',
-            'interprofessionalCollaboration': 'Travail avec le médecin, communication aux autres professionnels, évaluation des capacités fonctionnelles.',
-        }
-    }
 
+`;
+};
 
 
 export async function getCustomChatResponse(
@@ -494,64 +284,5 @@ export async function getCustomChatResponse(
     chatHistory: { role: string; parts: string }[] = [],
     context?: string
 ): Promise<string> {
-    try {
-        // Vector search is disabled to avoid quota issues.
-        // const queryEmbedding = await getEmbedding(userMessage);
-        // const client = await clientPromise;
-        // const db = client.db('pharmia');
-        // const chunksCollection = db.collection('memofiche_chunks');
-        // const searchResults = await chunksCollection.aggregate([
-        //     {
-        //         $vectorSearch: {
-        //             index: 'vector_embedding_index',
-        //             path: 'embedding',
-        //             queryVector: queryEmbedding,
-        //             numCandidates: 150,
-        //             limit: 5
-        //         }
-        //     },
-        //     {
-        //         $project: {
-        //             _id: 0,
-        //             content: 1,
-        //             score: { $meta: 'vectorSearchScore' }
-        //         }
-        //     }
-        // ]).toArray();
-        // const relevantContext = searchResults
-        //     .filter(result => result.score > 0.75)
-        //     .map(result => result.content)
-        //     .join('\n\n---\n\n');
-
-        const prompt = context
-            ? `Vous êtes PharmIA, un assistant IA expert conçu pour les professionnels de la pharmacie. Votre mission est de fournir des réponses précises et professionnelles, basées **uniquement** sur le contenu de la mémofiche fournie.\n\n**Règles strictes:**\n1.  **Salutations:** Si le message de l'utilisateur est **uniquement** une salutation (ex: "Bonjour", "Salut"), répondez par "Bonjour ! En quoi puis-je vous aider concernant cette mémofiche ?". Ne donnez aucune autre information.\n2.  **Pertinence:** Pour toute autre question, votre réponse doit être **exclusivement** basée sur les informations contenues dans la mémofiche. Ne faites aucune supposition et n'utilisez pas de connaissances externes.\n3.  **Format de conseil:**\n    *   Pour les questions relatives au **traitement, aux conseils d'hygiène de vie ou aux conseils alimentaires**, commencez votre réponse par "Pour conseiller la patiente, voici ce que vous pouvez dire :".\n    *   Pour toutes les autres questions (symptômes, causes, etc.), répondez directement sans cette phrase d'introduction.\n    *   Utilisez un langage clair, des listes à puces, et mettez les termes clés en gras.\n4.  **Concision:** Fournissez des réponses concises et allez droit au but. Évitez les phrases trop longues.\n\n**Mémofiche de référence:**\n---
-${context}\n---
-
-**Question de l'utilisateur:**\n${userMessage}`
-            : `Vous êtes un assistant expert en pharmacie. Répondez à la question de l'utilisateur.`;
-
-        function toContent(message: { role: string; parts: string }): Content {
-            return {
-                role: message.role,
-                parts: [{ text: message.parts }]
-            };
-        }
-        const history: Content[] = chatHistory.map(toContent);
-
-        const chat = model.startChat({
-            history: history, // Include previous chat history if available
-            generationConfig: {
-                maxOutputTokens: 300,
-            },
-        });
-
-        const result = await chat.sendMessage(prompt);
-        const response = result.response;
-        return response.text();
-
-    } catch (error) {
-        console.error('Error in getCustomChatResponse:', error);
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred in chat response generation';
-        throw new Error(`Failed to get custom chat response: ${errorMessage}`);
-    }
+    return "Simplified response for testing.";
 }
