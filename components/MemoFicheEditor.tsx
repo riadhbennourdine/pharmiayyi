@@ -30,6 +30,7 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
     shortDescription: initialCaseStudy.shortDescription || '',
     kahootUrl: initialCaseStudy.kahootUrl || '',
     sourceText: initialCaseStudy.sourceText || '',
+    memoSections: initialCaseStudy.memoSections || [],
 } : {
     _id: '',
     title: '',
@@ -107,6 +108,34 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(caseStudy);
+  };
+
+  const handleMemoSectionChange = (index: number, field: 'title' | 'content', value: string) => {
+    const newMemoSections = [...(caseStudy.memoSections || [])];
+    newMemoSections[index] = { ...newMemoSections[index], [field]: value };
+    setCaseStudy(prev => ({ ...prev, memoSections: newMemoSections }));
+  };
+
+  const addMemoSection = () => {
+    const newMemoSections = [...(caseStudy.memoSections || []), { title: '', content: '' }];
+    setCaseStudy(prev => ({ ...prev, memoSections: newMemoSections }));
+  };
+
+  const moveMemoSection = (index: number, direction: 'up' | 'down') => {
+    const newMemoSections = [...(caseStudy.memoSections || [])];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex >= 0 && newIndex < newMemoSections.length) {
+      const temp = newMemoSections[index];
+      newMemoSections[index] = newMemoSections[newIndex];
+      newMemoSections[newIndex] = temp;
+      setCaseStudy(prev => ({ ...prev, memoSections: newMemoSections }));
+    }
+  };
+
+  const deleteMemoSection = (index: number) => {
+    const newMemoSections = [...(caseStudy.memoSections || [])];
+    newMemoSections.splice(index, 1);
+    setCaseStudy(prev => ({ ...prev, memoSections: newMemoSections }));
   };
 
   const handleFillWithAI = async () => {
@@ -280,6 +309,31 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
           <label className="block text-sm font-medium text-gray-700">Texte Source Complet</label>
           <textarea name="sourceText" value={caseStudy.sourceText || ''} onChange={handleChange} rows={10} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
+
+        <h3 className="text-xl font-bold mt-6 mb-2">Sections Mémo</h3>
+        {caseStudy.memoSections && caseStudy.memoSections.map((section, index) => (
+          <div key={index} className="border p-4 rounded-md">
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="text-lg font-semibold">Section {index + 1}</h4>
+              <div>
+                <button type="button" onClick={() => moveMemoSection(index, 'up')} disabled={index === 0} className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50">Monter</button>
+                <button type="button" onClick={() => moveMemoSection(index, 'down')} disabled={index === caseStudy.memoSections.length - 1} className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50">Descendre</button>
+                <button type="button" onClick={() => deleteMemoSection(index)} className="px-2 py-1 text-sm text-red-600 hover:text-red-900">Supprimer</button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Titre de la Section</label>
+              <input type="text" value={section.title} onChange={(e) => handleMemoSectionChange(index, 'title', e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Contenu de la Section</label>
+              <textarea value={section.content} onChange={(e) => handleMemoSectionChange(index, 'content', e.target.value)} rows={5} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+            </div>
+          </div>
+        ))}
+        <button type="button" onClick={addMemoSection} className="mt-2 px-4 py-2 border border-dashed border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+          Ajouter une section Mémo
+        </button>
 
         <div className="flex justify-end space-x-4">
           <button type="button" onClick={handleFillWithAI} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">

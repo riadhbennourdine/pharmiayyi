@@ -89,6 +89,11 @@ export interface Treatment {
   conseil_dispensation: string;
 }
 
+export interface MemoSection {
+  title: string;
+  content: string;
+}
+
 export interface CaseStudy {
   _id: any;
   title: string;
@@ -124,6 +129,7 @@ export interface CaseStudy {
   knowledgeBaseUrl?: string; // New field for Google Doc URL
   isLocked?: boolean; // Flag for non-subscriber access
   isFree?: boolean; // Flag for always free memo fiches
+  memoSections?: MemoSection[];
 }
 
 export interface ChatMessage {
