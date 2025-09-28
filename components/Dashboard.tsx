@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from './contexts/DataContext'; // Import the hook
 import { useAuth } from './contexts/AuthContext';
 import { UserRole } from '../types';
 import { TOPIC_CATEGORIES } from '../constants';
 import { CapsuleIcon, LockClosedIcon } from './icons';
-import { CaseStudy, MemoFiche } from '../types';
-import MemoFicheView from './MemoFicheView'; // Import MemoFicheView
+import { CaseStudy } from '../types';
 
 const Dashboard: React.FC = () => {
   const { selectCase } = useData(); // Use the context
@@ -19,36 +18,32 @@ const Dashboard: React.FC = () => {
   const [selectedSystem, setSelectedSystem] = useState('');
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
-  const fetchMemofiches = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('token');
-      console.log('Fetching memofiches with token:', token ? 'present' : 'absent');
-      const response = await fetch('/api/memofiches', { 
-        cache: 'no-store',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to fetch memofiches, response not OK:', response.status, errorText);
-        throw new Error(`Failed to fetch memofiches: ${response.statusText}`);
-      }
-      const data: CaseStudy[] = await response.json();
-      console.log('Successfully fetched memofiches:', data);
-      setMemofiches(data);
-    } catch (err) {
-      console.error('Error fetching memofiches:', err);
-      setError(`Failed to load memo fiches: ${err instanceof Error ? err.message : String(err)}. Please try again later.`);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []); // Empty dependency array means this function is created once
-
   useEffect(() => {
+    const fetchMemofiches = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/memofiches', { 
+          cache: 'no-store',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch memofiches');
+        }
+        const data: CaseStudy[] = await response.json();
+        setMemofiches(data);
+      } catch (err) {
+        console.error('Error fetching memofiches:', err);
+        setError('Failed to load memo fiches. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchMemofiches();
-  }, [fetchMemofiches]);
+  }, []);
 
   // Initialize filteredMemofiches as a mutable variable
   let currentFilteredMemofiches = memofiches;
@@ -233,17 +228,45 @@ const Dashboard: React.FC = () => {
             <>
                 <h3 className="text-2xl font-bold text-slate-800 mb-4 mt-8 text-center">Mémofiches Récentes</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
-                    {recentMemofiches.map(study => {
-                        console.log('Dashboard: Rendering MemoFicheView for study:', study);
-                        return (
-                            <MemoFicheView
-                                key={study._id}
-                                memoFiche={study as MemoFiche}
-                                onDeleteSuccess={fetchMemofiches}
-                                onSelectCase={(selectedFiche) => selectedFiche.isLocked ? setShowSubscribeModal(true) : selectCase(selectedFiche)}
-                            />
-                        );
-                    })}
+                    {recentMemofiches.map(study => (
+                        <div
+                            key={study.title}
+                            onClick={() => study.isLocked ? setShowSubscribeModal(true) : selectCase(study)}
+                            className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
+                        >
+                            {study.coverImageUrl ? (
+                                <div className="relative w-full h-40">
+                                    <img src={study.coverImageUrl} alt={study.title} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
+                                    {study.isLocked && (
+                                      <div className="absolute top-2 right-2 bg-slate-800 bg-opacity-50 p-2 rounded-full">
+                                        <LockClosedIcon className="h-5 w-5 text-white" />
+                                      </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
+                                    <CapsuleIcon className="h-6 w-6 text-teal-600" />
+                                </div>
+                            )}
+                            <div className="p-6 pt-4 flex-grow flex flex-col w-full">
+                                <h3 className="text-lg font-semibold text-slate-800 flex-grow group-hover:text-teal-600 transition-colors">{study.title}</h3>
+                                <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
+                                {(study.theme || study.system) && (
+                                    <p className="text-xs text-slate-500">
+                                        {study.theme && study.theme}
+                                        {study.theme && study.system && <span className="mx-1">&bull;</span>}
+                                        {study.system && study.system}
+                                    </p>
+                                )}
+                                <div className="mt-4 w-full">
+                                    <span className="text-xs font-semibold text-white bg-teal-500 px-3 py-1 rounded-full">
+                                    Consulter
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </>
         ) : (
@@ -257,12 +280,43 @@ const Dashboard: React.FC = () => {
                                 <h3 className="text-2xl font-bold text-slate-800 mb-4">{topic}</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
                                     {topicCases.map(study => (
-                                        <MemoFicheView
-                                            key={study._id}
-                                            memoFiche={study as MemoFiche}
-                                            onDeleteSuccess={fetchMemofiches}
-                                            onSelectCase={(selectedFiche) => selectedFiche.isLocked ? setShowSubscribeModal(true) : selectCase(selectedFiche)}
-                                        />
+                                        <div
+                                            key={study.title}
+                                            onClick={() => study.isLocked ? setShowSubscribeModal(true) : selectCase(study)}
+                                            className="group bg-white rounded-lg shadow-md text-left flex flex-col items-start h-full cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden"
+                                        >
+                                            {study.coverImageUrl ? (
+                                                <div className="relative w-full h-40">
+                                                    <img src={study.coverImageUrl} alt={study.title} className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>
+                                                    {study.isLocked && (
+                                                      <div className="absolute top-2 right-2 bg-slate-800 bg-opacity-50 p-2 rounded-full">
+                                                        <LockClosedIcon className="h-5 w-5 text-white" />
+                                                      </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="bg-teal-100 p-3 rounded-full m-6 mb-4">
+                                                    <CapsuleIcon className="h-6 w-6 text-teal-600" />
+                                                </div>
+                                            )}
+                                            <div className="p-6 pt-4 flex-grow flex flex-col w-full">
+                                                <h3 className="text-lg font-semibold text-slate-800 flex-grow group-hover:text-teal-600 transition-colors">{study.title}</h3>
+                                                <p className="text-xs text-slate-500 mt-1">Créé le {new Date(study.creationDate).toLocaleDateString('fr-FR')}</p>
+                                                {(study.theme || study.system) && (
+                                                    <p className="text-xs text-slate-500">
+                                                        {study.theme && study.theme}
+                                                        {study.theme && study.system && <span className="mx-1">&bull;</span>}
+                                                        {study.system && study.system}
+                                                    </p>
+                                                )}
+                                                <div className="mt-4 w-full">
+                                                    <span className="text-xs font-semibold text-white bg-teal-500 px-3 py-1 rounded-full">
+                                                    Consulter
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
