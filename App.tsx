@@ -137,6 +137,7 @@ const MemoFichePage = () => {
     if (!memoFiche) return <Navigate to="/dashboard" replace />; // Rediriger si la mémofiche n'est pas trouvée
 
     return <DetailedMemoFicheView memoFiche={memoFiche} onBack={goHome} />;
+}
 
 const GeneratorPage = () => {
     const { goHome, saveNewCaseStudy } = useData();
