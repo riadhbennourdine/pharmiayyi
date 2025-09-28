@@ -54,6 +54,7 @@ const MemoFicheEditor: React.FC<MemoFicheEditorProps> = ({ initialCaseStudy, onS
     quiz: [],
     creationDate: new Date().toISOString(),
     sourceText: '',
+    memoSections: [],
 });
 
   useEffect(() => {
