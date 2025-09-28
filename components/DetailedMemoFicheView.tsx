@@ -42,6 +42,8 @@ const AccordionSection: React.FC<{
 );
 
 export const DetailedMemoFicheView: React.FC<DetailedMemoFicheViewProps> = ({ memoFiche, onBack }) => {
+  console.log('memoFiche', memoFiche);
+  console.log('memoFiche.keyQuestions', memoFiche.keyQuestions);
   const [openSection, setOpenSection] = React.useState<string | null>(null);
 
   const handleToggle = (title: string) => {
