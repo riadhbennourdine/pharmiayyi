@@ -14,7 +14,7 @@ import MemoFicheView from './components/MemoFicheView';
 import GeneratorView from './components/GeneratorView';
 import LoginView from './components/LoginView';
 import RegisterView from './components/RegisterView';
-import LandingPage from './components/LandingPage';
+import MaintenancePage from './components/MaintenancePage';
 import QuizView from './components/QuizView';
 import MemoFicheEditor from './components/MemoFicheEditor';
 import PricingPage from './components/PricingPage';
@@ -135,7 +135,7 @@ const MemoFichePage = () => {
     if (error) return <div>Erreur: {error}</div>;
     if (!memoFiche) return <Navigate to="/dashboard" replace />; // Rediriger si la mémofiche n'est pas trouvée
 
-    return <MemoFicheView caseStudy={memoFiche} onStartQuiz={startQuiz} onBack={goHome} onEdit={editCase} />;
+    return <DetailedMemoFicheView memoFiche={memoFiche} onBack={goHome} />;
 }
 
 const GeneratorPage = () => {
@@ -165,7 +165,7 @@ const App: React.FC = () => (
     <HashRouter>
         <DataProvider> {/* DataProvider needs to be inside HashRouter to use navigate */}
             <Routes>
-                <Route path="/" element={<LandingPage />} />
+                <Route path="/" element={<MaintenancePage />} />
                 <Route path="/login" element={<LoginView />} />
                 <Route path="/register" element={<RegisterView />} />
                 <Route path="/forgot-password" element={<ForgotPasswordView />} />
